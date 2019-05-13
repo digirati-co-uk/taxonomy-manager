@@ -15,7 +15,8 @@ pipeline {
 
         stage('build modules') {
             steps {
-                sh 'gradle clean build'
+                def workspace = env.WORKSPACE
+                sh "$workspace/gradlew clean build"
             }
         }
 
