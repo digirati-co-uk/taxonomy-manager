@@ -17,7 +17,7 @@ pipeline {
             steps {
                 script {
                     def workspace = env.WORKSPACE
-                    sh "$workspace/gradlew clean build"
+                    sh "sudo $workspace/gradlew clean build"
                 }
             }
         }
