@@ -14,7 +14,3 @@
     -   id: detect-private-key
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
-
--   repo: git://https://github.com/stratasan/hadolint-pre-commit
-    hooks:
-    -   id: hadolint
