@@ -1,5 +1,5 @@
 FROM gradle:5.4.1-jdk11
-LABEL maintainer="Rob March <rob.march@digirati.com>"
+LABEL maintainer="Digirati <opensource@digirati.com>"
 
 USER root
 
