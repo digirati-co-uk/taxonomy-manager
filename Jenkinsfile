@@ -1,7 +1,7 @@
 pipeline {
     agent {
-        docker {
-            image 'gradle:5.4.1-jdk11'
+        dockerfile {
+            filename 'Dockerfile.build'
         }
     }
 
