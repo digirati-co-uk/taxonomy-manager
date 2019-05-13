@@ -46,8 +46,9 @@ pipeline {
                     script {
                         def branchName = env.GIT_BRANCH.replaceAll("origin/", "")
                         def changeId = env.CHANGE_ID
+                        def workspace = env.WORKSPACE
 
-                        sh "gradle sonarqube -Dsonar.pullrequest.branch=$branchName -Dsonar.pullrequest.key=$changeId"
+                        sh "$workspace/gradlew sonarqube -Dsonar.pullrequest.branch=$branchName -Dsonar.pullrequest.key=$changeId"
                     }
                 }
             }
@@ -60,7 +61,10 @@ pipeline {
 
             steps {
                 withSonarQubeEnv('default') {
-                    sh "gradle sonarqube"
+                    script {
+                        def workspace = env.WORKSPACE
+                        sh "$workspace/gradlew sonarqube"
+                    }
                 }
             }
         }
