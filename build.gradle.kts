@@ -1,15 +1,3 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath("org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.7")
-        classpath("gradle.plugin.com.github.spotbugs:spotbugs-gradle-plugin:1.7.1")
-        classpath("gradle.plugin.com.simonscholz:report-aggregator-gradle:0.0.1")
-    }
-}
-
 repositories {
     mavenCentral()
 }
