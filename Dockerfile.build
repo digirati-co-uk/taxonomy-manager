@@ -4,7 +4,7 @@ LABEL maintainer="Digirati <opensource@digirati.com>"
 USER root
 
 RUN apt-get clean && apt-get update && apt-get -y upgrade \
-    && apt-get install -y python python-pip
+    && apt-get install -y python python-pip docker-ce
 
 RUN pip install pre-commit
 
