@@ -1,9 +1,3 @@
--   repo: https://github.com/kintoandar/pre-commit.git
-    sha: v2.1.0
-    hooks:
-    -   id: terraform_fmt
-    -   id: terraform_validate
-
 -   repo: git://github.com/pre-commit/pre-commit-hooks
     sha: v2.0.0
     hooks:
@@ -14,3 +8,7 @@
     -   id: detect-private-key
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
+
+-   repo: git://github.com/digirati-co-uk/digirati-taxonomy-manager
+    hooks:
+    -   id: hadolint
