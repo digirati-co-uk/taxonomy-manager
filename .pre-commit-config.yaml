@@ -9,6 +9,7 @@
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
 
--   repo: git://github.com/digirati-co-uk/digirati-taxonomy-manager
+-   repo: .
+    rev: 4b5b03cd59316dc69c1e178fccce0be6101b644c
     hooks:
     -   id: hadolint
