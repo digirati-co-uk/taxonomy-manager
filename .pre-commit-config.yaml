@@ -9,7 +9,7 @@
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
 
--   repo: .
-    rev: 4b5b03cd59316dc69c1e178fccce0be6101b644c
+-   repo: git://github.com/stratasan/hadolint-pre-commit
+    rev: cdefcb096e520a6daa9552b1d4636f5f1e1729cd
     hooks:
     -   id: hadolint
