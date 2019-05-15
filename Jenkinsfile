@@ -1,16 +1,33 @@
 pipeline {
     agent {
         dockerfile {
+            dir 'dockerfiles'
             filename 'Dockerfile.build'
             args '-v /var/run/docker.sock:/var/run/docker.sock'
         }
     }
 
     stages {
-        stage('linting') {
+        stage('general linting') {
             steps {
                 sh 'pre-commit install'
                 sh 'pre-commit run --all-files --verbose'
+            }
+        }
+
+        stage('dockerfile linting') {
+            agent {
+                docker {
+                    image 'hadolint/hadolint:latest-debian'
+                }
+            }
+            steps {
+                sh 'hadolint dockerfiles/* | tee -a hadolint_lint.txt'
+            }
+            post {
+                always {
+                    archiveArtifacts 'hadolint_lint.txt'
+                }
             }
         }
 
