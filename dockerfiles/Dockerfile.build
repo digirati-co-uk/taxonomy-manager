@@ -5,10 +5,10 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN apt-get clean \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
-        python=2.7.13-2 \
-        python-pip=9.0.1-2+deb9u1 \
-        python-setuptools=33.1.1-1 \
-        python-wheel=0.29.0-2 \
+        python3=3.5.3-1 \
+        python3-pip=9.0.1-2+deb9u1 \
+        python3-setuptools=33.1.1-1 \
+        python3-wheel=0.29.0-2 \
         software-properties-common=0.96.20.2-1 \
         lsb-release=9.20161125 \
         apt-transport-https=1.4.9 \
@@ -20,7 +20,7 @@ RUN apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     && useradd -rm -d /home/build -s /bin/bash -u 1000 build
 
-RUN pip install pre-commit==1.16.1
+RUN pip3 install pre-commit==1.16.1
 
 USER build
 WORKDIR /home/build
