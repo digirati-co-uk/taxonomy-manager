@@ -4,22 +4,23 @@ LABEL maintainer="Digirati <opensource@digirati.com>"
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN apt-get clean \
     && apt-get update \
-    && apt-get install -y --no-install-recommends python=2.7.13-2 \
-    && apt-get install -y --no-install-recommends python-pip=9.0.1-2+deb9u1 \
-    && apt-get install -y --no-install-recommends python-setuptools=33.1.1-1 \
-    && apt-get install -y --no-install-recommends python-wheel=0.29.0-2 \
-    && apt-get install -y --no-install-recommends software-properties-common=0.96.20.2-1 \
-    && apt-get install -y --no-install-recommends lsb-release=9.20161125 \
-    && apt-get install -y --no-install-recommends apt-transport-https=1.4.9 \
+    && apt-get install -y --no-install-recommends \
+        python=2.7.13-2 \
+        python-pip=9.0.1-2+deb9u1 \
+        python-setuptools=33.1.1-1 \
+        python-wheel=0.29.0-2 \
+        software-properties-common=0.96.20.2-1 \
+        lsb-release=9.20161125 \
+        apt-transport-https=1.4.9 \
     && curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - \
     && add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable" \
     && apt-get update \
     && apt-get install -y --no-install-recommends docker-ce=5:18.09.6~3-0~debian-stretch \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd -rm -d /home/build -s /bin/bash -u 1000 build
 
 RUN pip install pre-commit==1.16.1
 
-RUN useradd -rm -d /home/build -s /bin/bash -u 1000 build
 USER build
 WORKDIR /home/build
