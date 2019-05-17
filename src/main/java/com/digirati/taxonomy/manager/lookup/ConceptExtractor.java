@@ -13,17 +13,17 @@ import java.util.stream.Collectors;
  * Encapsulates all operations related to determining which concepts exist within a given piece of
  * text.
  */
-public class ConceptLookupHandler {
+public class ConceptExtractor {
 
     private final TextSearcher textSearcher;
 
     private final Multimap<String, Concept> conceptLookupTable;
 
-    public ConceptLookupHandler(TextSearcher textSearcher) {
+    public ConceptExtractor(TextSearcher textSearcher) {
         this(textSearcher, ArrayListMultimap.create());
     }
 
-    public ConceptLookupHandler(TextSearcher textSearcher, Multimap<String, Concept> conceptLookupTable) {
+    public ConceptExtractor(TextSearcher textSearcher, Multimap<String, Concept> conceptLookupTable) {
         this.textSearcher = textSearcher;
         this.conceptLookupTable = conceptLookupTable;
     }
@@ -33,7 +33,7 @@ public class ConceptLookupHandler {
     }
 
     /**
-     * Uses the {@link AhoCorasickTextSearcher} to locate any matching terms in the input text, and
+     * Uses the {@link TextSearcher} to locate any matching terms in the input text, and
      * retrieves any {@link com.digirati.taxonomy.manager.lookup.model.Concept}s that these terms
      * could represent.
      *
@@ -41,7 +41,7 @@ public class ConceptLookupHandler {
      * @return a collection of {@link ConceptMatch}es containing details of what terms were found,
      *     where they were found, and what concepts these terms could be representing
      */
-    public Collection<ConceptMatch> search(String inputText) {
+    public Collection<ConceptMatch> extract(String inputText) {
         return textSearcher
                 .search(inputText)
                 .map(this::toConceptMatch)

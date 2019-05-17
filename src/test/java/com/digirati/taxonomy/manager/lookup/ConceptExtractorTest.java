@@ -12,18 +12,18 @@ import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class ConceptLookupHandlerTest {
+class ConceptExtractorTest {
 
     @Test
-    void searchShouldReturnCollectionWithAllMatchingConcepts() {
+    void extractShouldReturnCollectionWithAllMatchingConcepts() {
         // Given
         Concept fight = new Concept("fight", Lists.newArrayList("row"));
         Concept line = new Concept("line", Lists.newArrayList("row"));
         Concept purpose = new Concept("purpose", Lists.newArrayList("sake"));
         Concept riceWine = new Concept("rice wine", Lists.newArrayList("sake"));
 
-        ConceptLookupHandler underTest =
-                new ConceptLookupHandler(
+        ConceptExtractor underTest =
+                new ConceptExtractor(
                         new AhoCorasickTextSearcher(Lists.newArrayList("row", "sake")));
         Multimap<String, Concept> conceptLookupTable = underTest.getConceptLookupTable();
         conceptLookupTable.putAll("row", Arrays.asList(fight, line));
@@ -31,7 +31,7 @@ class ConceptLookupHandlerTest {
 
         // When
         Collection<ConceptMatch> actual =
-                underTest.search(
+                underTest.extract(
                         "a row broke out for the sake of working out who could drink a row of sake the fastest");
 
         // Then
@@ -45,15 +45,15 @@ class ConceptLookupHandlerTest {
     }
 
     @Test
-    void searchShouldBeAbleToHandleMatchedTermsWithNoAttachedConcepts() {
+    void extractShouldBeAbleToHandleMatchedTermsWithNoAttachedConcepts() {
         // Given
-        ConceptLookupHandler underTest =
-                new ConceptLookupHandler(
+        ConceptExtractor underTest =
+                new ConceptExtractor(
                         new AhoCorasickTextSearcher(Lists.newArrayList("row", "sake")));
 
         // When
         Collection<ConceptMatch> actual =
-                underTest.search(
+                underTest.extract(
                         "a row broke out for the sake of working out who could drink a row of sake the fastest");
 
         // Then
