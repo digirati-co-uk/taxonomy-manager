@@ -15,15 +15,21 @@ java {
     targetCompatibility = JavaVersion.VERSION_11
 }
 
+val ahoCorasickVersion: String by project
+val guavaVersion: String by project
+val junitVersion: String by project
+val hamcrestVersion: String by project
+val mockitoVersion: String by project
+
 dependencies {
     spotbugsPlugins("com.h3xstream.findsecbugs:findsecbugs-plugin:1.7.1")
 
-    compile("org.ahocorasick", "ahocorasick", "0.4.0")
-    compile("com.google.guava", "guava", "27.1-jre")
+    compile("org.ahocorasick", "ahocorasick", ahoCorasickVersion)
+    compile("com.google.guava", "guava", guavaVersion)
 
-    testCompile("org.junit.jupiter", "junit-jupiter", "5.4.2")
-    testCompile("org.hamcrest", "hamcrest", "2.1")
-    testCompile("org.mockito", "mockito-junit-jupiter", "2.27.0")
+    testCompile("org.junit.jupiter", "junit-jupiter", junitVersion)
+    testCompile("org.hamcrest", "hamcrest", hamcrestVersion)
+    testCompile("org.mockito", "mockito-junit-jupiter", mockitoVersion)
 }
 
 spotbugs {
