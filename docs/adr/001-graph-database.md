@@ -1,8 +1,8 @@
 # Selection of Graph Database software for SKOS taxonomy management
 
-* Status: proposed
-* Deciders: [@garyttierney](https://github.com/garyttierney), [@danielgrant](https://github.com/danielgrant), [@robmarch](https://github.com/robmarch) 
-* Date: 2019-05-18
+* Status: accepted
+* Deciders: [@garyttierney](https://github.com/garyttierney), [@danielgrant](https://github.com/danielgrant), [@robmarch](https://github.com/robmarch)
+* Date: 2019-05-23
 
 Technical Story: DTM-34
 
@@ -24,19 +24,19 @@ Such a data model could be represented in a traditional RDBMS, however, doing so
 * Apache Jena Fuseki
 * PostgreSQL
 
-<!-- ## Decision Outcome
+## Decision Outcome
 
-Chosen option: "[option 1]", because [justification. e.g., only option, which meets k.o. criterion decision driver | which resolves force force | … | comes out best (see below)].
+Chosen option: Apache Jena with underlying PostgreSQL persistence store and a custom persistence layer, because it provides a highly available database persistence that is widely available as a managed service. We opted against using Apache Jena's SDB to achieve this as it has been in a state of "maintenance only" since June 2013.
 
 ### Positive Consequences
 
-* [e.g., improvement of quality attribute satisfaction, follow-up decisions required, …]
-* …
+* PostgreSQL can be clustered, making it highly available
+* PostgreSQL is broadly available as a managed service
+* We can utilise the same PostgreSQL database for storing additional data (e.g. users, roles, etc)
 
 ### Negative Consequences
 
-* [e.g., compromising quality attribute, follow-up decisions required, …]
-* … -->
+* We have to design our own schema and code for interacting with the PostgreSQL database
 
 ## Pros and Cons of the Options
 
@@ -99,4 +99,3 @@ connection.load("<http://example.com/skos-concept> <http://www.w3.org/2004/02/sk
 * Good, because the query and persistence options are intuitive and easy to use.
 * Bad, because it is the only maintained open source SPARQL server available.
 * Bad, because it is self-hosted and would require maintenance (as well as deployment of a new unfamiliar technology).
-
