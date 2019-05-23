@@ -1,7 +1,7 @@
 # Selection of Graph Database software for SKOS taxonomy management
 
 * Status: accepted
-* Deciders: [@garyttierney](https://github.com/garyttierney), [@danielgrant](https://github.com/danielgrant), [@robmarch](https://github.com/robmarch)
+* Deciders: [@garyttierney](https://github.com/garyttierney), [@danielgrant](https://github.com/danielgrant), [@robmarch2](https://github.com/robmarch2)
 * Date: 2019-05-23
 
 Technical Story: DTM-34
