@@ -39,6 +39,10 @@ tasks.named<Test>("test") {
     useJUnitPlatform()
 }
 
+tasks.withType<JavaCompile> {
+    options.encoding = "UTF-8"
+}
+
 spotbugs {
     toolVersion = "3.1.+"
     effort = "max"
