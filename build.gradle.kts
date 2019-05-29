@@ -35,6 +35,10 @@ dependencies {
     testCompile("org.mockito", "mockito-junit-jupiter", mockitoVersion)
 }
 
+tasks.named<Test>("test") {
+    useJUnitPlatform()
+}
+
 spotbugs {
     toolVersion = "3.1.+"
     effort = "max"
