@@ -16,6 +16,7 @@ To build the Digirati Taxonomy Manager, use the included gradle wrapper:
 The following key dependencies are used in this application:
 
 - [**aho-corasick**](https://github.com/robert-bor/aho-corasick): an implementation library of the [Aho-Corasick algorithm](https://en.wikipedia.org/wiki/Aho%E2%80%93Corasick_algorithm) for use in looking up taxonomy terms within a piece of input text.
+- [**Stanford CoreNLP**](https://github.com/stanfordnlp/CoreNLP): a natural language processing library for use in normalising both taxonomy terms and query text.
 
 ## Contributing
 

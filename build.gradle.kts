@@ -17,6 +17,7 @@ java {
 
 val ahoCorasickVersion: String by project
 val guavaVersion: String by project
+val stanfordNlpVersion: String by project
 val junitVersion: String by project
 val hamcrestVersion: String by project
 val mockitoVersion: String by project
@@ -26,6 +27,9 @@ dependencies {
 
     compile("org.ahocorasick", "ahocorasick", ahoCorasickVersion)
     compile("com.google.guava", "guava", guavaVersion)
+    compile("edu.stanford.nlp", "stanford-corenlp", stanfordNlpVersion)
+    compile("edu.stanford.nlp:stanford-corenlp:$stanfordNlpVersion:models")
+    compile("edu.stanford.nlp:stanford-corenlp:$stanfordNlpVersion:models-french")
 
     testCompile("org.junit.jupiter", "junit-jupiter", junitVersion)
     testCompile("org.hamcrest", "hamcrest", hamcrestVersion)
