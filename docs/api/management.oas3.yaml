@@ -1,0 +1,140 @@
+openapi: 3.0.0
+info:
+  title: "API"
+  version: "1.0.0"
+  contact:
+    name: Digirati
+    email: opensource@digirati.com
+    url: https://github.com/digirati-co-uk/digirati-taxonomy-manager
+tags:
+  - name: concept-scheme
+    description: Operations executed on whole taxonomies.
+  - name: concept
+    description: Operations executed on single concepts.
+paths:
+  /0.1/concept-scheme/{scheme}/concept/{concept}:
+    parameters:
+      - $ref: '#/components/parameters/scheme'
+      - $ref: '#/components/parameters/concept'
+    put:
+      tags:
+        - concept
+      description: Update an existing skos:Concept.
+      requestBody:
+        description: The updated skos:Concept resource to be saved.
+        content:
+          'application/ld+json;profile="http://www.w3.org/2004/02/skos/core.jsonld"':
+            example:
+              $ref: './samples/concept.json'       
+      responses:
+         '204':
+            description: Update was successful, and the skos:Concept is unchanged from the request body.              
+
+  /0.1/concept-scheme/{scheme}/concept:
+    parameters:
+      - $ref: '#/components/parameters/scheme'
+    post:
+      tags:
+        - concept
+      summary: Add a skos:Concept to an existing skos:ConceptScheme.
+      operationId: addConceptToScheme
+      requestBody:
+        description: A skos:Concept resource.
+        content:
+          'application/ld+json;profile="http://www.w3.org/2004/02/skos/core.jsonld"':
+            example:
+              $ref: './samples/concept.json'
+      responses:
+        '201':
+          description: The newly created skos:Concept resource, with the additional skos:inScheme property for the new parent.
+          content:
+            'application/ld+json;profile="http://www.w3.org/2004/02/skos/core.jsonld"':
+              example:
+                $ref: './samples/concept-in-scheme.json'
+
+  /0.1/concept-scheme/{scheme}:
+    parameters:
+      - $ref: '#/components/parameters/scheme'
+    get:
+      summary: Get a ConceptScheme
+      tags:
+        - concept-scheme
+      responses:
+        '404':
+          $ref: '#/components/schemas/error'
+        '200':
+          description: A ConceptScheme resource.
+          content:
+            'application/ld+json;profile="http://www.w3.org/2004/02/skos/core.jsonld"':
+              example: 
+                $ref: samples/concept-scheme.json
+
+  /0.1/concept-scheme/:
+    post:
+      summary: Create a ConceptScheme
+      tags: 
+        - concept-scheme
+      operationId: createConceptScheme
+      requestBody:
+        description: "A representation of the ConceptScheme being created."
+        content:
+          'application/ld+json;profile="http://www.w3.org/2004/02/skos/core.jsonld"':
+            example:
+              $ref: './samples/concept-scheme.json'
+          multipart/form-data:
+            example:
+              $ref: './samples/concept-scheme.xml'
+      responses:
+        '201':
+          description: The newly created ConceptScheme resource.
+          links:
+            addConcept:
+              operationId: addConceptToScheme
+              parameters:
+                scheme: $response.body#/@id
+          content:
+            'application/ld+json;profile="http://www.w3.org/2004/02/skos/core.jsonld"':
+              example: 
+   
+components: 
+
+  responses:
+    notFound:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+    unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+
+  schemas:
+    error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message
+
+  parameters:
+    concept:
+      name: concept
+      in: path
+      description: Concept identifier. The unique identifier of the Concept being addressed (not its IRI).
+      schema:
+        type: string
+    scheme:
+      name: scheme
+      in: path
+      description: Scheme identifier. The unique identifier of the ConceptScheme being addressed (not its IRI).
+      schema:
+        type: string
+

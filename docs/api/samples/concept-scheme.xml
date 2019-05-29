@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+xmlns:dc="http://purl.org/dc/elements/1.1/">
+
+<skos:ConceptScheme rdf:about="http://example.com/taxonomy/">
+    <dc:title>The Example Taxonomy</dc:title>
+    <dc:description>An example taxonomy to illustrate the use of the SKOS schema.</dc:description>
+
+    <skos:member>
+        <skos:Concept rdf:about="/taxonomy/davos/">
+        <skos:prefLabel xml:lang="en">Davos</skos:prefLabel>
+        <skos:definition xml:lang="en">Onion Man</skos:definition>
+        <skos:inScheme>http://example.com/taxonomy</skos:inScheme>
+        <dc:identifier>DAVOS-1</dc:identifier>
+        </skos:Concept>
+    </skos:member>
+</skos:ConceptScheme>
+</rdf:RDF>
