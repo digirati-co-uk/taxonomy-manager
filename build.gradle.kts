@@ -29,7 +29,6 @@ dependencies {
     compile("com.google.guava", "guava", guavaVersion)
     compile("edu.stanford.nlp", "stanford-corenlp", stanfordNlpVersion)
     compile("edu.stanford.nlp:stanford-corenlp:$stanfordNlpVersion:models")
-    compile("edu.stanford.nlp:stanford-corenlp:$stanfordNlpVersion:models-french")
 
     testCompile("org.junit.jupiter", "junit-jupiter", junitVersion)
     testCompile("org.hamcrest", "hamcrest", hamcrestVersion)

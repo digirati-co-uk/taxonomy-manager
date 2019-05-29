@@ -4,8 +4,8 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.CoreDocument;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 
-import java.util.Collection;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * Provides a mechanism for normalising any text inputs, including the terms to search for and the
@@ -13,22 +13,12 @@ import java.util.Properties;
  */
 public class TextNormaliser {
 
-    private final Collection<String> stopwords;
+    private final Set<String> stopwords;
 
-    private final StanfordCoreNLP pipeline;
-
-    /**
-     * Constructs a {@link TextNormaliser} capable of correctly lemmatising English text
-     *
-     * @param stopwords a collection of common boilerplate words to remove from the text (e.g.
-     *     "the", "a", etc.)
-     */
-    public TextNormaliser(Collection<String> stopwords) {
-        this(stopwords, "en", "English");
-    }
+    private StanfordCoreNLP pipeline;
 
     /**
-     * Constructs a {@link TextNormaliser} for normalising any input language. Currently, full
+     * Initialises a {@link TextNormaliser} for normalising any input language. Currently, full
      * lemmatisation is only supported for English due to a restriction of the NLP library that
      * we're using, but language-specific tokenisation should still work
      *
@@ -37,9 +27,33 @@ public class TextNormaliser {
      * @param languageKey the ISO 639-1 language code for the text to be normalised
      * @param languageName the name of the language of the text to be normalised
      */
-    public TextNormaliser(Collection<String> stopwords, String languageKey, String languageName) {
+    public static TextNormaliser initialiseNormaliser(
+            Set<String> stopwords, String languageKey, String languageName) {
+        TextNormaliser normaliser = new TextNormaliser(stopwords);
+        normaliser.initialisePipeline(languageKey, languageName);
+        return normaliser;
+    }
+
+    /**
+     * Initialises a {@link TextNormaliser} capable of correctly lemmatising English text
+     *
+     * @param stopwords a collection of common boilerplate words to remove from the text (e.g.
+     *     "the", "a", etc.)
+     */
+    public static TextNormaliser initialiseEnglishNormaliser(Set<String> stopwords) {
+        return initialiseNormaliser(stopwords, "en", "English");
+    }
+
+    private TextNormaliser(Set<String> stopwords) {
         this.stopwords = stopwords;
-        this.pipeline = createPipeline(languageKey, languageName);
+    }
+
+    private void initialisePipeline(String languageKey, String languageName) {
+        Properties properties = new Properties();
+        properties.setProperty("annotators", "tokenize,ssplit,pos,lemma");
+        properties.setProperty("tokenize.language", languageKey);
+        properties.setProperty("language", languageName);
+        this.pipeline = new StanfordCoreNLP(properties);
     }
 
     /**
@@ -58,14 +72,6 @@ public class TextNormaliser {
                 .filter(this::isContentWord)
                 .forEach(coreLabel -> normalisedText.append(coreLabel.lemma()).append(" "));
         return normalisedText.toString().trim();
-    }
-
-    private StanfordCoreNLP createPipeline(String languageKey, String languageName) {
-        Properties properties = new Properties();
-        properties.setProperty("annotators", "tokenize,ssplit,pos,lemma");
-        properties.setProperty("tokenize.language", languageKey);
-        properties.setProperty("language", languageName);
-        return new StanfordCoreNLP(properties);
     }
 
     private boolean isContentWord(CoreLabel label) {

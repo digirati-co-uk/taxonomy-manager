@@ -1,9 +1,9 @@
 package com.digirati.taxonomy.manager.normalisation;
 
+import com.google.common.collect.Sets;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashSet;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -12,7 +12,7 @@ class TextNormaliserTest {
     @Test
     void normaliseShouldLemmatizeText() {
         // Given
-        TextNormaliser textNormaliser = new TextNormaliser(new ArrayList<>());
+        TextNormaliser textNormaliser = TextNormaliser.initialiseEnglishNormaliser(new HashSet<>());
 
         // When
         String actual = textNormaliser.normalise("I was there yesterday");
@@ -23,35 +23,10 @@ class TextNormaliserTest {
     }
 
     @Test
-    void normaliseShouldExpandContractedEnglishWords() {
-        // Given
-        TextNormaliser textNormaliser = new TextNormaliser(new ArrayList<>());
-
-        // When
-        String actual = textNormaliser.normalise("don't won't shouldn't can't I'm");
-
-        // Then
-        String expected = "do not will not should not can not I be";
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    void normaliseShouldLemmatizeBritishAndAmericanSpellings() {
-        // Given
-        TextNormaliser textNormaliser = new TextNormaliser(new ArrayList<>());
-
-        // When
-        String actual = textNormaliser.normalise("coloring colouring");
-
-        // Then
-        String expected = "color colour";
-        assertEquals(expected, actual);
-    }
-
-    @Test
     void normaliseShouldTokeniseWordsInNonEnglishLanguage() {
         // Given
-        TextNormaliser textNormaliser = new TextNormaliser(new ArrayList<>(), "fr", "French");
+        TextNormaliser textNormaliser =
+                TextNormaliser.initialiseNormaliser(new HashSet<>(), "fr", "French");
 
         // When
         String actual = textNormaliser.normalise("qu'est que c'est");
@@ -65,8 +40,8 @@ class TextNormaliserTest {
     void normaliseShouldRemoveStopwords() {
         // Given
         TextNormaliser textNormaliser =
-                new TextNormaliser(
-                        Arrays.asList(
+                TextNormaliser.initialiseEnglishNormaliser(
+                        Sets.newHashSet(
                                 "in", // Generic stopword
                                 "the", // Generic stopword
                                 "be", // lemmatized version of "was"
@@ -86,7 +61,7 @@ class TextNormaliserTest {
     @Test
     void normaliseShouldNotForceRemovalOfNonLatinCharacters() {
         // Given
-        TextNormaliser textNormaliser = new TextNormaliser(new ArrayList<>());
+        TextNormaliser textNormaliser = TextNormaliser.initialiseEnglishNormaliser(new HashSet<>());
 
         // When
         String actual = textNormaliser.normalise("הייתי שם אתמול אחר הצהריים");
@@ -99,7 +74,7 @@ class TextNormaliserTest {
     @Test
     void normaliseShouldTrimWhitespace() {
         // Given
-        TextNormaliser textNormaliser = new TextNormaliser(new ArrayList<>());
+        TextNormaliser textNormaliser = TextNormaliser.initialiseEnglishNormaliser(new HashSet<>());
 
         // When
         String actual = textNormaliser.normalise("       what		\n");
