@@ -1,7 +1,5 @@
 package com.digirati.taxonomy.manager.lookup.model;
 
-import edu.stanford.nlp.ling.CoreLabel;
-
 import java.util.Objects;
 
 /**
@@ -10,28 +8,30 @@ import java.util.Objects;
  */
 public class Word {
 
-    private String originalText;
+    private final String originalText;
 
-    private int originalStartPosition;
+    private final int originalStartPosition;
 
-    private int originalEndPosition;
+    private final int originalEndPosition;
 
-    private String lemma;
+    private final String lemma;
 
+    /**
+     * Constructor.
+     *
+     * @param originalText the original non-normalised form of the word
+     * @param originalStartPosition the start index of the word within the full non-normalised text
+     * @param originalEndPosition the end index (exclusive) of the word within the full
+     *     non-normalised text
+     * @param lemma the lemmatised form of the word if lemmatisation is supported for the relevant
+     *     language; the tokenised form if not
+     */
     public Word(
             String originalText, int originalStartPosition, int originalEndPosition, String lemma) {
         this.originalText = originalText;
         this.originalStartPosition = originalStartPosition;
         this.originalEndPosition = originalEndPosition;
         this.lemma = lemma;
-    }
-
-    public Word(CoreLabel coreLabel) {
-        this(
-                coreLabel.originalText(),
-                coreLabel.beginPosition(),
-                coreLabel.endPosition(),
-                coreLabel.lemma());
     }
 
     public String getOriginalText() {

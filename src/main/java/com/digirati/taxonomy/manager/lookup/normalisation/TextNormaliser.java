@@ -5,6 +5,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.CoreDocument;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -16,7 +17,7 @@ import java.util.stream.Collectors;
  */
 public class TextNormaliser {
 
-    private final Set<String> stopwords;
+    private Set<String> stopwords;
 
     private StanfordCoreNLP pipeline;
 
@@ -32,8 +33,9 @@ public class TextNormaliser {
      */
     public static TextNormaliser initialiseNormaliser(
             Set<String> stopwords, String languageKey, String languageName) {
-        TextNormaliser normaliser = new TextNormaliser(stopwords);
+        TextNormaliser normaliser = new TextNormaliser();
         normaliser.initialisePipeline(languageKey, languageName);
+        normaliser.stopwords = normaliser.normaliseStopwords(stopwords);
         return normaliser;
     }
 
@@ -47,8 +49,8 @@ public class TextNormaliser {
         return initialiseNormaliser(stopwords, "en", "English");
     }
 
-    private TextNormaliser(Set<String> stopwords) {
-        this.stopwords = stopwords;
+    private TextNormaliser() {
+        // no-op
     }
 
     private void initialisePipeline(String languageKey, String languageName) {
@@ -59,11 +61,25 @@ public class TextNormaliser {
         this.pipeline = new StanfordCoreNLP(properties);
     }
 
+    private Set<String> normaliseStopwords(Set<String> originalStopwords) {
+        Set<String> normalisedStopwords = new HashSet<>();
+        for (String originalStopword : originalStopwords) {
+            CoreDocument document = new CoreDocument(originalStopword);
+            pipeline.annotate(document);
+            String normalisedStopword =
+                    document.tokens().stream()
+                            .map(CoreLabel::lemma)
+                            .collect(Collectors.joining(" "));
+            normalisedStopwords.add(normalisedStopword);
+        }
+        return normalisedStopwords;
+    }
+
     /**
-     * Applies the NLP pipeline to a piece of input text to produce a list of the {@link
-     * Word}s it contains (i.e. all words, excluding stopwords). The NLP pipeline includes
-     * tokenisation, sentence splitting, part of speech tagging, and lemmatisation (if this is
-     * supported for the language in question).
+     * Applies the NLP pipeline to a piece of input text to produce a list of the {@link Word}s it
+     * contains (i.e. all words, excluding stopwords). The NLP pipeline includes tokenisation,
+     * sentence splitting, part of speech tagging, and lemmatisation (if this is supported for the
+     * language in question).
      *
      * @param text a piece of text from which to extract the content words
      * @return the list of content words contained in the input text
@@ -72,13 +88,15 @@ public class TextNormaliser {
         CoreDocument document = new CoreDocument(text);
         pipeline.annotate(document);
         return document.tokens().stream()
-                .filter(this::isContentWord)
-                .map(Word::new)
+                .filter(coreLabel -> !stopwords.contains(coreLabel.lemma()))
+                .map(
+                        coreLabel ->
+                                new Word(
+                                        coreLabel.originalText(),
+                                        coreLabel.beginPosition(),
+                                        coreLabel.endPosition(),
+                                        coreLabel.lemma()))
                 .collect(Collectors.toList());
-    }
-
-    private boolean isContentWord(CoreLabel label) {
-        return !stopwords.contains(label.originalText()) && !stopwords.contains(label.lemma());
     }
 
     /**
@@ -88,20 +106,6 @@ public class TextNormaliser {
      * @return a single normalised string built from the input {@link Word}s
      */
     public String normalise(List<Word> contentWords) {
-        StringBuilder normalisedText = new StringBuilder();
-        contentWords.forEach(coreLabel -> normalisedText.append(coreLabel.getLemma()).append(" "));
-        return normalisedText.toString().trim();
-    }
-
-    /**
-     * Applies the NLP pipeline to a piece of input text to produce a normalised version of it. This
-     * includes tokenisation, sentence splitting, part of speech tagging, and lemmatisation (if this
-     * is supported for the language in question).
-     *
-     * @param text a non-normalised piece of text
-     * @return the normalised form of the input text
-     */
-    public String normalise(String text) {
-        return normalise(extractContentWords(text));
+        return contentWords.stream().map(Word::getLemma).collect(Collectors.joining(" "));
     }
 }

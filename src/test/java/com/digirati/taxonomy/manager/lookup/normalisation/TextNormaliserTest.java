@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TextNormaliserTest {
 
@@ -31,10 +31,10 @@ class TextNormaliserTest {
     }
 
     @Test
-    void extractContentWordsShouldExcludeStopwords() {
+    void extractContentWordsShouldExcludeNormalisedStopwords() {
         // Given
         TextNormaliser textNormaliser =
-                TextNormaliser.initialiseEnglishNormaliser(Sets.newHashSet("I", "be"));
+                TextNormaliser.initialiseEnglishNormaliser(Sets.newHashSet("I", "is"));
 
         // When
         List<Word> actual = textNormaliser.extractContentWords("I was there yesterday");
@@ -73,7 +73,8 @@ class TextNormaliserTest {
                 TextNormaliser.initialiseNormaliser(new HashSet<>(), "fr", "French");
 
         // When
-        String actual = textNormaliser.normalise("qu'est que c'est");
+        String actual =
+                textNormaliser.normalise(textNormaliser.extractContentWords("qu'est que c'est"));
 
         // Then
         String expected = "qu' est que c' est";
@@ -86,7 +87,9 @@ class TextNormaliserTest {
         TextNormaliser textNormaliser = TextNormaliser.initialiseEnglishNormaliser(new HashSet<>());
 
         // When
-        String actual = textNormaliser.normalise("הייתי שם אתמול אחר הצהריים");
+        String actual =
+                textNormaliser.normalise(
+                        textNormaliser.extractContentWords("הייתי שם אתמול אחר הצהריים"));
 
         // Then
         String expected = "הייתי שם אתמול אחר הצהריים";
@@ -99,7 +102,8 @@ class TextNormaliserTest {
         TextNormaliser textNormaliser = TextNormaliser.initialiseEnglishNormaliser(new HashSet<>());
 
         // When
-        String actual = textNormaliser.normalise("       what		\n");
+        String actual =
+                textNormaliser.normalise(textNormaliser.extractContentWords("       what		\n"));
 
         // Then
         String expected = "what";

@@ -7,7 +7,7 @@ import java.util.Objects;
 /**
  * Models the context around the results of a lookup, including the original and normalised forms of
  * the searched text, the mapping between original words and normalised words, and details of any
- * matched concepts
+ * matched concepts.
  */
 public class LookupResultContext {
 
@@ -19,6 +19,14 @@ public class LookupResultContext {
 
     private final Collection<ConceptMatch> matchedConcepts;
 
+    /**
+     * Constructor.
+     *
+     * @param originalText the original non-normalised form of the text to be searched
+     * @param normalisedText the normalised form of the text to be searched
+     * @param contentWords the list of {@link Word}s to map between the original and normalised text
+     * @param matchedConcepts a collection of {@link ConceptMatch}es found in the text
+     */
     public LookupResultContext(
             String originalText,
             String normalisedText,

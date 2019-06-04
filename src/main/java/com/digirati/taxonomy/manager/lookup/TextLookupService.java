@@ -13,9 +13,9 @@ import java.util.stream.Collectors;
 /** Service to orchestrate all the steps in looking up concepts from a piece of input text. */
 public class TextLookupService {
 
-    private TextNormaliser textNormaliser;
+    private final TextNormaliser textNormaliser;
 
-    private ConceptExtractor conceptExtractor;
+    private final ConceptExtractor conceptExtractor;
 
     public TextLookupService(TextNormaliser textNormaliser, ConceptExtractor conceptExtractor) {
         this.textNormaliser = textNormaliser;
