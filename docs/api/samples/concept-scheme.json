@@ -10,5 +10,16 @@
     "dcterms:title": "Taxonomy Title",
     "dcterms:description": "This is the description of my taxonomy!",
     "dcterms:created": "2019-08-01",
-    "dcterms:updated": "2019-08-01"
+    "dcterms:updated": "2019-08-01",
+    "skos:hasTopConcept": [
+        {
+            "@id": "<concept-1>",
+            "skos:prefLabel": [
+                {
+                    "@language": "en",
+                    "@value": "This is my preferred label"
+                }
+            ]
+        }
+    ]
 }

@@ -6,6 +6,49 @@ info:
     name: Digirati
     email: opensource@digirati.com
     url: https://github.com/digirati-co-uk/digirati-taxonomy-manager
+  description: |
+    This specification covers all actions and operations required to create and manage a SKOS taxonomy.
+
+    __Data Model__ 
+
+    The taxonomy management API is architected as a set of RESTful JSON-LD resources that can be manipulated and traversed
+    by a client. All URIs present in an API response from the management system **MUST** be dereferencable as SKOS resources.
+    The operations listed below specify the actions that can be performed on the collection of taxonomies that TaxMan hosts.
+
+    __Localization__
+    
+    The SKOS data model puts a large focus on localization of taxonomies, and the API should respect and export this.
+    Any property with a type of rdfs:PlainLiteral should be marshalled to JSON with an embedded language map, even when
+    only one other label exists for the property.
+
+    <small>Conforming Response</small>
+    ```json
+    {
+      "@id": "<x>",
+      "skos:prefLabel": [
+        {
+          "@lang": "en",
+          "@value": "test"
+        }
+      ]
+    }
+    ```
+      
+    <small>Non-conforming Response</small>
+    ```json
+    {
+      "@id": "<x>",
+      "skos:prefLabel": "test"
+    }
+    ```
+
+    __Deferencing Resources__
+
+    It **MUST** be possible to deference all resources that are referenced by IRI. For example, when a GET request to a _skos:Concept_ 
+    provides a list of IRIs that are _broader_ or _narrower_ concepts then each of those elements should have an IRI that dereferences to
+    a taxonomy management endpoint. This is in addition to providing all [Lexical labels](https://www.w3.org/TR/skos-reference/#labels) for each resource
+
+
 tags:
   - name: concept-scheme
     description: Operations executed on whole taxonomies.
@@ -36,7 +79,7 @@ paths:
     post:
       tags:
         - concept
-      summary: Add a skos:Concept to an existing skos:ConceptScheme.
+      summary: Create a new Concept.
       operationId: addConceptToScheme
       requestBody:
         description: A skos:Concept resource.
@@ -63,7 +106,10 @@ paths:
         '404':
           $ref: '#/components/schemas/error'
         '200':
-          description: A ConceptScheme resource.
+          description: |
+            A skos:ConceptScheme resource, containing embedded links to the skos:Concept entries
+            appearing within it. Any embedded data (such as a `skos:Concept`, or a linked `skos:Collection`)
+            will contain presentational properties as defined by _Lexical Labels_ in the SKOS specification.
           content:
             'application/ld+json;profile="http://www.w3.org/2004/02/skos/core.jsonld"':
               example: 
@@ -102,13 +148,13 @@ components:
     notFound:
       description: The specified resource was not found
       content:
-        application/json:
+        'application/problem+json':
           schema:
             $ref: '#/components/schemas/error'
     unauthorized:
       description: Unauthorized
       content:
-        application/json:
+        'application/problem+json':
           schema:
             $ref: '#/components/schemas/error'
 
