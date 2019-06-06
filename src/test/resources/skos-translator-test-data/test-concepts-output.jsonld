@@ -1,0 +1,96 @@
+{
+  "@graph" : [ {
+    "@id" : "http://example.com/concept#1",
+    "@type" : "http://www.w3.org/2004/02/skos/core#Concept",
+    "altLabel" : [ {
+      "@language" : "en",
+      "@value" : "first"
+    }, {
+      "@language" : "fr",
+      "@value" : "premier"
+    } ],
+    "narrower" : "http://example.com/concept#2",
+    "prefLabel" : [ {
+      "@language" : "en",
+      "@value" : "one"
+    }, {
+      "@language" : "fr",
+      "@value" : "un"
+    } ]
+  }, {
+    "@id" : "http://example.com/concept#2",
+    "@type" : "http://www.w3.org/2004/02/skos/core#Concept",
+    "altLabel" : [ {
+      "@language" : "en",
+      "@value" : "second"
+    }, {
+      "@language" : "fr",
+      "@value" : "deuxieme"
+    } ],
+    "prefLabel" : [ {
+      "@language" : "en",
+      "@value" : "two"
+    }, {
+      "@language" : "fr",
+      "@value" : "deux"
+    } ],
+    "related" : [ "http://example.com/concept#3", "http://example.com/concept#4" ]
+  }, {
+    "@id" : "http://example.com/concept#3",
+    "@type" : "http://www.w3.org/2004/02/skos/core#Concept",
+    "altLabel" : [ {
+      "@language" : "en",
+      "@value" : "third"
+    }, {
+      "@language" : "fr",
+      "@value" : "troisieme"
+    } ],
+    "broader" : "http://example.com/concept#1",
+    "narrower" : "http://example.com/concept#4",
+    "prefLabel" : [ {
+      "@language" : "en",
+      "@value" : "three"
+    }, {
+      "@language" : "fr",
+      "@value" : "trois"
+    } ]
+  }, {
+    "@id" : "http://example.com/concept#4",
+    "@type" : "http://www.w3.org/2004/02/skos/core#Concept",
+    "altLabel" : [ {
+      "@language" : "en",
+      "@value" : "fourth"
+    }, {
+      "@language" : "fr",
+      "@value" : "quatrieme"
+    } ],
+    "broader" : "http://example.com/concept#3",
+    "prefLabel" : [ {
+      "@language" : "en",
+      "@value" : "four"
+    }, {
+      "@language" : "fr",
+      "@value" : "quatre"
+    } ]
+  } ],
+  "@context" : {
+    "related" : {
+      "@id" : "http://www.w3.org/2004/02/skos/core#related",
+      "@type" : "@id"
+    },
+    "altLabel" : {
+      "@id" : "http://www.w3.org/2004/02/skos/core#altLabel"
+    },
+    "prefLabel" : {
+      "@id" : "http://www.w3.org/2004/02/skos/core#prefLabel"
+    },
+    "narrower" : {
+      "@id" : "http://www.w3.org/2004/02/skos/core#narrower",
+      "@type" : "@id"
+    },
+    "broader" : {
+      "@id" : "http://www.w3.org/2004/02/skos/core#broader",
+      "@type" : "@id"
+    }
+  }
+}

@@ -17,6 +17,9 @@ java {
 
 val ahoCorasickVersion: String by project
 val guavaVersion: String by project
+val jenaVersion: String by project
+val log4jVersion: String by project
+val jacksonVersion: String by project
 val junitVersion: String by project
 val hamcrestVersion: String by project
 val mockitoVersion: String by project
@@ -26,6 +29,11 @@ dependencies {
 
     compile("org.ahocorasick", "ahocorasick", ahoCorasickVersion)
     compile("com.google.guava", "guava", guavaVersion)
+    compile("org.apache.jena", "jena-core", jenaVersion)
+    compile("org.apache.jena", "apache-jena-libs", jenaVersion)
+    compile("org.apache.logging.log4j", "log4j-core", log4jVersion)
+    compile("org.apache.logging.log4j", "log4j-api", log4jVersion)
+    compile("com.fasterxml.jackson.core", "jackson-databind", jacksonVersion)
 
     testCompile("org.junit.jupiter", "junit-jupiter", junitVersion)
     testCompile("org.hamcrest", "hamcrest", hamcrestVersion)

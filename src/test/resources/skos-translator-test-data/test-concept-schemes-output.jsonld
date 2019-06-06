@@ -1,0 +1,36 @@
+{
+  "@graph" : [ {
+    "@id" : "http://example.com/",
+    "@type" : "http://www.w3.org/2004/02/skos/core#ConceptScheme",
+    "hasTopConcept" : [ "http://example.com/concept#1", "http://example.com/concept#2" ]
+  }, {
+    "@id" : "http://example.com/concept#1",
+    "@type" : "http://www.w3.org/2004/02/skos/core#Concept",
+    "prefLabel" : [ {
+      "@language" : "en",
+      "@value" : "one"
+    }, {
+      "@language" : "fr",
+      "@value" : "un"
+    } ]
+  }, {
+    "@id" : "http://example.com/concept#2",
+    "@type" : "http://www.w3.org/2004/02/skos/core#Concept",
+    "prefLabel" : [ {
+      "@language" : "en",
+      "@value" : "two"
+    }, {
+      "@language" : "fr",
+      "@value" : "deux"
+    } ]
+  } ],
+  "@context" : {
+    "prefLabel" : {
+      "@id" : "http://www.w3.org/2004/02/skos/core#prefLabel"
+    },
+    "hasTopConcept" : {
+      "@id" : "http://www.w3.org/2004/02/skos/core#hasTopConcept",
+      "@type" : "@id"
+    }
+  }
+}
