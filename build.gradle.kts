@@ -20,6 +20,7 @@ val guavaVersion: String by project
 val jenaVersion: String by project
 val log4jVersion: String by project
 val jacksonVersion: String by project
+val postgresDriverVersion: String by project
 val junitVersion: String by project
 val hamcrestVersion: String by project
 val mockitoVersion: String by project
@@ -34,6 +35,7 @@ dependencies {
     compile("org.apache.logging.log4j", "log4j-core", log4jVersion)
     compile("org.apache.logging.log4j", "log4j-api", log4jVersion)
     compile("com.fasterxml.jackson.core", "jackson-databind", jacksonVersion)
+    compile("org.postgresql", "postgresql", postgresDriverVersion)
 
     testCompile("org.junit.jupiter", "junit-jupiter", junitVersion)
     testCompile("org.hamcrest", "hamcrest", hamcrestVersion)
@@ -65,4 +67,11 @@ sonarqube {
         property("sonar.pullrequest.provider", "GitHub")
         property("sonar.pullrequest.github.repository", "digirati-co-uk/digirati-taxonomy-manager")
     }
+}
+
+sourceSets.create("integrationTest") {
+    java.srcDir("src/integrationTest/java")
+    resources.srcDir("src/integrationTest/resources")
+    compileClasspath += sourceSets.test.get().compileClasspath
+    runtimeClasspath += sourceSets.test.get().runtimeClasspath
 }

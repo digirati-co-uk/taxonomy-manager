@@ -4,8 +4,8 @@ import java.util.Objects;
 
 public class ConceptModel {
 
-    // Primary key - of type bigserial
-    private String id;
+    // Primary key - of type bigint
+    private Long id;
 
     // Type text
     private String iri;
@@ -21,11 +21,11 @@ public class ConceptModel {
     private String historyNote;
     private String scopeNote;
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public ConceptModel setId(String id) {
+    public ConceptModel setId(Long id) {
         this.id = id;
         return this;
     }

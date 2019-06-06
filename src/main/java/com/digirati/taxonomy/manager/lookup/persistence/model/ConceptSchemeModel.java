@@ -5,16 +5,16 @@ import java.util.Objects;
 public class ConceptSchemeModel {
 
     // Primary Key, type bigserial
-    private String id;
+    private Long id;
 
     // Type text
     private String iri;
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public ConceptSchemeModel setId(String id) {
+    public ConceptSchemeModel setId(Long id) {
         this.id = id;
         return this;
     }

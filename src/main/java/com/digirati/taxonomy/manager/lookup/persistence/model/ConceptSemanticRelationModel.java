@@ -13,6 +13,7 @@ public class ConceptSemanticRelationModel {
     private boolean transitive;
 
     // Type bigint
+    // TODO these will probably be better as IRIs
     private String sourceId;
     private String targetId;
 

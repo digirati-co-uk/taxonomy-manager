@@ -1,3 +1,5 @@
 /.gradle
 /.idea
 /build
+/src/main/resources/db-credentials.properties
+/src/integrationTest/resources/db-credentials.properties
