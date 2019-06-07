@@ -10,7 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ConceptDaoIntegrationTest {
 
@@ -65,7 +65,7 @@ class ConceptDaoIntegrationTest {
                         .orElseThrow(() -> new AssertionError("Concept to retrieve not found."));
 
         // Then
-        Assertions.assertEquals(created, retrieved);
+        assertEquals(created, retrieved);
     }
 
     @Test
@@ -88,8 +88,8 @@ class ConceptDaoIntegrationTest {
 
         // Then
         // TODO this really doesn't prove anything because update could just return back its arg
-        Assertions.assertEquals(toModify.getId(), updated.getId());
-        Assertions.assertEquals(toModify.getIri(), updated.getIri());
+        assertEquals(toModify.getId(), updated.getId());
+        assertEquals(toModify.getIri(), updated.getIri());
         // TODO json fields getting swapped around
         // assertEquals(toModify, updated);
     }
@@ -109,7 +109,7 @@ class ConceptDaoIntegrationTest {
         // Then
         Assertions.assertTrue(deleted);
         Optional<ConceptModel> retrieved = underTest.read(created.getId());
-        Assertions.assertEquals(Optional.empty(), retrieved);
+        assertEquals(Optional.empty(), retrieved);
     }
 
     @AfterEach

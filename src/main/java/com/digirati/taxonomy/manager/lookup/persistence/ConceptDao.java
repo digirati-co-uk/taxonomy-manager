@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class ConceptDao implements Dao<ConceptModel> {
+public class ConceptDao {
 
     private static final Logger logger = LogManager.getLogger(ConceptDao.class);
 
@@ -38,7 +38,6 @@ public class ConceptDao implements Dao<ConceptModel> {
         this.connectionProvider = connectionProvider;
     }
 
-    @Override
     public Optional<ConceptModel> create(ConceptModel toCreate) {
         logger.info(() -> "Preparing to create concept with IRI=" + toCreate.getIri());
 
@@ -101,7 +100,6 @@ public class ConceptDao implements Dao<ConceptModel> {
         return concepts;
     }
 
-    @Override
     public Optional<ConceptModel> read(long primaryKey) {
         try (Connection connection = connectionProvider.getConnection();
                 PreparedStatement readStatement =
@@ -123,7 +121,6 @@ public class ConceptDao implements Dao<ConceptModel> {
         return Optional.empty();
     }
 
-    @Override
     public Optional<ConceptModel> update(ConceptModel toUpdate) {
         logger.info(() -> "Preparing to update concept with IRI=" + toUpdate.getIri());
 
@@ -159,7 +156,6 @@ public class ConceptDao implements Dao<ConceptModel> {
         }
     }
 
-    @Override
     public boolean delete(long primaryKey) {
         logger.info(() -> "Preparing to delete concept with ID=" + primaryKey);
 

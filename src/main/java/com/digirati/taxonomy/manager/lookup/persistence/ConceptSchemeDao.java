@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class ConceptSchemeDao implements Dao<ConceptSchemeModel> {
+public class ConceptSchemeDao {
 
     private static final Logger logger = LogManager.getLogger(ConceptSchemeDao.class);
 
@@ -32,7 +32,6 @@ public class ConceptSchemeDao implements Dao<ConceptSchemeModel> {
         this.connectionProvider = connectionProvider;
     }
 
-    @Override
     public Optional<ConceptSchemeModel> create(ConceptSchemeModel toCreate) {
         logger.info(() -> "Preparing to create concept scheme with IRI=" + toCreate.getIri());
 
@@ -73,7 +72,6 @@ public class ConceptSchemeDao implements Dao<ConceptSchemeModel> {
         return conceptSchemes;
     }
 
-    @Override
     public Optional<ConceptSchemeModel> read(long primaryKey) {
         try (Connection connection = connectionProvider.getConnection();
                 PreparedStatement readStatement =
@@ -94,7 +92,6 @@ public class ConceptSchemeDao implements Dao<ConceptSchemeModel> {
         return Optional.empty();
     }
 
-    @Override
     public Optional<ConceptSchemeModel> update(ConceptSchemeModel toUpdate) {
         logger.info(() -> "Preparing to update concept scheme with IRI=" + toUpdate.getIri());
 
@@ -115,7 +112,6 @@ public class ConceptSchemeDao implements Dao<ConceptSchemeModel> {
         }
     }
 
-    @Override
     public boolean delete(long primaryKey) {
         logger.info(() -> "Preparing to delete concept scheme with ID=" + primaryKey);
 
