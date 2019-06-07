@@ -12,29 +12,38 @@ import java.util.Properties;
 
 class ConnectionProvider {
 
-	private static final Logger logger = LogManager.getLogger(ConnectionProvider.class);
+    private static final Logger logger = LogManager.getLogger(ConnectionProvider.class);
 
-	Connection getConnection() throws SQLException {
-		try {
-			// TODO make this connection string configurable
-			String connectionString = "jdbc:postgresql://localhost:5432/taxman-test";
-			Properties properties = loadDbCredentials();
-			return DriverManager.getConnection(connectionString, properties);
-		} catch (SQLException e) {
-			logger.error(() -> "Unable to connect to database", e);
-			throw e;
-		}
-	}
+    Connection getConnection() throws SQLException {
+        try {
+            Properties dbConfigProps = loadDbProperties("db-config.properties");
+            String connectionString =
+                    "jdbc:"
+                            + dbConfigProps.getProperty("db.type")
+                            + "://"
+                            + dbConfigProps.getProperty("db.host")
+                            + ":"
+                            + dbConfigProps.getProperty("db.port")
+                            + "/"
+                            + dbConfigProps.getProperty("db.name");
 
-	private Properties loadDbCredentials() {
+            Properties properties = loadDbProperties("db-credentials.properties");
+            return DriverManager.getConnection(connectionString, properties);
+        } catch (SQLException e) {
+            logger.error(() -> "Unable to connect to database", e);
+            throw e;
+        }
+    }
+
+    private Properties loadDbProperties(String propertiesFileName) {
         try (InputStream dbCredentials =
-                getClass().getClassLoader().getResourceAsStream("db-credentials.properties")) {
+                getClass().getClassLoader().getResourceAsStream(propertiesFileName)) {
             Properties properties = new Properties();
             properties.load(dbCredentials);
             return properties;
-		} catch (IOException e) {
-			logger.error(() -> "Unable to load database credentials", e);
-			throw new RuntimeException(e);
-		}
-	}
+        } catch (IOException e) {
+            logger.error(() -> "Unable to load database credentials", e);
+            throw new RuntimeException(e);
+        }
+    }
 }
