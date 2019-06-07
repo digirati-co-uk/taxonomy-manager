@@ -34,5 +34,7 @@ CREATE TABLE concept_semantic_relation
   relation   semantic_relation_type,
   transitive boolean,
   source_id  bigint,
-  target_id  bigint
+  target_id  bigint,
+  source_iri text,
+  target_iri text
 );
