@@ -1,0 +1,48 @@
+{
+  "definitions": {},
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://example.com/root.json",
+  "type": "object",
+  "title": "Project API Response Schema",
+  "required": [
+    "dcterms:identifier",
+    "dcterms:title",
+    "dcterms:hasPart"
+  ],
+  "properties": {
+    "dcterms:identifier": {
+      "$id": "#/properties/dcterms:identifier",
+      "type": "string",
+      "title": "Project slug",
+      "default": "",
+      "examples": [
+        "my-project-slug"
+      ],
+      "pattern": "^(.*)$"
+    },
+    "dcterms:title": {
+      "$id": "#/properties/dcterms:title",
+      "type": "array",
+      "title": "Project title",
+      "items": {
+        "$ref": "../rdf/plain-literal.json"
+      },
+      "pattern": "^(.*)$"
+    },
+    "dcterms:hasPart": {
+      "$id": "#/properties/dcterms:hasPart",
+      "type": "array",
+      "title": "Associated resources",
+      "description": "Collection of resources belonging to this Project (only skos:ConceptScheme)",
+      "items": {
+        "$id": "#/properties/dcterms:hasPart/items",
+        "type": "object",
+        "oneOf": [
+          {
+            "$ref": "../concept-scheme/embedded.json"
+          }
+        ]
+      }
+    }
+  }
+}

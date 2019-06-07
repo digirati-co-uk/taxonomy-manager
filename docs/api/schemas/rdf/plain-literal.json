@@ -1,0 +1,33 @@
+{
+    "$id": "rdf:PlainLiteral",
+    "type": "object",
+    "title": "Localized Literal",
+    "required": [
+        "@lang",
+        "@value"
+    ],
+    "properties": {
+        "@lang": {
+            "$id": "#/rdf:PlainLiteral/@lang",
+            "type": "string",
+            "title": "The ISO-691 language code ",
+            "required": true,
+            "examples": [
+                "en",
+                "fr",
+                "es"
+            ],
+            "pattern": "^[a-zA-Z]{1,8}(-[a-zA-Z0-9]{1,8})*$"
+        },
+        "@value": {
+            "$id": "#/rdf:PlainLiteral/@value",
+            "type": "string",
+            "title": "The value of the literal for the associated language",
+            "required": "true",
+            "examples": [
+                "Localized Label"
+            ],
+            "pattern": "^(.*)$"
+        }
+    }
+}

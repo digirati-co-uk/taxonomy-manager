@@ -1,0 +1,56 @@
+{
+    "definitions": {},
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "http://example.com/root.json",
+    "type": "object",
+    "title": "skos:Concept request",
+    "required": [
+        "skos:prefLabel",
+        "skos:altLabel",
+        "skos:hiddenLabel",
+        "skos:narrower",
+        "skos:broader"
+    ],
+    "properties": {
+        "skos:prefLabel": {
+            "$id": "#/properties/dcterms:hasPart/items/properties/skos:prefLabel",
+            "type": "array",
+            "title": "SKOS localized lexical labels, used for presentation",
+            "items": {
+                "$ref": "../rdf/plain-literal.json"
+            }
+        },
+        "skos:altLabel": {
+            "$id": "#/properties/dcterms:hasPart/items/properties/skos:prefLabel",
+            "type": "array",
+            "title": "SKOS localized lexical labels, used for presentation",
+            "items": {
+                "$ref": "../rdf/plain-literal.json"
+            }
+        },
+        "skos:hiddenLabel": {
+            "$id": "#/properties/dcterms:hasPart/items/properties/skos:prefLabel",
+            "type": "array",
+            "title": "SKOS localized lexical labels, used for presentation",
+            "items": {
+                "$ref": "../rdf/plain-literal.json"
+            }
+        },
+        "skos:narrower": {
+            "$id": "#/properties/dcterms:hasPart/items/properties/skos:prefLabel",
+            "type": "array",
+            "title": "Narrower Concepts",
+            "items": {
+                "$ref": "./embedded.json"
+            }
+        },
+        "skos:broader": {
+            "$id": "#/properties/dcterms:hasPart/items/properties/skos:prefLabel",
+            "type": "array",
+            "title": "Broader Concepts",
+            "items": {
+                "$ref": "./embedded.json"
+            }
+        }
+    }
+}

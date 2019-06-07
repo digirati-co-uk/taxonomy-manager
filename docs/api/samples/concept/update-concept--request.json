@@ -1,0 +1,27 @@
+{
+    "@context": {
+      "dc": "http://purl.org/dc/elements/1.1/",
+      "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+      "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "skos": "http://www.w3.org/2004/02/skos/core#",
+      "xsd": "http://www.w3.org/2001/XMLSchema#"
+    },
+    "@id": "http://taxman.com/0.1/concept-scheme/1/2",
+    "@type": "skos:Concept",
+    "skos:broader": [{
+      "@id": "http://taxman.com/0.1/concept-scheme/1/1",
+      "skos:prefLabel": [
+          {
+              "@lang": "en",
+              "@value": "Broader Concept"
+          }
+      ]
+    }],
+    "skos:prefLabel": [
+        {
+            "@lang": "en",
+            "@value": "Updated English Label"
+        }
+    ]
+  }
+
