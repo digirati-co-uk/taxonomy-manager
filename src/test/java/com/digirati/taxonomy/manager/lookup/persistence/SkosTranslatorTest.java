@@ -7,11 +7,9 @@ import com.digirati.taxonomy.manager.lookup.persistence.model.RdfModel;
 import com.digirati.taxonomy.manager.lookup.persistence.model.SemanticRelationType;
 import org.apache.commons.io.IOUtils;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.util.FileManager;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -36,7 +34,7 @@ class SkosTranslatorTest {
         InputStream testConceptSchemesInput = load("test-concept-schemes-input.jsonld");
 
         // When
-        RdfModel actual = underTest.translate(testConceptSchemesInput, null, SkosFileType.JSON_LD);
+        RdfModel actual = underTest.translate(testConceptSchemesInput, "http://example.com/", SkosFileType.JSON_LD);
 
         // Then
         assertEquals(conceptSchemesRdfModel, actual);
@@ -63,7 +61,7 @@ class SkosTranslatorTest {
         InputStream testConceptsInput = load("test-concepts-input.jsonld");
 
         // When
-        RdfModel actual = underTest.translate(testConceptsInput, null, SkosFileType.JSON_LD);
+        RdfModel actual = underTest.translate(testConceptsInput, "http://example.com/", SkosFileType.JSON_LD);
 
         // Then
         assertEquals(conceptsRdfModel, actual);
@@ -86,16 +84,16 @@ class SkosTranslatorTest {
 
     private static RdfModel createConceptSchemesModel() {
         ConceptSchemeModel conceptSchemeModel =
-                new ConceptSchemeModel().setIri("http://example.com/");
+                new ConceptSchemeModel().setId("http://example.com/");
 
         ConceptModel one =
                 new ConceptModel()
-                        .setIri("http://example.com/concept#1")
+                        .setId("http://example.com/concept#1")
                         .setPreferredLabel(
                                 "[{\"language\":\"fr\",\"value\":\"un\"},{\"language\":\"en\",\"value\":\"one\"}]");
         ConceptModel two =
                 new ConceptModel()
-                        .setIri("http://example.com/concept#2")
+                        .setId("http://example.com/concept#2")
                         .setPreferredLabel(
                                 "[{\"language\":\"fr\",\"value\":\"deux\"},{\"language\":\"en\",\"value\":\"two\"}]");
 
@@ -121,28 +119,28 @@ class SkosTranslatorTest {
     private static RdfModel createConceptsModel() {
         ConceptModel one =
                 new ConceptModel()
-                        .setIri("http://example.com/concept#1")
+                        .setId("http://example.com/concept#1")
                         .setPreferredLabel(
                                 "[{\"language\":\"fr\",\"value\":\"un\"},{\"language\":\"en\",\"value\":\"one\"}]")
                         .setAltLabel(
                                 "[{\"language\":\"fr\",\"value\":\"premier\"},{\"language\":\"en\",\"value\":\"first\"}]");
         ConceptModel two =
                 new ConceptModel()
-                        .setIri("http://example.com/concept#2")
+                        .setId("http://example.com/concept#2")
                         .setPreferredLabel(
                                 "[{\"language\":\"fr\",\"value\":\"deux\"},{\"language\":\"en\",\"value\":\"two\"}]")
                         .setAltLabel(
                                 "[{\"language\":\"fr\",\"value\":\"deuxieme\"},{\"language\":\"en\",\"value\":\"second\"}]");
         ConceptModel three =
                 new ConceptModel()
-                        .setIri("http://example.com/concept#3")
+                        .setId("http://example.com/concept#3")
                         .setPreferredLabel(
                                 "[{\"language\":\"fr\",\"value\":\"trois\"},{\"language\":\"en\",\"value\":\"three\"}]")
                         .setAltLabel(
                                 "[{\"language\":\"fr\",\"value\":\"troisieme\"},{\"language\":\"en\",\"value\":\"third\"}]");
         ConceptModel four =
                 new ConceptModel()
-                        .setIri("http://example.com/concept#4")
+                        .setId("http://example.com/concept#4")
                         .setPreferredLabel(
                                 "[{\"language\":\"fr\",\"value\":\"quatre\"},{\"language\":\"en\",\"value\":\"four\"}]")
                         .setAltLabel(

@@ -1,4 +1,5 @@
 -- TODO work out what to do about setting up DBs
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TYPE semantic_relation_type AS ENUM (
     'broader',
@@ -10,14 +11,12 @@ CREATE TYPE semantic_relation_type AS ENUM (
 
 CREATE TABLE concept_scheme
 (
-  id  bigserial primary key,
-  iri text
+  id uuid primary key
 );
 
 CREATE TABLE concept
 (
-  id              bigserial primary key,
-  iri             text,
+  id              uuid primary key,
   preferred_label jsonb,
   alt_label       jsonb,
   hidden_label    jsonb,
@@ -33,8 +32,6 @@ CREATE TABLE concept_semantic_relation
 (
   relation   semantic_relation_type,
   transitive boolean,
-  source_id  bigint,
-  target_id  bigint,
-  source_iri text,
-  target_iri text
+  source_id  uuid,
+  target_id  uuid
 );

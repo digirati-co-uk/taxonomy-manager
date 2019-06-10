@@ -1,5 +1,6 @@
 package com.digirati.taxonomy.manager.lookup.persistence;
 
+import com.digirati.taxonomy.manager.lookup.exception.SkosPersistenceException;
 import com.digirati.taxonomy.manager.lookup.persistence.model.ConceptSchemeModel;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -8,6 +9,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -25,10 +27,10 @@ public class ConceptSchemeDaoIntegrationTest {
     }
 
     @Test
-    void createShouldWriteToTheDb() {
+    void createShouldWriteToTheDb() throws SkosPersistenceException {
         // Given
         ConceptSchemeModel conceptScheme =
-                new ConceptSchemeModel().setIri("http://example.com/conceptScheme#1");
+                new ConceptSchemeModel().setId(UUID.randomUUID().toString());
 
         // When
         ConceptSchemeModel created =
@@ -38,14 +40,14 @@ public class ConceptSchemeDaoIntegrationTest {
 
         // Then
         // TODO how to prove that this actually went via the db?
-        assertEquals(conceptScheme.getIri(), created.getIri());
+        assertEquals(conceptScheme.getId(), created.getId());
     }
 
     @Test
-    void readShouldRetrieveFromTheDb() {
+    void readShouldRetrieveFromTheDb() throws SkosPersistenceException {
         // Given
         ConceptSchemeModel conceptScheme =
-                new ConceptSchemeModel().setIri("http://example.com/conceptScheme#1");
+                new ConceptSchemeModel().setId(UUID.randomUUID().toString());
         ConceptSchemeModel created =
                 underTest
                         .create(conceptScheme)
@@ -63,34 +65,10 @@ public class ConceptSchemeDaoIntegrationTest {
     }
 
     @Test
-    void updateShouldModfifyInTheDb() {
+    void deleteShouldRemoveFromTheDb() throws SkosPersistenceException {
         // Given
         ConceptSchemeModel conceptScheme =
-                new ConceptSchemeModel().setIri("http://example.com/conceptScheme#1");
-        ConceptSchemeModel toModify =
-                underTest
-                        .create(conceptScheme)
-                        .orElseThrow(() -> new AssertionError("Created concept scheme not found."));
-
-        toModify.setIri("http://example.com/conceptScheme#2");
-
-        // When
-        ConceptSchemeModel updated =
-                underTest
-                        .update(toModify)
-                        .orElseThrow(
-                                () -> new AssertionError("Modified concept scheme not found."));
-
-        // Then
-        // TODO how to prove that this went via the db?
-        assertEquals(toModify, updated);
-    }
-
-    @Test
-    void deleteShouldRemoveFromTheDb() {
-        // Given
-        ConceptSchemeModel conceptScheme =
-                new ConceptSchemeModel().setIri("http://example.com/conceptScheme#1");
+                new ConceptSchemeModel().setId(UUID.randomUUID().toString());
         ConceptSchemeModel created =
                 underTest
                         .create(conceptScheme)

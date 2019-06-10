@@ -1,9 +1,6 @@
 package com.digirati.taxonomy.manager.lookup.persistence;
 
-import com.digirati.taxonomy.manager.lookup.exception.RelationshipAlreadyExistsException;
-import com.digirati.taxonomy.manager.lookup.exception.RelationshipNotFoundException;
-import com.digirati.taxonomy.manager.lookup.exception.UnableToCreateRelationshipException;
-import com.digirati.taxonomy.manager.lookup.exception.UnableToUpdateRelationshipException;
+import com.digirati.taxonomy.manager.lookup.exception.SkosPersistenceException;
 import com.digirati.taxonomy.manager.lookup.persistence.model.ConceptSemanticRelationModel;
 import com.digirati.taxonomy.manager.lookup.persistence.model.SemanticRelationType;
 import org.junit.jupiter.api.AfterEach;
@@ -29,8 +26,7 @@ public class RelationshipDaoIntegrationTest {
 
     @Test
     void createShouldWriteToDb()
-            throws RelationshipAlreadyExistsException, RelationshipNotFoundException,
-                    UnableToCreateRelationshipException {
+            throws SkosPersistenceException {
         // Given
         ConceptSemanticRelationModel relationship = createBaseModel(SemanticRelationType.RELATED);
 
@@ -43,28 +39,26 @@ public class RelationshipDaoIntegrationTest {
 
     @Test
     void createShouldThrowExceptionWhenARelationshipAlreadyExistsBetweenSourceAndTarget()
-            throws RelationshipAlreadyExistsException, RelationshipNotFoundException,
-                    UnableToCreateRelationshipException {
+            throws SkosPersistenceException {
         // Given
         underTest.create(createBaseModel(SemanticRelationType.RELATED));
 
         ConceptSemanticRelationModel duplicate = createBaseModel(SemanticRelationType.BROADER);
 
         // Then
-        assertThrows(RelationshipAlreadyExistsException.class, () -> underTest.create(duplicate));
+        assertThrows(SkosPersistenceException.class, () -> underTest.create(duplicate));
     }
 
     @Test
     void readShouldRetrieveFromDb()
-            throws RelationshipAlreadyExistsException, RelationshipNotFoundException,
-                    UnableToCreateRelationshipException {
+            throws SkosPersistenceException {
         // Given
         ConceptSemanticRelationModel relationship = createBaseModel(SemanticRelationType.RELATED);
         ConceptSemanticRelationModel created = underTest.create(relationship);
 
         // When
         Optional<ConceptSemanticRelationModel> retrieved =
-                underTest.read(relationship.getSourceIri(), relationship.getTargetIri());
+                underTest.read(relationship.getSourceId(), relationship.getTargetId());
 
         // Then
         assertEquals(created, retrieved.get());
@@ -72,13 +66,13 @@ public class RelationshipDaoIntegrationTest {
 
     @Test
     void readShouldProvideEmptyResultIfNoSuchRelationshipExists()
-            throws RelationshipNotFoundException {
+            throws SkosPersistenceException {
         // Given
         ConceptSemanticRelationModel relationship = createBaseModel(SemanticRelationType.BROADER);
 
         // When
         Optional<ConceptSemanticRelationModel> retrieved =
-                underTest.read(relationship.getSourceIri(), relationship.getTargetIri());
+                underTest.read(relationship.getSourceId(), relationship.getTargetId());
 
         // Then
         assertEquals(Optional.empty(), retrieved);
@@ -86,8 +80,7 @@ public class RelationshipDaoIntegrationTest {
 
     @Test
     void updateShouldModifyInDb()
-            throws RelationshipAlreadyExistsException, RelationshipNotFoundException,
-                    UnableToCreateRelationshipException, UnableToUpdateRelationshipException {
+            throws SkosPersistenceException {
         // Given
         ConceptSemanticRelationModel relationship = createBaseModel(SemanticRelationType.RELATED);
         ConceptSemanticRelationModel created = underTest.create(relationship);
@@ -107,24 +100,23 @@ public class RelationshipDaoIntegrationTest {
         ConceptSemanticRelationModel relationship = createBaseModel(SemanticRelationType.RELATED);
 
         // Then
-        assertThrows(RelationshipNotFoundException.class, () -> underTest.update(relationship));
+        assertThrows(SkosPersistenceException.class, () -> underTest.update(relationship));
     }
 
     @Test
     void deleteShouldRemoveFromDb()
-            throws RelationshipAlreadyExistsException, RelationshipNotFoundException,
-                    UnableToCreateRelationshipException {
+            throws SkosPersistenceException {
         // Given
         ConceptSemanticRelationModel relationship = createBaseModel(SemanticRelationType.RELATED);
         ConceptSemanticRelationModel created = underTest.create(relationship);
 
         // When
-        boolean deleted = underTest.delete(created.getSourceIri(), created.getTargetIri());
+        boolean deleted = underTest.delete(created.getSourceId(), created.getTargetId());
 
         // Then
         assertTrue(deleted);
         assertEquals(
-                Optional.empty(), underTest.read(created.getSourceIri(), created.getTargetIri()));
+                Optional.empty(), underTest.read(created.getSourceId(), created.getTargetId()));
     }
 
     @Test
@@ -134,8 +126,8 @@ public class RelationshipDaoIntegrationTest {
 
         // Then
         assertThrows(
-                RelationshipNotFoundException.class,
-                () -> underTest.delete(relationship.getSourceIri(), relationship.getTargetIri()));
+                SkosPersistenceException.class,
+                () -> underTest.delete(relationship.getSourceId(), relationship.getTargetId()));
     }
 
     @AfterEach
@@ -155,9 +147,7 @@ public class RelationshipDaoIntegrationTest {
         return new ConceptSemanticRelationModel()
                 .setRelation(relationType)
                 .setTransitive(false)
-                .setSourceId(1L)
-                .setTargetId(2L)
-                .setSourceIri("http://example.com/concept#1")
-                .setTargetIri("http://example.com/concept#2");
+                .setSourceId("1c3f8ea2-73e2-4ea7-ae00-207ac1513920")
+                .setTargetId("88a15250-2d59-41f2-bbef-5b9239e31b25");
     }
 }

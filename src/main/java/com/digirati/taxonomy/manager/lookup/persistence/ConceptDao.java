@@ -1,5 +1,6 @@
 package com.digirati.taxonomy.manager.lookup.persistence;
 
+import com.digirati.taxonomy.manager.lookup.exception.SkosPersistenceException;
 import com.digirati.taxonomy.manager.lookup.persistence.model.ConceptModel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,19 +19,17 @@ public class ConceptDao {
 
     private static final String CREATE_TEMPLATE =
             "INSERT INTO concept "
-                    + "(iri, preferred_label, alt_label, hidden_label, note, change_note, editorial_note, example, history_note, scope_note) "
-                    + "VALUES (?, ?::JSONB, ?::JSONB, ?::JSONB, ?::JSONB, ?::JSONB, ?::JSONB, ?::JSONB, ?::JSONB, ?::JSONB)";
+                    + "(id, preferred_label, alt_label, hidden_label, note, change_note, editorial_note, example, history_note, scope_note) "
+                    + "VALUES (?::UUID, ?::JSONB, ?::JSONB, ?::JSONB, ?::JSONB, ?::JSONB, ?::JSONB, ?::JSONB, ?::JSONB, ?::JSONB)";
 
-    private static final String SELECT_BY_IRI_TEMPLATE = "SELECT * FROM concept WHERE iri=?";
-
-    private static final String SELECT_BY_ID_TEMPLATE = "SELECT * FROM concept WHERE id=?";
+    private static final String SELECT_BY_IRI_TEMPLATE = "SELECT * FROM concept WHERE id=?::UUID";
 
     private static final String UPDATE_TEMPLATE =
             "UPDATE concept "
-                    + "SET iri=?, preferred_label=?::JSONB, alt_label=?::JSONB, hidden_label=?::JSONB, note=?::JSONB, change_note=?::JSONB, editorial_note=?::JSONB, example=?::JSONB, history_note=?::JSONB, scope_note=?::JSONB "
-                    + "WHERE id=?";
+                    + "SET preferred_label=?::JSONB, alt_label=?::JSONB, hidden_label=?::JSONB, note=?::JSONB, change_note=?::JSONB, editorial_note=?::JSONB, example=?::JSONB, history_note=?::JSONB, scope_note=?::JSONB "
+                    + "WHERE id=?::UUID";
 
-    private static final String DELETE_TEMPLATE = "DELETE FROM concept WHERE id=?";
+    private static final String DELETE_TEMPLATE = "DELETE FROM concept WHERE id=?::UUID";
 
     private final ConnectionProvider connectionProvider;
 
@@ -38,15 +37,17 @@ public class ConceptDao {
         this.connectionProvider = connectionProvider;
     }
 
-    public Optional<ConceptModel> create(ConceptModel toCreate) {
-        logger.info(() -> "Preparing to create concept with IRI=" + toCreate.getIri());
+    public Optional<ConceptModel> create(ConceptModel toCreate) throws SkosPersistenceException {
+        logger.info(() -> "Preparing to create concept with ID=" + toCreate.getId());
+
+        if (toCreate.getId() != null && read(toCreate.getId()).isPresent()) {
+            throw SkosPersistenceException.conceptAlreadyExists(toCreate.getId());
+        }
 
         try (Connection connection = connectionProvider.getConnection();
-                PreparedStatement createStatement = connection.prepareStatement(CREATE_TEMPLATE);
-                PreparedStatement readStatement =
-                        connection.prepareStatement(SELECT_BY_IRI_TEMPLATE)) {
+                PreparedStatement createStatement = connection.prepareStatement(CREATE_TEMPLATE)) {
 
-            createStatement.setString(1, toCreate.getIri());
+            createStatement.setString(1, toCreate.getId());
             createStatement.setString(2, toCreate.getPreferredLabel());
             createStatement.setString(3, toCreate.getAltLabel());
             createStatement.setString(4, toCreate.getHiddenLabel());
@@ -58,25 +59,14 @@ public class ConceptDao {
             createStatement.setString(10, toCreate.getScopeNote());
             createStatement.execute();
 
-            logger.info(() -> "Successfully created concept with IRI=" + toCreate.getIri());
+            logger.info(() -> "Successfully created concept with IRI=" + toCreate.getId());
 
-            // TODO should these be atomic?
-            // TODO any way of getting the created one by ID? Because then we could swap this whole
-            // block for a call to read(id)
-            readStatement.setString(1, toCreate.getIri());
-            ResultSet resultSet = readStatement.executeQuery();
-            List<ConceptModel> created = fromResultSet(resultSet);
-            // TODO any way of closing this via try with resources?
-            resultSet.close();
-            if (created != null && !created.isEmpty()) {
-                return Optional.of(created.get(created.size() - 1));
-            }
+            return read(toCreate.getId());
 
         } catch (SQLException e) {
             logger.error(() -> e);
+            throw SkosPersistenceException.unableToCreateConcept(toCreate.getId(), e);
         }
-
-        return Optional.empty();
     }
 
     private List<ConceptModel> fromResultSet(ResultSet resultSet) throws SQLException {
@@ -84,8 +74,7 @@ public class ConceptDao {
         while (resultSet.next()) {
             ConceptModel concept =
                     new ConceptModel()
-                            .setId(resultSet.getLong("id"))
-                            .setIri(resultSet.getString("iri"))
+                            .setId(resultSet.getString("id"))
                             .setPreferredLabel(resultSet.getString("preferred_label"))
                             .setAltLabel(resultSet.getString("alt_label"))
                             .setHiddenLabel(resultSet.getString("hidden_label"))
@@ -100,15 +89,14 @@ public class ConceptDao {
         return concepts;
     }
 
-    public Optional<ConceptModel> read(long primaryKey) {
+    public Optional<ConceptModel> read(String id) {
         try (Connection connection = connectionProvider.getConnection();
-                PreparedStatement readStatement =
-                        connection.prepareStatement(SELECT_BY_ID_TEMPLATE)) {
+             PreparedStatement readStatement =
+                     connection.prepareStatement(SELECT_BY_IRI_TEMPLATE)) {
 
-            readStatement.setLong(1, primaryKey);
+            readStatement.setString(1, id);
             ResultSet resultSet = readStatement.executeQuery();
             List<ConceptModel> created = fromResultSet(resultSet);
-            // TODO any way of closing this via try with resources?
             resultSet.close();
             if (created != null && !created.isEmpty()) {
                 return Optional.of(created.get(created.size() - 1));
@@ -121,30 +109,33 @@ public class ConceptDao {
         return Optional.empty();
     }
 
-    public Optional<ConceptModel> update(ConceptModel toUpdate) {
-        logger.info(() -> "Preparing to update concept with IRI=" + toUpdate.getIri());
+    public Optional<ConceptModel> update(ConceptModel toUpdate) throws SkosPersistenceException {
+        logger.info(() -> "Preparing to update concept with IRI=" + toUpdate.getId());
+
+        if (toUpdate.getId() == null) {
+            // TODO this could be better
+            throw SkosPersistenceException.conceptNotFound(toUpdate.getId());
+        }
 
         try (Connection connection = connectionProvider.getConnection();
                 PreparedStatement updateStatement = connection.prepareStatement(UPDATE_TEMPLATE)) {
 
-            // TODO should the update and read be atomic?
-            updateStatement.setString(1, toUpdate.getIri());
-            updateStatement.setString(2, toUpdate.getPreferredLabel());
-            updateStatement.setString(3, toUpdate.getAltLabel());
-            updateStatement.setString(4, toUpdate.getHiddenLabel());
-            updateStatement.setString(5, toUpdate.getNote());
-            updateStatement.setString(6, toUpdate.getChangeNote());
-            updateStatement.setString(7, toUpdate.getEditorialNote());
-            updateStatement.setString(8, toUpdate.getExample());
-            updateStatement.setString(9, toUpdate.getHistoryNote());
-            updateStatement.setString(10, toUpdate.getScopeNote());
-            updateStatement.setLong(11, toUpdate.getId());
+            updateStatement.setString(1, toUpdate.getPreferredLabel());
+            updateStatement.setString(2, toUpdate.getAltLabel());
+            updateStatement.setString(3, toUpdate.getHiddenLabel());
+            updateStatement.setString(4, toUpdate.getNote());
+            updateStatement.setString(5, toUpdate.getChangeNote());
+            updateStatement.setString(6, toUpdate.getEditorialNote());
+            updateStatement.setString(7, toUpdate.getExample());
+            updateStatement.setString(8, toUpdate.getHistoryNote());
+            updateStatement.setString(9, toUpdate.getScopeNote());
+            updateStatement.setString(10, toUpdate.getId());
             int rowsAffected = updateStatement.executeUpdate();
 
             logger.info(
                     () ->
-                            "Successfully updated concept with IRI="
-                                    + toUpdate.getIri()
+                            "Successfully updated concept with ID="
+                                    + toUpdate.getId()
                                     + " - number of rows affected: "
                                     + rowsAffected);
 
@@ -152,24 +143,28 @@ public class ConceptDao {
 
         } catch (SQLException e) {
             logger.error(() -> e);
-            return Optional.empty();
+            throw SkosPersistenceException.unableToUpdateConcept(toUpdate.getId(), e);
         }
     }
 
-    public boolean delete(long primaryKey) {
-        logger.info(() -> "Preparing to delete concept with ID=" + primaryKey);
+    public boolean delete(String id) throws SkosPersistenceException {
+        logger.info(() -> "Preparing to delete concept with ID=" + id);
+
+        if (!read(id).isPresent()) {
+            throw SkosPersistenceException.conceptNotFound(id);
+        }
 
         try {
             Connection connection = connectionProvider.getConnection();
             PreparedStatement deleteStatement = connection.prepareStatement(DELETE_TEMPLATE);
-            deleteStatement.setLong(1, primaryKey);
+            deleteStatement.setString(1, id);
             int rowsAffected = deleteStatement.executeUpdate();
             deleteStatement.close();
 
             logger.info(
                     () ->
                             "Successfully deleted concept with ID="
-                                    + primaryKey
+                                    + id
                                     + " - number of rows affected: "
                                     + rowsAffected);
 

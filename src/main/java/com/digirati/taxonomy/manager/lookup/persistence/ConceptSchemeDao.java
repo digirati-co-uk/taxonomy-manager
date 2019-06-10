@@ -1,5 +1,6 @@
 package com.digirati.taxonomy.manager.lookup.persistence;
 
+import com.digirati.taxonomy.manager.lookup.exception.SkosPersistenceException;
 import com.digirati.taxonomy.manager.lookup.persistence.model.ConceptSchemeModel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,15 +17,11 @@ public class ConceptSchemeDao {
 
     private static final Logger logger = LogManager.getLogger(ConceptSchemeDao.class);
 
-    private static final String CREATE_TEMPLATE = "INSERT INTO concept_scheme (iri) VALUES (?)";
+    private static final String CREATE_TEMPLATE = "INSERT INTO concept_scheme (id) VALUES (?::UUID)";
 
-    private static final String SELECT_BY_IRI_TEMPLATE = "SELECT * FROM concept_scheme WHERE iri=?";
+    private static final String SELECT_BY_ID_TEMPLATE = "SELECT * FROM concept_scheme WHERE id=?::UUID";
 
-    private static final String SELECT_BY_ID_TEMPLATE = "SELECT * FROM concept_scheme WHERE id=?";
-
-    private static final String UPDATE_TEMPLATE = "UPDATE concept_scheme SET iri=? WHERE id=?";
-
-    private static final String DELETE_TEMPLATE = "DELETE FROM concept_scheme WHERE id=?";
+    private static final String DELETE_TEMPLATE = "DELETE FROM concept_scheme WHERE id=?::UUID";
 
     private final ConnectionProvider connectionProvider;
 
@@ -32,32 +29,28 @@ public class ConceptSchemeDao {
         this.connectionProvider = connectionProvider;
     }
 
-    public Optional<ConceptSchemeModel> create(ConceptSchemeModel toCreate) {
-        logger.info(() -> "Preparing to create concept scheme with IRI=" + toCreate.getIri());
+    public Optional<ConceptSchemeModel> create(ConceptSchemeModel toCreate)
+            throws SkosPersistenceException {
+        logger.info(() -> "Preparing to create concept scheme with ID=" + toCreate.getId());
+
+        if (toCreate.getId() != null && read(toCreate.getId()).isPresent()) {
+            throw SkosPersistenceException.conceptSchemeAlreadyExists(toCreate.getId());
+        }
 
         try (Connection connection = connectionProvider.getConnection();
-                PreparedStatement createStatement = connection.prepareStatement(CREATE_TEMPLATE);
-                PreparedStatement readStatement =
-                        connection.prepareStatement(SELECT_BY_IRI_TEMPLATE)) {
+                PreparedStatement createStatement = connection.prepareStatement(CREATE_TEMPLATE)) {
 
-            createStatement.setString(1, toCreate.getIri());
+            createStatement.setString(1, toCreate.getId());
             createStatement.execute();
 
-            logger.info(() -> "Successfully created concept with IRI=" + toCreate.getIri());
+            logger.info(() -> "Successfully created concept with IRI=" + toCreate.getId());
 
-            readStatement.setString(1, toCreate.getIri());
-            ResultSet resultSet = readStatement.executeQuery();
-            List<ConceptSchemeModel> created = fromResultSet(resultSet);
-            resultSet.close();
-            if (created != null && !created.isEmpty()) {
-                return Optional.of(created.get(created.size() - 1));
-            }
+            return read(toCreate.getId());
 
         } catch (SQLException e) {
             logger.error(() -> e);
+            throw SkosPersistenceException.unableToCreateConceptScheme(toCreate.getId(), e);
         }
-
-        return Optional.empty();
     }
 
     private List<ConceptSchemeModel> fromResultSet(ResultSet resultSet) throws SQLException {
@@ -65,19 +58,18 @@ public class ConceptSchemeDao {
         while (resultSet.next()) {
             ConceptSchemeModel conceptScheme =
                     new ConceptSchemeModel()
-                            .setId(resultSet.getLong("id"))
-                            .setIri(resultSet.getString("iri"));
+                            .setId(resultSet.getString("id"));
             conceptSchemes.add(conceptScheme);
         }
         return conceptSchemes;
     }
 
-    public Optional<ConceptSchemeModel> read(long primaryKey) {
+    public Optional<ConceptSchemeModel> read(String id) {
         try (Connection connection = connectionProvider.getConnection();
                 PreparedStatement readStatement =
                         connection.prepareStatement(SELECT_BY_ID_TEMPLATE)) {
 
-            readStatement.setLong(1, primaryKey);
+            readStatement.setString(1, id);
             ResultSet resultSet = readStatement.executeQuery();
             List<ConceptSchemeModel> created = fromResultSet(resultSet);
             resultSet.close();
@@ -92,40 +84,23 @@ public class ConceptSchemeDao {
         return Optional.empty();
     }
 
-    public Optional<ConceptSchemeModel> update(ConceptSchemeModel toUpdate) {
-        logger.info(() -> "Preparing to update concept scheme with IRI=" + toUpdate.getIri());
+    public boolean delete(String id) throws SkosPersistenceException {
+        logger.info(() -> "Preparing to delete concept scheme with ID=" + id);
+
+        if (!read(id).isPresent()) {
+            throw SkosPersistenceException.conceptSchemeNotFound(id);
+        }
 
         try (Connection connection = connectionProvider.getConnection();
-                PreparedStatement updateStatement = connection.prepareStatement(UPDATE_TEMPLATE)) {
-
-            updateStatement.setString(1, toUpdate.getIri());
-            updateStatement.setLong(2, toUpdate.getId());
-            updateStatement.execute();
-
-            logger.info(() -> "Successfully updated concept with IRI=" + toUpdate.getIri());
-
-            return read(toUpdate.getId());
-
-        } catch (SQLException e) {
-            logger.error(() -> e);
-            return Optional.empty();
-        }
-    }
-
-    public boolean delete(long primaryKey) {
-        logger.info(() -> "Preparing to delete concept scheme with ID=" + primaryKey);
-
-        try {
-            Connection connection = connectionProvider.getConnection();
-            PreparedStatement deleteStatement = connection.prepareStatement(DELETE_TEMPLATE);
-            deleteStatement.setLong(1, primaryKey);
+                PreparedStatement deleteStatement =
+                        connection.prepareStatement(DELETE_TEMPLATE)) {
+            deleteStatement.setString(1, id);
             int rowsAffected = deleteStatement.executeUpdate();
-            deleteStatement.close();
 
             logger.info(
                     () ->
                             "Successfully deleted concept scheme with ID="
-                                    + primaryKey
+                                    + id
                                     + " - number of rows affected: "
                                     + rowsAffected);
 

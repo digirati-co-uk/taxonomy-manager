@@ -2,29 +2,17 @@ package com.digirati.taxonomy.manager.lookup.persistence.model;
 
 import java.util.Objects;
 
+// TODO add text field
 public class ConceptSchemeModel {
 
-    // Primary Key, type bigserial
-    private Long id;
+    private String id;
 
-    // Type text
-    private String iri;
-
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public ConceptSchemeModel setId(Long id) {
+    public ConceptSchemeModel setId(String id) {
         this.id = id;
-        return this;
-    }
-
-    public String getIri() {
-        return iri;
-    }
-
-    public ConceptSchemeModel setIri(String iri) {
-        this.iri = iri;
         return this;
     }
 
@@ -37,11 +25,11 @@ public class ConceptSchemeModel {
             return false;
         }
         ConceptSchemeModel that = (ConceptSchemeModel) o;
-        return Objects.equals(id, that.id) && Objects.equals(iri, that.iri);
+        return Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, iri);
+        return Objects.hash(id);
     }
 }

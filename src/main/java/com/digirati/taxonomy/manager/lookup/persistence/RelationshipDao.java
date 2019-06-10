@@ -1,9 +1,6 @@
 package com.digirati.taxonomy.manager.lookup.persistence;
 
-import com.digirati.taxonomy.manager.lookup.exception.RelationshipAlreadyExistsException;
-import com.digirati.taxonomy.manager.lookup.exception.RelationshipNotFoundException;
-import com.digirati.taxonomy.manager.lookup.exception.UnableToCreateRelationshipException;
-import com.digirati.taxonomy.manager.lookup.exception.UnableToUpdateRelationshipException;
+import com.digirati.taxonomy.manager.lookup.exception.SkosPersistenceException;
 import com.digirati.taxonomy.manager.lookup.persistence.model.ConceptSemanticRelationModel;
 import com.digirati.taxonomy.manager.lookup.persistence.model.SemanticRelationType;
 import org.apache.logging.log4j.LogManager;
@@ -14,6 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,17 +21,29 @@ class RelationshipDao {
 
     private static final String CREATE_TEMPLATE =
             "INSERT INTO concept_semantic_relation "
-                    + "(relation, transitive, source_id, target_id, source_iri, target_iri) "
-                    + "VALUES (?::semantic_relation_type, ?, ?, ?, ?, ?)";
+                    + "(relation, transitive, source_id, target_id) "
+                    + "VALUES (?::semantic_relation_type, ?, ?::UUID, ?::UUID)";
 
     private static final String SELECT_BY_IRI_TEMPLATE =
-            "SELECT * FROM concept_semantic_relation WHERE source_iri=? AND target_iri=?";
+            "SELECT * FROM concept_semantic_relation WHERE source_id=?::UUID AND target_id=?::UUID";
+
+    private static final String RELATED_TO_SOURCE_TEMPLATE =
+            "SELECT * FROM concept_semantic_relation WHERE source_id=?::UUID";
+
+    private static final String RELATED_TO_TARGET_TEMPLATE =
+            "SELECT * FROM concept_semantic_relation WHERE target_id=?::UUID";
 
     private static final String UPDATE_BY_IRI_TEMPLATE =
-            "UPDATE concept_semantic_relation SET relation=?::semantic_relation_type, transitive=? WHERE source_iri=? AND target_iri=?";
+            "UPDATE concept_semantic_relation SET relation=?::semantic_relation_type, transitive=? WHERE source_id=?::UUID AND target_id=?::UUID";
 
     private static final String DELETE_BY_IRI_TEMPLATE =
-            "DELETE FROM concept_semantic_relation WHERE source_iri=? AND target_iri=?";
+            "DELETE FROM concept_semantic_relation WHERE source_id=?::UUID AND target_id=?::UUID";
+
+    private static final String DELETE_BY_SOURCE_IRI_TEMPLATE =
+            "DELETE FROM concept_semantic_relation WHERE source_id=?::UUID";
+
+    private static final String DELETE_BY_TARGET_IRI_TEMPLATE =
+            "DELETE FROM concept_semantic_relation WHERE target_id=?::UUID";
 
     private final ConnectionProvider connectionProvider;
 
@@ -42,10 +52,9 @@ class RelationshipDao {
     }
 
     public ConceptSemanticRelationModel create(ConceptSemanticRelationModel relationship)
-            throws RelationshipAlreadyExistsException, RelationshipNotFoundException,
-                    UnableToCreateRelationshipException {
-        if (read(relationship.getSourceIri(), relationship.getTargetIri()).isPresent()) {
-            throw new RelationshipAlreadyExistsException(relationship);
+            throws SkosPersistenceException {
+        if (read(relationship.getSourceId(), relationship.getTargetId()).isPresent()) {
+            throw SkosPersistenceException.relationshipAlreadyExists(relationship);
         }
 
         logger.info(() -> "Preparing to create relationship: " + relationship);
@@ -55,32 +64,30 @@ class RelationshipDao {
 
             createStatement.setString(1, relationship.getRelation().name().toLowerCase());
             createStatement.setBoolean(2, relationship.isTransitive());
-            createStatement.setLong(3, relationship.getSourceId());
-            createStatement.setLong(4, relationship.getTargetId());
-            createStatement.setString(5, relationship.getSourceIri());
-            createStatement.setString(6, relationship.getTargetIri());
+            createStatement.setString(3, relationship.getSourceId());
+            createStatement.setString(4, relationship.getTargetId());
             createStatement.execute();
 
             logger.info(() -> "Successfully created relationship: " + relationship);
 
-            return read(relationship.getSourceIri(), relationship.getTargetIri())
-                    .orElseThrow(() -> new UnableToCreateRelationshipException(relationship));
+            return read(relationship.getSourceId(), relationship.getTargetId())
+                    .orElseThrow(() -> SkosPersistenceException.unableToCreateRelationship(relationship));
 
         } catch (SQLException e) {
             logger.error(() -> e);
-            throw new UnableToCreateRelationshipException(relationship, e);
+            throw SkosPersistenceException.unableToCreateRelationship(relationship, e);
         }
     }
 
-    // TODO can multiple relationships exist between the same two things?
-    public Optional<ConceptSemanticRelationModel> read(String sourceIri, String targetIri)
-            throws RelationshipNotFoundException {
+    // TODO can multiple relationships exist between the same two things in the same direction?
+    public Optional<ConceptSemanticRelationModel> read(String sourceId, String targetId)
+            throws SkosPersistenceException {
         try (Connection connection = connectionProvider.getConnection();
                 PreparedStatement readStatement =
                         connection.prepareStatement(SELECT_BY_IRI_TEMPLATE)) {
 
-            readStatement.setString(1, sourceIri);
-            readStatement.setString(2, targetIri);
+            readStatement.setString(1, sourceId);
+            readStatement.setString(2, targetId);
             ResultSet result = readStatement.executeQuery();
             List<ConceptSemanticRelationModel> retrieved = fromResultSet(result);
             result.close();
@@ -91,7 +98,7 @@ class RelationshipDao {
 
         } catch (SQLException e) {
             logger.error(() -> e);
-            throw new RelationshipNotFoundException(sourceIri, targetIri, e);
+            throw SkosPersistenceException.relationshipNotFound(sourceId, targetId, e);
         }
     }
 
@@ -104,19 +111,49 @@ class RelationshipDao {
                     new ConceptSemanticRelationModel()
                             .setRelation(SemanticRelationType.valueOf(relationTypeName))
                             .setTransitive(resultSet.getBoolean("transitive"))
-                            .setSourceId(resultSet.getLong("source_id"))
-                            .setTargetId(resultSet.getLong("target_id"))
-                            .setSourceIri(resultSet.getString("source_iri"))
-                            .setTargetIri(resultSet.getString("target_iri"));
+                            .setSourceId(resultSet.getString("source_id"))
+                            .setTargetId(resultSet.getString("target_id"));
             relationships.add(relationship);
         }
         return relationships;
     }
 
+    public Collection<ConceptSemanticRelationModel> getRelationships(String sourceId)
+            throws SkosPersistenceException {
+        List<ConceptSemanticRelationModel> relationships = new ArrayList<>();
+
+        try (Connection connection = connectionProvider.getConnection();
+                PreparedStatement relatedToSourceStatement =
+                        connection.prepareStatement(RELATED_TO_SOURCE_TEMPLATE);
+                PreparedStatement relatedToTargetStatement =
+                        connection.prepareStatement(RELATED_TO_TARGET_TEMPLATE)) {
+
+            connection.setAutoCommit(false);
+
+            relatedToSourceStatement.setString(1, sourceId);
+            relatedToTargetStatement.setString(1, sourceId);
+            ResultSet relatedToSourceResults = relatedToSourceStatement.executeQuery();
+            ResultSet relatedToTargetResults = relatedToTargetStatement.executeQuery();
+
+            connection.commit();
+
+            relationships.addAll(fromResultSet(relatedToSourceResults));
+            relationships.addAll(fromResultSet(relatedToTargetResults));
+            relatedToSourceResults.close();
+            relatedToTargetResults.close();
+
+            return relationships;
+
+        } catch (SQLException e) {
+            logger.error(() -> e);
+            throw SkosPersistenceException.unableToGetRelationships(sourceId);
+        }
+    }
+
     public ConceptSemanticRelationModel update(ConceptSemanticRelationModel relationship)
-            throws RelationshipNotFoundException, UnableToUpdateRelationshipException {
-        if (!read(relationship.getSourceIri(), relationship.getTargetIri()).isPresent()) {
-            throw new RelationshipNotFoundException(relationship);
+            throws SkosPersistenceException {
+        if (!read(relationship.getSourceId(), relationship.getTargetId()).isPresent()) {
+            throw SkosPersistenceException.relationshipNotFound(relationship);
         }
 
         logger.info(() -> "Preparing to update relationship: " + relationship);
@@ -127,51 +164,87 @@ class RelationshipDao {
 
             updateStatement.setString(1, relationship.getRelation().name().toLowerCase());
             updateStatement.setBoolean(2, relationship.isTransitive());
-            updateStatement.setString(3, relationship.getSourceIri());
-            updateStatement.setString(4, relationship.getTargetIri());
+            updateStatement.setString(3, relationship.getSourceId());
+            updateStatement.setString(4, relationship.getTargetId());
             updateStatement.executeUpdate();
 
             logger.info(() -> "Successfully updated relationship: " + relationship);
 
-            return read(relationship.getSourceIri(), relationship.getTargetIri())
-                    .orElseThrow(() -> new UnableToUpdateRelationshipException(relationship));
+            return read(relationship.getSourceId(), relationship.getTargetId())
+                    .orElseThrow(() -> SkosPersistenceException.unableToUpdateRelationship(relationship));
 
         } catch (SQLException e) {
             logger.error(() -> e);
-            throw new UnableToUpdateRelationshipException(relationship, e);
+            throw SkosPersistenceException.unableToUpdateRelationship(relationship, e);
         }
     }
 
-    public boolean delete(String sourceIri, String targetIri) throws RelationshipNotFoundException {
-        if (!read(sourceIri, targetIri).isPresent()) {
-            throw new RelationshipNotFoundException(sourceIri, targetIri);
+    public boolean delete(String sourceId, String targetId) throws SkosPersistenceException {
+        if (!read(sourceId, targetId).isPresent()) {
+            throw SkosPersistenceException.relationshipNotFound(sourceId, targetId);
         }
 
         logger.info(
                 () ->
                         "Preparing to delete relationship between "
-                                + sourceIri
+                                + sourceId
                                 + " and "
-                                + targetIri);
+                                + targetId);
 
         try (Connection connection = connectionProvider.getConnection();
                 PreparedStatement deleteStatement =
                         connection.prepareStatement(DELETE_BY_IRI_TEMPLATE)) {
 
-            deleteStatement.setString(1, sourceIri);
-            deleteStatement.setString(2, targetIri);
+            deleteStatement.setString(1, sourceId);
+            deleteStatement.setString(2, targetId);
             int rowsAffected = deleteStatement.executeUpdate();
 
             logger.info(
                     () ->
                             "Successfully deleted relationship between "
-                                    + sourceIri
+                                    + sourceId
                                     + " and "
-                                    + targetIri
+                                    + targetId
                                     + " - number of rows affected: "
                                     + rowsAffected);
 
             return rowsAffected > 0;
+
+        } catch (SQLException e) {
+            logger.error(() -> e);
+            return false;
+        }
+    }
+
+    public boolean delete(String id) {
+        logger.info(() -> "Preparing to delete all relationships involving " + id);
+
+        try (Connection connection = connectionProvider.getConnection();
+                PreparedStatement deleteBySourceIri =
+                        connection.prepareStatement(DELETE_BY_SOURCE_IRI_TEMPLATE);
+                PreparedStatement deleteByTargetIri =
+                        connection.prepareStatement(DELETE_BY_TARGET_IRI_TEMPLATE)) {
+
+            connection.setAutoCommit(false);
+
+            deleteBySourceIri.setString(1, id);
+            int sourceRowsAffected = deleteBySourceIri.executeUpdate();
+
+            deleteByTargetIri.setString(1, id);
+            int targetRowsAffected = deleteByTargetIri.executeUpdate();
+
+            connection.commit();
+
+            logger.info(
+                    () ->
+                            "Successfully deleted all relationships involving "
+                                    + id
+                                    + " - number of source relationships deleted: "
+                                    + sourceRowsAffected
+                                    + ", number of target relationships deleted: "
+                                    + targetRowsAffected);
+
+            return (sourceRowsAffected + targetRowsAffected) > 0;
 
         } catch (SQLException e) {
             logger.error(() -> e);

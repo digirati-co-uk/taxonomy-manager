@@ -1,5 +1,6 @@
 package com.digirati.taxonomy.manager.lookup.persistence;
 
+import com.digirati.taxonomy.manager.lookup.exception.SkosPersistenceException;
 import com.digirati.taxonomy.manager.lookup.persistence.model.ConceptModel;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -9,6 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -24,7 +26,7 @@ class ConceptDaoIntegrationTest {
     }
 
     @Test
-    void createShouldWriteToTheDb() {
+    void createShouldWriteToTheDb() throws SkosPersistenceException {
         // Given
         ConceptModel concept = buildBaseConcept();
 
@@ -36,7 +38,7 @@ class ConceptDaoIntegrationTest {
 
         // Then
         // TODO how to prove that this actually went via the db?
-        assertEquals(concept.getIri(), created.getIri());
+        assertEquals(concept.getId(), created.getId());
         // TODO jsonb field order is getting swapped around
         // assertEquals(concept.getPreferredLabel(), created.getPreferredLabel());
         // assertEquals(concept.getAltLabel(), created.getAltLabel());
@@ -50,7 +52,7 @@ class ConceptDaoIntegrationTest {
     }
 
     @Test
-    void readShouldRetrieveFromTheDb() {
+    void readShouldRetrieveFromTheDb() throws SkosPersistenceException {
         // Given
         ConceptModel concept = buildBaseConcept();
         ConceptModel created =
@@ -69,7 +71,7 @@ class ConceptDaoIntegrationTest {
     }
 
     @Test
-    void updateShouldModifyInTheDb() {
+    void updateShouldModifyInTheDb() throws SkosPersistenceException {
         // Given
         ConceptModel toCreate = buildBaseConcept();
         ConceptModel toModify =
@@ -89,13 +91,12 @@ class ConceptDaoIntegrationTest {
         // Then
         // TODO this really doesn't prove anything because update could just return back its arg
         assertEquals(toModify.getId(), updated.getId());
-        assertEquals(toModify.getIri(), updated.getIri());
         // TODO json fields getting swapped around
         // assertEquals(toModify, updated);
     }
 
     @Test
-    void deleteShouldRemoveFromTheDb() {
+    void deleteShouldRemoveFromTheDb() throws SkosPersistenceException {
         // Given
         ConceptModel toCreate = buildBaseConcept();
         ConceptModel created =
@@ -127,7 +128,7 @@ class ConceptDaoIntegrationTest {
 
     private ConceptModel buildBaseConcept() {
         return new ConceptModel()
-                .setIri("http://example.com/concept#1")
+                .setId(UUID.randomUUID().toString())
                 .setPreferredLabel("[{\"language\":\"en\",\"value\":\"one\"}]")
                 .setAltLabel("[{\"language\":\"en\",\"value\":\"first\"}]")
                 .setHiddenLabel("[{\"language\":\"en\",\"value\":\"1\"}]")

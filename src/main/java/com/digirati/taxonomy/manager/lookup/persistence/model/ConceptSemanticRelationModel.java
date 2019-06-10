@@ -6,15 +6,12 @@ import java.util.Objects;
 
 public class ConceptSemanticRelationModel {
 
-    // Type semantic_relation_type
     private SemanticRelationType relation;
 
-    // Type boolean
     private boolean transitive;
 
-    // Type bigint
-    // TODO these will probably be better as IRIs
     private String sourceId;
+
     private String targetId;
 
     public SemanticRelationType getRelation() {

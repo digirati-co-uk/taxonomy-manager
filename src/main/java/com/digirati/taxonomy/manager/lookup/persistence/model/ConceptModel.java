@@ -4,13 +4,8 @@ import java.util.Objects;
 
 public class ConceptModel {
 
-    // Primary key - of type bigint
-    private Long id;
+    private String id;
 
-    // Type text
-    private String iri;
-
-    // Type jsonb
     private String preferredLabel;
     private String altLabel;
     private String hiddenLabel;
@@ -21,21 +16,12 @@ public class ConceptModel {
     private String historyNote;
     private String scopeNote;
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public ConceptModel setId(Long id) {
+    public ConceptModel setId(String id) {
         this.id = id;
-        return this;
-    }
-
-    public String getIri() {
-        return iri;
-    }
-
-    public ConceptModel setIri(String iri) {
-        this.iri = iri;
         return this;
     }
 
@@ -130,7 +116,6 @@ public class ConceptModel {
         }
         ConceptModel that = (ConceptModel) o;
         return Objects.equals(id, that.id)
-                && Objects.equals(iri, that.iri)
                 && Objects.equals(preferredLabel, that.preferredLabel)
                 && Objects.equals(altLabel, that.altLabel)
                 && Objects.equals(hiddenLabel, that.hiddenLabel)
@@ -146,7 +131,6 @@ public class ConceptModel {
     public int hashCode() {
         return Objects.hash(
                 id,
-                iri,
                 preferredLabel,
                 altLabel,
                 hiddenLabel,

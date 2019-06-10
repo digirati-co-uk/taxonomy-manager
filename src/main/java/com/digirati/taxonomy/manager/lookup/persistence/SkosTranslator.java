@@ -27,9 +27,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class SkosTranslator {
+class SkosTranslator {
 
     private static final Logger logger = LogManager.getLogger(SkosTranslator.class);
+
+    SkosTranslator() {
+        // no-op
+    }
 
     public RdfModel translate(InputStream skos, String baseUrl, SkosFileType skosFileType) {
         Model model = read(skos, baseUrl, skosFileType);
@@ -63,7 +67,7 @@ public class SkosTranslator {
 
     private ConceptModel extractConcept(Resource resource) {
         return new ConceptModel()
-                .setIri(resource.getURI())
+                .setId(resource.getURI())
                 .setPreferredLabel(extractJson(resource, SKOS.prefLabel))
                 .setAltLabel(extractJson(resource, SKOS.altLabel))
                 .setHiddenLabel(extractJson(resource, SKOS.hiddenLabel))
@@ -93,7 +97,7 @@ public class SkosTranslator {
 
     private ConceptSchemeModel extractConceptScheme(Resource resource) {
         ConceptSchemeModel conceptScheme = new ConceptSchemeModel();
-        conceptScheme.setIri(resource.getURI());
+        conceptScheme.setId(resource.getURI());
         return conceptScheme;
     }
 
@@ -150,7 +154,7 @@ public class SkosTranslator {
     public Model translate(RdfModel rdfModel) {
         Model model = ModelFactory.createDefaultModel();
         for (ConceptModel concept : rdfModel.getConcepts()) {
-            Resource conceptResource = model.createResource(concept.getIri(), SKOS.Concept);
+            Resource conceptResource = model.createResource(concept.getId(), SKOS.Concept);
             addConceptProperties(conceptResource, SKOS.prefLabel, concept.getPreferredLabel());
             addConceptProperties(conceptResource, SKOS.altLabel, concept.getAltLabel());
             addConceptProperties(conceptResource, SKOS.hiddenLabel, concept.getHiddenLabel());
@@ -164,11 +168,11 @@ public class SkosTranslator {
 
         for (ConceptSchemeModel conceptScheme : rdfModel.getConceptSchemes()) {
             Resource conceptSchemeResource =
-                    model.createResource(conceptScheme.getIri(), SKOS.ConceptScheme);
+                    model.createResource(conceptScheme.getId(), SKOS.ConceptScheme);
             rdfModel.getRelationships().stream()
                     .filter(
                             relationship ->
-                                    conceptScheme.getIri().equals(relationship.getSourceId()))
+                                    conceptScheme.getId().equals(relationship.getSourceId()))
                     .forEach(
                             relationship ->
                                     relationshipToRdfStatement(
@@ -194,7 +198,7 @@ public class SkosTranslator {
                 continue;
             }
             subject.addProperty(predicate, object);
-            model.createStatement(subject, predicate, conceptSemanticRelation.getTargetId());
+            model.createStatement(subject, predicate, conceptSemanticRelation.getTargetId().toString());
         }
         return model;
     }
@@ -240,9 +244,9 @@ public class SkosTranslator {
         }
     }
 
-    private Resource getResource(Model model, String uri) {
+    private Resource getResource(Model model, String id) {
         for (RDFNode r : model.listSubjects().toList()) {
-            if (r.isResource() && r.asResource().getURI().equals(uri)) {
+            if (r.isResource() && r.asResource().getURI().equals(id)) {
                 return r.asResource();
             }
         }
@@ -257,7 +261,7 @@ public class SkosTranslator {
                 .anyMatch(
                         conceptModel ->
                                 conceptModel
-                                        .getIri()
+                                        .getId()
                                         .equals(conceptSemanticRelation.getTargetId()))) {
             return baseWarning + " (match found in concept list)";
         }
