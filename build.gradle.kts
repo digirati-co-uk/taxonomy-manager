@@ -6,6 +6,9 @@ plugins {
     id("com.github.spotbugs") version "1.7.1" apply (false)
 }
 
+val ci: String by project
+val isCiRunning = ci.toBoolean()
+
 subprojects {
     apply(plugin = "com.github.spotbugs")
     apply(plugin = "checkstyle")
@@ -26,15 +29,15 @@ subprojects {
 
     tasks.withType<Checkstyle> {
         reports {
-            xml.isEnabled = true
-            html.isEnabled = true
+            xml.isEnabled = isCiRunning
+            html.isEnabled = !isCiRunning
         }
     }
 
     tasks.withType<SpotBugsTask> {
         reports {
-            xml.isEnabled = true
-            html.isEnabled = true
+            xml.isEnabled = isCiRunning
+            html.isEnabled = !isCiRunning
         }
     }
 
