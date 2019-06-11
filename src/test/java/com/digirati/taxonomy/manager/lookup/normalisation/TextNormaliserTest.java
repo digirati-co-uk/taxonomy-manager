@@ -1,21 +1,41 @@
 package com.digirati.taxonomy.manager.lookup.normalisation;
 
 import com.digirati.taxonomy.manager.lookup.model.Word;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.pipeline.CoreDocument;
+import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 
+@ExtendWith(MockitoExtension.class)
 class TextNormaliserTest {
 
+    @Mock private StanfordCoreNLP mockPipeline;
+
+    @Mock private CoreDocument mockDocument;
+
     @Test
-    void extractContentWordsShouldExtractWordsLocationsAndLemmas() {
+    void extractContentWordsShouldExtractWordsLocationsAndLemmas()
+            throws ExecutionException, InterruptedException {
         // Given
-        TextNormaliser textNormaliser = TextNormaliser.initialiseEnglishNormaliser(new HashSet<>());
+        TextNormaliser textNormaliser =
+                TextNormaliser.initialiseEnglishNormaliser(new HashSet<>()).get();
 
         // When
         List<Word> actual = textNormaliser.extractContentWords("I was there yesterday");
@@ -33,8 +53,20 @@ class TextNormaliserTest {
     @Test
     void extractContentWordsShouldExcludeNormalisedStopwords() {
         // Given
+        Map<String, CoreDocument> inputToNormalisedDocument = new HashMap<>();
+        inputToNormalisedDocument.put("I", mockedDocumentWithWords(mockedWord("I")));
+        inputToNormalisedDocument.put("is", mockedDocumentWithWords(mockedWord("is", "be", 0, 2)));
+        inputToNormalisedDocument.put(
+                "I was there yesterday",
+                mockedDocumentWithWords(
+                        mockedWord("I"),
+                        mockedWord("was", "be", 2, 5),
+                        mockedWord("there", "there", 6, 11),
+                        mockedWord("yesterday", "yesterday", 12, 21)));
+
         TextNormaliser textNormaliser =
-                TextNormaliser.initialiseEnglishNormaliser(Sets.newHashSet("I", "is"));
+                new TextNormaliser(
+                        Sets.newHashSet("I", "is"), mockPipeline, inputToNormalisedDocument::get);
 
         // When
         List<Word> actual = textNormaliser.extractContentWords("I was there yesterday");
@@ -50,7 +82,8 @@ class TextNormaliserTest {
     @Test
     void normaliseShouldCollapseContentWordsIntoLemmatisedText() {
         // Given
-        TextNormaliser textNormaliser = TextNormaliser.initialiseEnglishNormaliser(new HashSet<>());
+        TextNormaliser textNormaliser =
+                new TextNormaliser(new HashSet<>(), mockPipeline, text -> mockDocument);
         List<Word> contentWords =
                 Arrays.asList(
                         new Word("I", 0, 1, "I"),
@@ -67,10 +100,11 @@ class TextNormaliserTest {
     }
 
     @Test
-    void normaliseShouldTokeniseWordsInNonEnglishLanguage() {
+    void normaliseShouldTokeniseWordsInNonEnglishLanguage()
+            throws ExecutionException, InterruptedException {
         // Given
         TextNormaliser textNormaliser =
-                TextNormaliser.initialiseNormaliser(new HashSet<>(), "fr", "French");
+                TextNormaliser.initialiseNormaliser(new HashSet<>(), "fr", "French").get();
 
         // When
         String actual =
@@ -84,7 +118,14 @@ class TextNormaliserTest {
     @Test
     void normaliseShouldNotForceRemovalOfNonLatinCharacters() {
         // Given
-        TextNormaliser textNormaliser = TextNormaliser.initialiseEnglishNormaliser(new HashSet<>());
+        givenMockedDocumentHasLemmas(
+                mockedWord("הייתי"),
+                mockedWord("שם"),
+                mockedWord("אתמול"),
+                mockedWord("אחר"),
+                mockedWord("הצהריים"));
+        TextNormaliser textNormaliser =
+                new TextNormaliser(new HashSet<>(), mockPipeline, text -> mockDocument);
 
         // When
         String actual =
@@ -96,17 +137,27 @@ class TextNormaliserTest {
         assertEquals(expected, actual);
     }
 
-    @Test
-    void normaliseShouldTrimWhitespace() {
-        // Given
-        TextNormaliser textNormaliser = TextNormaliser.initialiseEnglishNormaliser(new HashSet<>());
+    private void givenMockedDocumentHasLemmas(CoreLabel... words) {
+        given(mockDocument.tokens()).willReturn(Lists.newArrayList(words));
+    }
 
-        // When
-        String actual =
-                textNormaliser.normalise(textNormaliser.extractContentWords("       what		\n"));
+    private CoreDocument mockedDocumentWithWords(CoreLabel... words) {
+        CoreDocument coreDocument = mock(CoreDocument.class);
+        given(coreDocument.tokens()).willReturn(Lists.newArrayList(words));
+        return coreDocument;
+    }
 
-        // Then
-        String expected = "what";
-        assertEquals(expected, actual);
+    private CoreLabel mockedWord(
+            String originalForm, String lemmaForm, int startIndex, int endIndex) {
+        CoreLabel mockedWord = mock(CoreLabel.class);
+        lenient().when(mockedWord.originalText()).thenReturn(originalForm);
+        lenient().when(mockedWord.lemma()).thenReturn(lemmaForm);
+        lenient().when(mockedWord.beginPosition()).thenReturn(startIndex);
+        lenient().when(mockedWord.endPosition()).thenReturn(endIndex);
+        return mockedWord;
+    }
+
+    private CoreLabel mockedWord(String word) {
+        return mockedWord(word, word, 0, 0);
     }
 }

@@ -13,13 +13,14 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TextLookupServiceTest {
 
     @Test
-    void searchShouldProvideFullyPopulatedLookupResultContext() {
+    void searchShouldProvideFullyPopulatedLookupResultContext() throws ExecutionException, InterruptedException {
         // Given
         String inputText = "\n	  	I was there yesterday    	";
 
@@ -28,7 +29,7 @@ class TextLookupServiceTest {
 
         TextSearcher textSearcher = new AhoCorasickTextSearcher(terms);
         ConceptExtractor conceptExtractor = new ConceptExtractor(textSearcher);
-        TextNormaliser textNormaliser = TextNormaliser.initialiseEnglishNormaliser(stopwords);
+        TextNormaliser textNormaliser = TextNormaliser.initialiseEnglishNormaliser(stopwords).get();
         TextLookupService underTest = new TextLookupService(textNormaliser, conceptExtractor);
 
         // When
