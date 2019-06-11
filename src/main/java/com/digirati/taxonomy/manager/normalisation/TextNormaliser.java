@@ -1,11 +1,15 @@
 package com.digirati.taxonomy.manager.normalisation;
 
+import com.google.common.annotations.VisibleForTesting;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.CoreDocument;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.function.Function;
 
 /**
  * Provides a mechanism for normalising any text inputs, including the terms to search for and the
@@ -15,7 +19,9 @@ public class TextNormaliser {
 
     private final Set<String> stopwords;
 
-    private StanfordCoreNLP pipeline;
+    private final StanfordCoreNLP pipeline;
+
+    private final Function<String, CoreDocument> coreDocumentGenerator;
 
     /**
      * Initialises a {@link TextNormaliser} for normalising any input language. Currently, full
@@ -27,11 +33,22 @@ public class TextNormaliser {
      * @param languageKey the ISO 639-1 language code for the text to be normalised
      * @param languageName the name of the language of the text to be normalised
      */
-    public static TextNormaliser initialiseNormaliser(
+    public static Future<TextNormaliser> initialiseNormaliser(
             Set<String> stopwords, String languageKey, String languageName) {
-        TextNormaliser normaliser = new TextNormaliser(stopwords);
-        normaliser.initialisePipeline(languageKey, languageName);
-        return normaliser;
+        return Executors.newSingleThreadExecutor()
+                .submit(
+                        () -> {
+                            StanfordCoreNLP p = initialisePipeline(languageKey, languageName);
+                            return new TextNormaliser(stopwords, p, CoreDocument::new);
+                        });
+    }
+
+    private static StanfordCoreNLP initialisePipeline(String languageKey, String languageName) {
+        Properties properties = new Properties();
+        properties.setProperty("annotators", "tokenize,ssplit,pos,lemma");
+        properties.setProperty("tokenize.language", languageKey);
+        properties.setProperty("language", languageName);
+        return new StanfordCoreNLP(properties);
     }
 
     /**
@@ -40,20 +57,18 @@ public class TextNormaliser {
      * @param stopwords a collection of common boilerplate words to remove from the text (e.g.
      *     "the", "a", etc.)
      */
-    public static TextNormaliser initialiseEnglishNormaliser(Set<String> stopwords) {
+    public static Future<TextNormaliser> initialiseEnglishNormaliser(Set<String> stopwords) {
         return initialiseNormaliser(stopwords, "en", "English");
     }
 
-    private TextNormaliser(Set<String> stopwords) {
+    @VisibleForTesting
+    TextNormaliser(
+            Set<String> stopwords,
+            StanfordCoreNLP pipeline,
+            Function<String, CoreDocument> coreDocumentGenerator) {
         this.stopwords = stopwords;
-    }
-
-    private void initialisePipeline(String languageKey, String languageName) {
-        Properties properties = new Properties();
-        properties.setProperty("annotators", "tokenize,ssplit,pos,lemma");
-        properties.setProperty("tokenize.language", languageKey);
-        properties.setProperty("language", languageName);
-        this.pipeline = new StanfordCoreNLP(properties);
+        this.pipeline = pipeline;
+        this.coreDocumentGenerator = coreDocumentGenerator;
     }
 
     /**
@@ -66,7 +81,7 @@ public class TextNormaliser {
      */
     public String normalise(String text) {
         StringBuilder normalisedText = new StringBuilder();
-        CoreDocument document = new CoreDocument(text);
+        CoreDocument document = coreDocumentGenerator.apply(text);
         pipeline.annotate(document);
         document.tokens().stream()
                 .filter(this::isContentWord)
