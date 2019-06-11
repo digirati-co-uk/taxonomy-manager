@@ -3,7 +3,7 @@ import com.github.spotbugs.SpotBugsTask
 
 plugins {
     id("org.sonarqube") version "2.7"
-    id("com.github.spotbugs") version "1.7.1" apply(false)
+    id("com.github.spotbugs") version "1.7.1" apply (false)
 }
 
 subprojects {
@@ -29,6 +29,19 @@ subprojects {
             xml.isEnabled = true
             html.isEnabled = true
         }
+    }
+
+    tasks.withType<SpotBugsTask> {
+        reports {
+            xml.isEnabled = true
+            html.isEnabled = true
+        }
+    }
+
+    configure<SpotBugsExtension> {
+        toolVersion = "3.1.+"
+        effort = "max"
+        isIgnoreFailures = true
     }
 }
 
