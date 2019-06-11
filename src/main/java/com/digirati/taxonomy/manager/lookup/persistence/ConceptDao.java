@@ -91,14 +91,14 @@ public class ConceptDao {
 
     public Optional<ConceptModel> read(String id) {
         try (Connection connection = connectionProvider.getConnection();
-             PreparedStatement readStatement =
-                     connection.prepareStatement(SELECT_BY_IRI_TEMPLATE)) {
+                PreparedStatement readStatement =
+                        connection.prepareStatement(SELECT_BY_IRI_TEMPLATE)) {
 
             readStatement.setString(1, id);
             ResultSet resultSet = readStatement.executeQuery();
             List<ConceptModel> created = fromResultSet(resultSet);
             resultSet.close();
-            if (created != null && !created.isEmpty()) {
+            if (!created.isEmpty()) {
                 return Optional.of(created.get(created.size() - 1));
             }
 
@@ -154,9 +154,8 @@ public class ConceptDao {
             throw SkosPersistenceException.conceptNotFound(id);
         }
 
-        try {
-            Connection connection = connectionProvider.getConnection();
-            PreparedStatement deleteStatement = connection.prepareStatement(DELETE_TEMPLATE);
+        try (Connection connection = connectionProvider.getConnection();
+                PreparedStatement deleteStatement = connection.prepareStatement(DELETE_TEMPLATE)) {
             deleteStatement.setString(1, id);
             int rowsAffected = deleteStatement.executeUpdate();
             deleteStatement.close();

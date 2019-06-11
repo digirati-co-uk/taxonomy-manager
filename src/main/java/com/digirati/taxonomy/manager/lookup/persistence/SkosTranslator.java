@@ -81,7 +81,7 @@ class SkosTranslator {
 
     private String extractJson(Resource resource, Property property) {
         List<Statement> propertyStatements = resource.listProperties(property).toList();
-        if (propertyStatements == null || propertyStatements.size() == 0) {
+        if (propertyStatements == null || propertyStatements.isEmpty()) {
             return null;
         }
         ObjectMapper objectMapper = new ObjectMapper();
@@ -198,7 +198,7 @@ class SkosTranslator {
                 continue;
             }
             subject.addProperty(predicate, object);
-            model.createStatement(subject, predicate, conceptSemanticRelation.getTargetId().toString());
+            model.createStatement(subject, predicate, conceptSemanticRelation.getTargetId());
         }
         return model;
     }
@@ -225,7 +225,7 @@ class SkosTranslator {
                 conceptResource.addProperty(key, value);
 
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new IllegalStateException("Unable to parse json string: " + value, e);
             }
         }
     }

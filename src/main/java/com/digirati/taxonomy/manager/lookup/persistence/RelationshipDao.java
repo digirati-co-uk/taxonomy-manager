@@ -71,7 +71,10 @@ class RelationshipDao {
             logger.info(() -> "Successfully created relationship: " + relationship);
 
             return read(relationship.getSourceId(), relationship.getTargetId())
-                    .orElseThrow(() -> SkosPersistenceException.unableToCreateRelationship(relationship));
+                    .orElseThrow(
+                            () ->
+                                    SkosPersistenceException.unableToCreateRelationship(
+                                            relationship));
 
         } catch (SQLException e) {
             logger.error(() -> e);
@@ -91,7 +94,7 @@ class RelationshipDao {
             ResultSet result = readStatement.executeQuery();
             List<ConceptSemanticRelationModel> retrieved = fromResultSet(result);
             result.close();
-            if (retrieved != null && !retrieved.isEmpty()) {
+            if (!retrieved.isEmpty()) {
                 return Optional.of(retrieved.get(retrieved.size() - 1));
             }
             return Optional.empty();
@@ -122,6 +125,8 @@ class RelationshipDao {
             throws SkosPersistenceException {
         List<ConceptSemanticRelationModel> relationships = new ArrayList<>();
 
+        ResultSet relatedToSourceResults = null;
+        ResultSet relatedToTargetResults = null;
         try (Connection connection = connectionProvider.getConnection();
                 PreparedStatement relatedToSourceStatement =
                         connection.prepareStatement(RELATED_TO_SOURCE_TEMPLATE);
@@ -132,21 +137,31 @@ class RelationshipDao {
 
             relatedToSourceStatement.setString(1, sourceId);
             relatedToTargetStatement.setString(1, sourceId);
-            ResultSet relatedToSourceResults = relatedToSourceStatement.executeQuery();
-            ResultSet relatedToTargetResults = relatedToTargetStatement.executeQuery();
+            relatedToSourceResults = relatedToSourceStatement.executeQuery();
+            relatedToTargetResults = relatedToTargetStatement.executeQuery();
 
             connection.commit();
 
             relationships.addAll(fromResultSet(relatedToSourceResults));
             relationships.addAll(fromResultSet(relatedToTargetResults));
-            relatedToSourceResults.close();
-            relatedToTargetResults.close();
 
             return relationships;
 
         } catch (SQLException e) {
             logger.error(() -> e);
             throw SkosPersistenceException.unableToGetRelationships(sourceId);
+
+        } finally {
+            try {
+                if (relatedToSourceResults != null) {
+                    relatedToSourceResults.close();
+                }
+                if (relatedToTargetResults != null) {
+                    relatedToTargetResults.close();
+                }
+            } catch (SQLException e) {
+                logger.error(() -> "Unable to close result set", e);
+            }
         }
     }
 
@@ -171,7 +186,10 @@ class RelationshipDao {
             logger.info(() -> "Successfully updated relationship: " + relationship);
 
             return read(relationship.getSourceId(), relationship.getTargetId())
-                    .orElseThrow(() -> SkosPersistenceException.unableToUpdateRelationship(relationship));
+                    .orElseThrow(
+                            () ->
+                                    SkosPersistenceException.unableToUpdateRelationship(
+                                            relationship));
 
         } catch (SQLException e) {
             logger.error(() -> e);
@@ -185,11 +203,7 @@ class RelationshipDao {
         }
 
         logger.info(
-                () ->
-                        "Preparing to delete relationship between "
-                                + sourceId
-                                + " and "
-                                + targetId);
+                () -> "Preparing to delete relationship between " + sourceId + " and " + targetId);
 
         try (Connection connection = connectionProvider.getConnection();
                 PreparedStatement deleteStatement =

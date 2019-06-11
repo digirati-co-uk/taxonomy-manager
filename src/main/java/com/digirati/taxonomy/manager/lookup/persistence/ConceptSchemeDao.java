@@ -71,10 +71,10 @@ public class ConceptSchemeDao {
 
             readStatement.setString(1, id);
             ResultSet resultSet = readStatement.executeQuery();
-            List<ConceptSchemeModel> created = fromResultSet(resultSet);
+            List<ConceptSchemeModel> readResults = fromResultSet(resultSet);
             resultSet.close();
-            if (created != null && !created.isEmpty()) {
-                return Optional.of(created.get(created.size() - 1));
+            if (!readResults.isEmpty()) {
+                return Optional.of(readResults.get(readResults.size() - 1));
             }
 
         } catch (SQLException e) {
