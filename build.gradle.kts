@@ -1,58 +1,34 @@
-repositories {
-    mavenCentral()
-}
+import com.github.spotbugs.SpotBugsExtension
+import com.github.spotbugs.SpotBugsTask
 
 plugins {
-    java
-    jacoco
-    checkstyle
     id("org.sonarqube") version "2.7"
-    id("com.github.spotbugs") version "1.7.1"
+    id("com.github.spotbugs") version "1.7.1" apply(false)
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
-}
+subprojects {
+    apply(plugin = "com.github.spotbugs")
+    apply(plugin = "checkstyle")
+    apply(plugin = "jacoco")
 
-val ahoCorasickVersion: String by project
-val guavaVersion: String by project
-val stanfordNlpVersion: String by project
-val junitVersion: String by project
-val hamcrestVersion: String by project
-val mockitoVersion: String by project
+    repositories {
+        mavenCentral()
+    }
 
-dependencies {
-    spotbugsPlugins("com.h3xstream.findsecbugs:findsecbugs-plugin:1.7.1")
+    tasks.withType<JavaCompile> {
+        sourceCompatibility = "11"
+        targetCompatibility = "11"
+    }
 
-    compile("org.ahocorasick", "ahocorasick", ahoCorasickVersion)
-    compile("com.google.guava", "guava", guavaVersion)
-    compile("edu.stanford.nlp", "stanford-corenlp", stanfordNlpVersion)
-    compile("edu.stanford.nlp:stanford-corenlp:$stanfordNlpVersion:models")
+    tasks.withType<Test> {
+        useJUnitPlatform()
+    }
 
-    testCompile("org.junit.jupiter", "junit-jupiter", junitVersion)
-    testCompile("org.hamcrest", "hamcrest", hamcrestVersion)
-    testCompile("org.mockito", "mockito-junit-jupiter", mockitoVersion)
-}
-
-tasks.named<Test>("test") {
-    useJUnitPlatform()
-}
-
-tasks.withType<JavaCompile> {
-    options.encoding = "UTF-8"
-}
-
-spotbugs {
-    toolVersion = "3.1.+"
-    effort = "max"
-    isIgnoreFailures = true
-}
-
-tasks.withType<Checkstyle>().configureEach {
-    reports {
-        xml.isEnabled = false
-        html.isEnabled = true
+    tasks.withType<Checkstyle> {
+        reports {
+            xml.isEnabled = true
+            html.isEnabled = true
+        }
     }
 }
 
