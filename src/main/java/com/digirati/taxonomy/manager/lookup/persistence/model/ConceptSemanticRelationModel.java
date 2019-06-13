@@ -1,26 +1,30 @@
 package com.digirati.taxonomy.manager.lookup.persistence.model;
 
+import com.google.common.base.MoreObjects;
 import org.apache.jena.rdf.model.Property;
 
 import java.util.Objects;
 
 public class ConceptSemanticRelationModel {
 
-    private SemanticRelationType relation;
+    private final String sourceId;
 
-    private boolean transitive;
+    private final String targetId;
 
-    private String sourceId;
+    private final SemanticRelationType relation;
 
-    private String targetId;
+    private final boolean transitive;
+
+    public ConceptSemanticRelationModel(
+            String sourceId, String targetId, SemanticRelationType relation, boolean transitive) {
+        this.sourceId = sourceId;
+        this.targetId = targetId;
+        this.relation = relation;
+        this.transitive = transitive;
+    }
 
     public SemanticRelationType getRelation() {
         return relation;
-    }
-
-    public ConceptSemanticRelationModel setRelation(SemanticRelationType relation) {
-        this.relation = relation;
-        return this;
     }
 
     public Property getRelationPredicate() {
@@ -31,32 +35,22 @@ public class ConceptSemanticRelationModel {
         return transitive;
     }
 
-    public ConceptSemanticRelationModel setTransitive(boolean transitive) {
-        this.transitive = transitive;
-        return this;
-    }
-
     public String getSourceId() {
         return sourceId;
-    }
-
-    public ConceptSemanticRelationModel setSourceId(String sourceId) {
-        this.sourceId = sourceId;
-        return this;
     }
 
     public String getTargetId() {
         return targetId;
     }
 
-    public ConceptSemanticRelationModel setTargetId(String targetId) {
-        this.targetId = targetId;
-        return this;
-    }
-
     @Override
     public String toString() {
-        return sourceId + " - " + relation.name() + "_" + transitive + " - " + targetId;
+        return MoreObjects.toStringHelper(this)
+                .add("sourceId", sourceId)
+                .add("targetId", targetId)
+                .add("relation", relation.name())
+                .add("transitive", transitive)
+                .toString();
     }
 
     @Override

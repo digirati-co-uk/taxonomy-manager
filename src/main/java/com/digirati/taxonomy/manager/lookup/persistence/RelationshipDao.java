@@ -24,25 +24,25 @@ class RelationshipDao {
                     + "(relation, transitive, source_id, target_id) "
                     + "VALUES (?::semantic_relation_type, ?, ?::UUID, ?::UUID)";
 
-    private static final String SELECT_BY_IRI_TEMPLATE =
+    private static final String SELECT_RELATIONSHIP_TEMPLATE =
             "SELECT * FROM concept_semantic_relation WHERE source_id=?::UUID AND target_id=?::UUID";
 
-    private static final String RELATED_TO_SOURCE_TEMPLATE =
+    private static final String SELECT_RELATED_TO_SOURCE_TEMPLATE =
             "SELECT * FROM concept_semantic_relation WHERE source_id=?::UUID";
 
-    private static final String RELATED_TO_TARGET_TEMPLATE =
+    private static final String SELECT_RELATED_TO_TARGET_TEMPLATE =
             "SELECT * FROM concept_semantic_relation WHERE target_id=?::UUID";
 
-    private static final String UPDATE_BY_IRI_TEMPLATE =
+    private static final String UPDATE_TEMPLATE =
             "UPDATE concept_semantic_relation SET relation=?::semantic_relation_type, transitive=? WHERE source_id=?::UUID AND target_id=?::UUID";
 
-    private static final String DELETE_BY_IRI_TEMPLATE =
+    private static final String DELETE_RELATIONSHIP_TEMPLATE =
             "DELETE FROM concept_semantic_relation WHERE source_id=?::UUID AND target_id=?::UUID";
 
-    private static final String DELETE_BY_SOURCE_IRI_TEMPLATE =
+    private static final String DELETE_RELATED_TO_SOURCE_TEMPLATE =
             "DELETE FROM concept_semantic_relation WHERE source_id=?::UUID";
 
-    private static final String DELETE_BY_TARGET_IRI_TEMPLATE =
+    private static final String DELETE_RELATED_TO_TARGET_TEMPLATE =
             "DELETE FROM concept_semantic_relation WHERE target_id=?::UUID";
 
     private final ConnectionProvider connectionProvider;
@@ -57,7 +57,7 @@ class RelationshipDao {
             throw SkosPersistenceException.relationshipAlreadyExists(relationship);
         }
 
-        logger.info(() -> "Preparing to create relationship: " + relationship);
+        logger.info("Preparing to create relationship: " + relationship);
 
         try (Connection connection = connectionProvider.getConnection();
                 PreparedStatement createStatement = connection.prepareStatement(CREATE_TEMPLATE)) {
@@ -68,7 +68,7 @@ class RelationshipDao {
             createStatement.setString(4, relationship.getTargetId());
             createStatement.execute();
 
-            logger.info(() -> "Successfully created relationship: " + relationship);
+            logger.info("Successfully created relationship: " + relationship);
 
             return read(relationship.getSourceId(), relationship.getTargetId())
                     .orElseThrow(
@@ -77,17 +77,16 @@ class RelationshipDao {
                                             relationship));
 
         } catch (SQLException e) {
-            logger.error(() -> e);
+            logger.error(e);
             throw SkosPersistenceException.unableToCreateRelationship(relationship, e);
         }
     }
 
-    // TODO can multiple relationships exist between the same two things in the same direction?
     public Optional<ConceptSemanticRelationModel> read(String sourceId, String targetId)
             throws SkosPersistenceException {
         try (Connection connection = connectionProvider.getConnection();
                 PreparedStatement readStatement =
-                        connection.prepareStatement(SELECT_BY_IRI_TEMPLATE)) {
+                        connection.prepareStatement(SELECT_RELATIONSHIP_TEMPLATE)) {
 
             readStatement.setString(1, sourceId);
             readStatement.setString(2, targetId);
@@ -100,7 +99,7 @@ class RelationshipDao {
             return Optional.empty();
 
         } catch (SQLException e) {
-            logger.error(() -> e);
+            logger.error(e);
             throw SkosPersistenceException.relationshipNotFound(sourceId, targetId, e);
         }
     }
@@ -111,11 +110,11 @@ class RelationshipDao {
         while (resultSet.next()) {
             String relationTypeName = resultSet.getString("relation").toUpperCase();
             ConceptSemanticRelationModel relationship =
-                    new ConceptSemanticRelationModel()
-                            .setRelation(SemanticRelationType.valueOf(relationTypeName))
-                            .setTransitive(resultSet.getBoolean("transitive"))
-                            .setSourceId(resultSet.getString("source_id"))
-                            .setTargetId(resultSet.getString("target_id"));
+                    new ConceptSemanticRelationModel(
+                            resultSet.getString("source_id"),
+                            resultSet.getString("target_id"),
+                            SemanticRelationType.valueOf(relationTypeName),
+                            resultSet.getBoolean("transitive"));
             relationships.add(relationship);
         }
         return relationships;
@@ -129,9 +128,9 @@ class RelationshipDao {
         ResultSet relatedToTargetResults = null;
         try (Connection connection = connectionProvider.getConnection();
                 PreparedStatement relatedToSourceStatement =
-                        connection.prepareStatement(RELATED_TO_SOURCE_TEMPLATE);
+                        connection.prepareStatement(SELECT_RELATED_TO_SOURCE_TEMPLATE);
                 PreparedStatement relatedToTargetStatement =
-                        connection.prepareStatement(RELATED_TO_TARGET_TEMPLATE)) {
+                        connection.prepareStatement(SELECT_RELATED_TO_TARGET_TEMPLATE)) {
 
             connection.setAutoCommit(false);
 
@@ -148,7 +147,7 @@ class RelationshipDao {
             return relationships;
 
         } catch (SQLException e) {
-            logger.error(() -> e);
+            logger.error(e);
             throw SkosPersistenceException.unableToGetRelationships(sourceId);
 
         } finally {
@@ -160,7 +159,7 @@ class RelationshipDao {
                     relatedToTargetResults.close();
                 }
             } catch (SQLException e) {
-                logger.error(() -> "Unable to close result set", e);
+                logger.error("Unable to close result set", e);
             }
         }
     }
@@ -171,11 +170,10 @@ class RelationshipDao {
             throw SkosPersistenceException.relationshipNotFound(relationship);
         }
 
-        logger.info(() -> "Preparing to update relationship: " + relationship);
+        logger.info("Preparing to update relationship: " + relationship);
 
         try (Connection connection = connectionProvider.getConnection();
-                PreparedStatement updateStatement =
-                        connection.prepareStatement(UPDATE_BY_IRI_TEMPLATE)) {
+                PreparedStatement updateStatement = connection.prepareStatement(UPDATE_TEMPLATE)) {
 
             updateStatement.setString(1, relationship.getRelation().name().toLowerCase());
             updateStatement.setBoolean(2, relationship.isTransitive());
@@ -183,7 +181,7 @@ class RelationshipDao {
             updateStatement.setString(4, relationship.getTargetId());
             updateStatement.executeUpdate();
 
-            logger.info(() -> "Successfully updated relationship: " + relationship);
+            logger.info("Successfully updated relationship: " + relationship);
 
             return read(relationship.getSourceId(), relationship.getTargetId())
                     .orElseThrow(
@@ -192,7 +190,7 @@ class RelationshipDao {
                                             relationship));
 
         } catch (SQLException e) {
-            logger.error(() -> e);
+            logger.error(e);
             throw SkosPersistenceException.unableToUpdateRelationship(relationship, e);
         }
     }
@@ -202,42 +200,40 @@ class RelationshipDao {
             throw SkosPersistenceException.relationshipNotFound(sourceId, targetId);
         }
 
-        logger.info(
-                () -> "Preparing to delete relationship between " + sourceId + " and " + targetId);
+        logger.info("Preparing to delete relationship between " + sourceId + " and " + targetId);
 
         try (Connection connection = connectionProvider.getConnection();
                 PreparedStatement deleteStatement =
-                        connection.prepareStatement(DELETE_BY_IRI_TEMPLATE)) {
+                        connection.prepareStatement(DELETE_RELATIONSHIP_TEMPLATE)) {
 
             deleteStatement.setString(1, sourceId);
             deleteStatement.setString(2, targetId);
             int rowsAffected = deleteStatement.executeUpdate();
 
             logger.info(
-                    () ->
-                            "Successfully deleted relationship between "
-                                    + sourceId
-                                    + " and "
-                                    + targetId
-                                    + " - number of rows affected: "
-                                    + rowsAffected);
+                    "Successfully deleted relationship between "
+                            + sourceId
+                            + " and "
+                            + targetId
+                            + " - number of rows affected: "
+                            + rowsAffected);
 
             return rowsAffected > 0;
 
         } catch (SQLException e) {
-            logger.error(() -> e);
+            logger.error(e);
             return false;
         }
     }
 
     public boolean delete(String id) {
-        logger.info(() -> "Preparing to delete all relationships involving " + id);
+        logger.info("Preparing to delete all relationships involving " + id);
 
         try (Connection connection = connectionProvider.getConnection();
                 PreparedStatement deleteBySourceIri =
-                        connection.prepareStatement(DELETE_BY_SOURCE_IRI_TEMPLATE);
+                        connection.prepareStatement(DELETE_RELATED_TO_SOURCE_TEMPLATE);
                 PreparedStatement deleteByTargetIri =
-                        connection.prepareStatement(DELETE_BY_TARGET_IRI_TEMPLATE)) {
+                        connection.prepareStatement(DELETE_RELATED_TO_TARGET_TEMPLATE)) {
 
             connection.setAutoCommit(false);
 
@@ -250,18 +246,17 @@ class RelationshipDao {
             connection.commit();
 
             logger.info(
-                    () ->
-                            "Successfully deleted all relationships involving "
-                                    + id
-                                    + " - number of source relationships deleted: "
-                                    + sourceRowsAffected
-                                    + ", number of target relationships deleted: "
-                                    + targetRowsAffected);
+                    "Successfully deleted all relationships involving "
+                            + id
+                            + " - number of source relationships deleted: "
+                            + sourceRowsAffected
+                            + ", number of target relationships deleted: "
+                            + targetRowsAffected);
 
             return (sourceRowsAffected + targetRowsAffected) > 0;
 
         } catch (SQLException e) {
-            logger.error(() -> e);
+            logger.error(e);
             return false;
         }
     }

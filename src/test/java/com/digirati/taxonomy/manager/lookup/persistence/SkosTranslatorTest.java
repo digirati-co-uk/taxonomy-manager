@@ -5,13 +5,17 @@ import com.digirati.taxonomy.manager.lookup.persistence.model.ConceptSchemeModel
 import com.digirati.taxonomy.manager.lookup.persistence.model.ConceptSemanticRelationModel;
 import com.digirati.taxonomy.manager.lookup.persistence.model.RdfModel;
 import com.digirati.taxonomy.manager.lookup.persistence.model.SemanticRelationType;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.io.CharStreams;
 import org.apache.commons.io.IOUtils;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.util.FileManager;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -34,10 +38,14 @@ class SkosTranslatorTest {
         InputStream testConceptSchemesInput = load("test-concept-schemes-input.jsonld");
 
         // When
-        RdfModel actual = underTest.translate(testConceptSchemesInput, "http://example.com/", SkosFileType.JSON_LD);
+        RdfModel actual =
+                underTest.translate(
+                        testConceptSchemesInput, "http://example.com/", SkosFileType.JSON_LD);
 
         // Then
-        assertEquals(conceptSchemesRdfModel, actual);
+        assertEquals(conceptSchemesRdfModel.getConcepts(), actual.getConcepts());
+        assertEquals(conceptSchemesRdfModel.getConceptSchemes(), actual.getConceptSchemes());
+        assertEquals(conceptSchemesRdfModel.getRelationships(), actual.getRelationships());
     }
 
     @Test
@@ -50,7 +58,10 @@ class SkosTranslatorTest {
 
         // Then
         InputStream expectedStream = load("test-concept-schemes-output.jsonld");
-        String expected = IOUtils.toString(expectedStream, StandardCharsets.UTF_8).trim();
+        String expected;
+        try (Reader reader = new InputStreamReader(expectedStream)) {
+            expected = CharStreams.toString(reader).trim();
+        }
 
         assertEquals(expected, actual);
     }
@@ -61,10 +72,13 @@ class SkosTranslatorTest {
         InputStream testConceptsInput = load("test-concepts-input.jsonld");
 
         // When
-        RdfModel actual = underTest.translate(testConceptsInput, "http://example.com/", SkosFileType.JSON_LD);
+        RdfModel actual =
+                underTest.translate(testConceptsInput, "http://example.com/", SkosFileType.JSON_LD);
 
         // Then
-        assertEquals(conceptsRdfModel, actual);
+        assertEquals(conceptsRdfModel.getConcepts(), actual.getConcepts());
+        assertEquals(conceptsRdfModel.getConceptSchemes(), actual.getConceptSchemes());
+        assertEquals(conceptsRdfModel.getRelationships(), actual.getRelationships());
     }
 
     @Test
@@ -84,31 +98,47 @@ class SkosTranslatorTest {
 
     private static RdfModel createConceptSchemesModel() {
         ConceptSchemeModel conceptSchemeModel =
-                new ConceptSchemeModel().setId("http://example.com/");
+                new ConceptSchemeModel("http://example.com/", "Example Scheme");
 
         ConceptModel one =
-                new ConceptModel()
-                        .setId("http://example.com/concept#1")
-                        .setPreferredLabel(
-                                "[{\"language\":\"fr\",\"value\":\"un\"},{\"language\":\"en\",\"value\":\"one\"}]");
+                new ConceptModel(
+                        "http://example.com/concept#1",
+                        jsonForString(
+                                "[{\"language\":\"fr\",\"value\":\"un\"},{\"language\":\"en\",\"value\":\"one\"}]"),
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null);
         ConceptModel two =
-                new ConceptModel()
-                        .setId("http://example.com/concept#2")
-                        .setPreferredLabel(
-                                "[{\"language\":\"fr\",\"value\":\"deux\"},{\"language\":\"en\",\"value\":\"two\"}]");
+                new ConceptModel(
+                        "http://example.com/concept#2",
+                        jsonForString(
+                                "[{\"language\":\"fr\",\"value\":\"deux\"},{\"language\":\"en\",\"value\":\"two\"}]"),
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null);
 
         ConceptSemanticRelationModel schemeHasTopConceptOne =
-                new ConceptSemanticRelationModel()
-                        .setSourceId("http://example.com/")
-                        .setTargetId("http://example.com/concept#1")
-                        .setRelation(SemanticRelationType.HAS_TOP_CONCEPT)
-                        .setTransitive(false);
+                new ConceptSemanticRelationModel(
+                        "http://example.com/",
+                        "http://example.com/concept#1",
+                        SemanticRelationType.HAS_TOP_CONCEPT,
+                        false);
         ConceptSemanticRelationModel schemeHasTopConceptTwo =
-                new ConceptSemanticRelationModel()
-                        .setSourceId("http://example.com/")
-                        .setTargetId("http://example.com/concept#2")
-                        .setRelation(SemanticRelationType.HAS_TOP_CONCEPT)
-                        .setTransitive(false);
+                new ConceptSemanticRelationModel(
+                        "http://example.com/",
+                        "http://example.com/concept#2",
+                        SemanticRelationType.HAS_TOP_CONCEPT,
+                        false);
 
         return new RdfModel(
                 Arrays.asList(one, two),
@@ -116,72 +146,109 @@ class SkosTranslatorTest {
                 Arrays.asList(schemeHasTopConceptTwo, schemeHasTopConceptOne));
     }
 
+    private static JsonNode jsonForString(String jsonString) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.readTree(jsonString);
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
+    }
+
     private static RdfModel createConceptsModel() {
         ConceptModel one =
-                new ConceptModel()
-                        .setId("http://example.com/concept#1")
-                        .setPreferredLabel(
-                                "[{\"language\":\"fr\",\"value\":\"un\"},{\"language\":\"en\",\"value\":\"one\"}]")
-                        .setAltLabel(
-                                "[{\"language\":\"fr\",\"value\":\"premier\"},{\"language\":\"en\",\"value\":\"first\"}]");
+                new ConceptModel(
+                        "http://example.com/concept#1",
+                        jsonForString(
+                                "[{\"language\":\"fr\",\"value\":\"un\"},{\"language\":\"en\",\"value\":\"one\"}]"),
+                        jsonForString(
+                                "[{\"language\":\"fr\",\"value\":\"premier\"},{\"language\":\"en\",\"value\":\"first\"}]"),
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null);
         ConceptModel two =
-                new ConceptModel()
-                        .setId("http://example.com/concept#2")
-                        .setPreferredLabel(
-                                "[{\"language\":\"fr\",\"value\":\"deux\"},{\"language\":\"en\",\"value\":\"two\"}]")
-                        .setAltLabel(
-                                "[{\"language\":\"fr\",\"value\":\"deuxieme\"},{\"language\":\"en\",\"value\":\"second\"}]");
+                new ConceptModel(
+                        "http://example.com/concept#2",
+                        jsonForString(
+                                "[{\"language\":\"fr\",\"value\":\"deux\"},{\"language\":\"en\",\"value\":\"two\"}]"),
+                        jsonForString(
+                                "[{\"language\":\"fr\",\"value\":\"deuxieme\"},{\"language\":\"en\",\"value\":\"second\"}]"),
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null);
         ConceptModel three =
-                new ConceptModel()
-                        .setId("http://example.com/concept#3")
-                        .setPreferredLabel(
-                                "[{\"language\":\"fr\",\"value\":\"trois\"},{\"language\":\"en\",\"value\":\"three\"}]")
-                        .setAltLabel(
-                                "[{\"language\":\"fr\",\"value\":\"troisieme\"},{\"language\":\"en\",\"value\":\"third\"}]");
+                new ConceptModel(
+                        "http://example.com/concept#3",
+                        jsonForString(
+                                "[{\"language\":\"fr\",\"value\":\"trois\"},{\"language\":\"en\",\"value\":\"three\"}]"),
+                        jsonForString(
+                                "[{\"language\":\"fr\",\"value\":\"troisieme\"},{\"language\":\"en\",\"value\":\"third\"}]"),
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null);
         ConceptModel four =
-                new ConceptModel()
-                        .setId("http://example.com/concept#4")
-                        .setPreferredLabel(
-                                "[{\"language\":\"fr\",\"value\":\"quatre\"},{\"language\":\"en\",\"value\":\"four\"}]")
-                        .setAltLabel(
-                                "[{\"language\":\"fr\",\"value\":\"quatrieme\"},{\"language\":\"en\",\"value\":\"fourth\"}]");
+                new ConceptModel(
+                        "http://example.com/concept#4",
+                        jsonForString(
+                                "[{\"language\":\"fr\",\"value\":\"quatre\"},{\"language\":\"en\",\"value\":\"four\"}]"),
+                        jsonForString(
+                                "[{\"language\":\"fr\",\"value\":\"quatrieme\"},{\"language\":\"en\",\"value\":\"fourth\"}]"),
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null);
 
         ConceptSemanticRelationModel oneIsNarrowerThanTwo =
-                new ConceptSemanticRelationModel()
-                        .setSourceId("http://example.com/concept#1")
-                        .setTargetId("http://example.com/concept#2")
-                        .setRelation(SemanticRelationType.NARROWER)
-                        .setTransitive(false);
+                new ConceptSemanticRelationModel(
+                        "http://example.com/concept#1",
+                        "http://example.com/concept#2",
+                        SemanticRelationType.NARROWER,
+                        false);
         ConceptSemanticRelationModel twoIsRelatedToThree =
-                new ConceptSemanticRelationModel()
-                        .setSourceId("http://example.com/concept#2")
-                        .setTargetId("http://example.com/concept#3")
-                        .setRelation(SemanticRelationType.RELATED)
-                        .setTransitive(false);
+                new ConceptSemanticRelationModel(
+                        "http://example.com/concept#2",
+                        "http://example.com/concept#3",
+                        SemanticRelationType.RELATED,
+                        false);
         ConceptSemanticRelationModel twoIsRelatedToFour =
-                new ConceptSemanticRelationModel()
-                        .setSourceId("http://example.com/concept#2")
-                        .setTargetId("http://example.com/concept#4")
-                        .setRelation(SemanticRelationType.RELATED)
-                        .setTransitive(false);
+                new ConceptSemanticRelationModel(
+                        "http://example.com/concept#2",
+                        "http://example.com/concept#4",
+                        SemanticRelationType.RELATED,
+                        false);
         ConceptSemanticRelationModel threeIsBroaderThanOne =
-                new ConceptSemanticRelationModel()
-                        .setSourceId("http://example.com/concept#3")
-                        .setTargetId("http://example.com/concept#1")
-                        .setRelation(SemanticRelationType.BROADER)
-                        .setTransitive(false);
+                new ConceptSemanticRelationModel(
+                        "http://example.com/concept#3",
+                        "http://example.com/concept#1",
+                        SemanticRelationType.BROADER,
+                        false);
         ConceptSemanticRelationModel threeIsNarrowerThanFour =
-                new ConceptSemanticRelationModel()
-                        .setSourceId("http://example.com/concept#3")
-                        .setTargetId("http://example.com/concept#4")
-                        .setRelation(SemanticRelationType.NARROWER)
-                        .setTransitive(false);
+                new ConceptSemanticRelationModel(
+                        "http://example.com/concept#3",
+                        "http://example.com/concept#4",
+                        SemanticRelationType.NARROWER,
+                        false);
         ConceptSemanticRelationModel fourIsBroaderThanThree =
-                new ConceptSemanticRelationModel()
-                        .setSourceId("http://example.com/concept#4")
-                        .setTargetId("http://example.com/concept#3")
-                        .setRelation(SemanticRelationType.BROADER)
-                        .setTransitive(false);
+                new ConceptSemanticRelationModel(
+                        "http://example.com/concept#4",
+                        "http://example.com/concept#3",
+                        SemanticRelationType.BROADER,
+                        false);
 
         return new RdfModel(
                 Arrays.asList(one, three, two, four),
@@ -196,6 +263,6 @@ class SkosTranslatorTest {
     }
 
     private InputStream load(String rdfFileName) {
-        return FileManager.get().open("skos-translator-test-data/" + rdfFileName);
+        return ClassLoader.getSystemResourceAsStream("skos-translator-test-data/" + rdfFileName);
     }
 }

@@ -2,6 +2,7 @@
   "@graph" : [ {
     "@id" : "http://example.com/",
     "@type" : "skos:ConceptScheme",
+    "dcterms:title": "Example Scheme",
     "hasTopConcept" : [ "http://example.com/concept#1", "http://example.com/concept#2" ]
   }, {
     "@id" : "http://example.com/concept#1",
@@ -35,35 +36,14 @@
     "created" : {
       "@id" : "http://purl.org/dc/terms/created"
     },
-    "broader" : {
-      "@id" : "http://www.w3.org/2004/02/skos/core#broader",
-      "@type" : "@id"
-    },
-    "inScheme" : {
-      "@id" : "http://www.w3.org/2004/02/skos/core#inScheme",
-      "@type" : "@id"
-    },
-    "altLabel" : {
-      "@id" : "http://www.w3.org/2004/02/skos/core#altLabel"
-    },
     "prefLabel" : {
       "@id" : "http://www.w3.org/2004/02/skos/core#prefLabel"
-    },
-    "narrower" : {
-      "@id" : "http://www.w3.org/2004/02/skos/core#narrower",
-      "@type" : "@id"
     },
     "hasTopConcept" : {
       "@id" : "http://www.w3.org/2004/02/skos/core#hasTopConcept",
       "@type" : "@id"
     },
-    "related" : {
-      "@id" : "http://www.w3.org/2004/02/skos/core#related",
-      "@type" : "@id"
-    },
-    "rdf" : "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
     "skos" : "http://www.w3.org/2004/02/skos/core#",
-    "dcterms" : "http://purl.org/dc/terms/",
-    "dc" : "http://purl.org/dc/elements/1.1/"
+    "dcterms": "http://purl.org/dc/terms/1.1/"
   }
 }

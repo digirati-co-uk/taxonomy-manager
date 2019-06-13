@@ -9,7 +9,10 @@ import org.junit.jupiter.api.Test;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -25,16 +28,17 @@ public class RelationshipDaoIntegrationTest {
     }
 
     @Test
-    void createShouldWriteToDb()
-            throws SkosPersistenceException {
+    void createShouldWriteToDb() throws SkosPersistenceException {
         // Given
         ConceptSemanticRelationModel relationship = createBaseModel(SemanticRelationType.RELATED);
 
         // When
-        ConceptSemanticRelationModel created = underTest.create(relationship);
+        underTest.create(relationship);
 
         // Then
-        assertEquals(relationship, created);
+        assertEquals(
+                relationship,
+                underTest.read(relationship.getSourceId(), relationship.getTargetId()).get());
     }
 
     @Test
@@ -50,8 +54,7 @@ public class RelationshipDaoIntegrationTest {
     }
 
     @Test
-    void readShouldRetrieveFromDb()
-            throws SkosPersistenceException {
+    void readShouldRetrieveFromDb() throws SkosPersistenceException {
         // Given
         ConceptSemanticRelationModel relationship = createBaseModel(SemanticRelationType.RELATED);
         ConceptSemanticRelationModel created = underTest.create(relationship);
@@ -65,8 +68,7 @@ public class RelationshipDaoIntegrationTest {
     }
 
     @Test
-    void readShouldProvideEmptyResultIfNoSuchRelationshipExists()
-            throws SkosPersistenceException {
+    void readShouldProvideEmptyResultIfNoSuchRelationshipExists() throws SkosPersistenceException {
         // Given
         ConceptSemanticRelationModel relationship = createBaseModel(SemanticRelationType.BROADER);
 
@@ -79,19 +81,49 @@ public class RelationshipDaoIntegrationTest {
     }
 
     @Test
-    void updateShouldModifyInDb()
+    void getRelationshipsShouldReturnAllRelationshipsInvolvingInputId()
             throws SkosPersistenceException {
+        // Given
+        String id = UUID.randomUUID().toString();
+        ConceptSemanticRelationModel oneRelatedToTwo =
+                new ConceptSemanticRelationModel(
+                        UUID.randomUUID().toString(), id, SemanticRelationType.RELATED, false);
+        ConceptSemanticRelationModel twoBroaderThanThree =
+                new ConceptSemanticRelationModel(
+                        id, UUID.randomUUID().toString(), SemanticRelationType.BROADER, false);
+
+        underTest.create(oneRelatedToTwo);
+        underTest.create(twoBroaderThanThree);
+
+        // When
+        Collection<ConceptSemanticRelationModel> actual = underTest.getRelationships(id);
+
+        // Then
+        Collection<ConceptSemanticRelationModel> expected =
+                List.of(twoBroaderThanThree, oneRelatedToTwo);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void updateShouldModifyInDb() throws SkosPersistenceException {
         // Given
         ConceptSemanticRelationModel relationship = createBaseModel(SemanticRelationType.RELATED);
         ConceptSemanticRelationModel created = underTest.create(relationship);
 
-        created.setRelation(SemanticRelationType.BROADER);
+        ConceptSemanticRelationModel toModify =
+                new ConceptSemanticRelationModel(
+                        created.getSourceId(),
+                        created.getTargetId(),
+                        SemanticRelationType.BROADER,
+                        created.isTransitive());
 
         // When
-        ConceptSemanticRelationModel modified = underTest.update(created);
+        underTest.update(toModify);
 
         // Then
-        assertEquals(created, modified);
+        assertEquals(
+                toModify,
+                underTest.read(relationship.getSourceId(), relationship.getTargetId()).get());
     }
 
     @Test
@@ -104,8 +136,7 @@ public class RelationshipDaoIntegrationTest {
     }
 
     @Test
-    void deleteShouldRemoveFromDb()
-            throws SkosPersistenceException {
+    void deleteShouldRemoveFromDb() throws SkosPersistenceException {
         // Given
         ConceptSemanticRelationModel relationship = createBaseModel(SemanticRelationType.RELATED);
         ConceptSemanticRelationModel created = underTest.create(relationship);
@@ -144,10 +175,10 @@ public class RelationshipDaoIntegrationTest {
     }
 
     private ConceptSemanticRelationModel createBaseModel(SemanticRelationType relationType) {
-        return new ConceptSemanticRelationModel()
-                .setRelation(relationType)
-                .setTransitive(false)
-                .setSourceId("1c3f8ea2-73e2-4ea7-ae00-207ac1513920")
-                .setTargetId("88a15250-2d59-41f2-bbef-5b9239e31b25");
+        return new ConceptSemanticRelationModel(
+                "1c3f8ea2-73e2-4ea7-ae00-207ac1513920",
+                "88a15250-2d59-41f2-bbef-5b9239e31b25",
+                relationType,
+                false);
     }
 }

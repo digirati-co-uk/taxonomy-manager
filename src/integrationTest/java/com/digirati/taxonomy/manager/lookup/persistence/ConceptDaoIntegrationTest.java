@@ -2,10 +2,13 @@ package com.digirati.taxonomy.manager.lookup.persistence;
 
 import com.digirati.taxonomy.manager.lookup.exception.SkosPersistenceException;
 import com.digirati.taxonomy.manager.lookup.persistence.model.ConceptModel;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -13,6 +16,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ConceptDaoIntegrationTest {
 
@@ -26,77 +30,112 @@ class ConceptDaoIntegrationTest {
     }
 
     @Test
-    void createShouldWriteToTheDb() throws SkosPersistenceException {
+    void createShouldWriteToTheDb() throws SkosPersistenceException, IOException {
         // Given
         ConceptModel concept = buildBaseConcept();
 
         // When
-        ConceptModel created =
-                underTest
-                        .create(concept)
-                        .orElseThrow(() -> new AssertionError("Created concept not found."));
+        underTest
+                .create(concept)
+                .orElseThrow(() -> new AssertionError("Created concept not found."));
 
         // Then
-        // TODO how to prove that this actually went via the db?
-        assertEquals(concept.getId(), created.getId());
-        // TODO jsonb field order is getting swapped around
-        // assertEquals(concept.getPreferredLabel(), created.getPreferredLabel());
-        // assertEquals(concept.getAltLabel(), created.getAltLabel());
-        // assertEquals(concept.getHiddenLabel(), created.getHiddenLabel());
-        // assertEquals(concept.getNote(), created.getNote());
-        // assertEquals(concept.getChangeNote(), created.getChangeNote());
-        // assertEquals(concept.getEditorialNote(), created.getEditorialNote());
-        // assertEquals(concept.getExample(), created.getExample());
-        // assertEquals(concept.getHistoryNote(), created.getHistoryNote());
-        // assertEquals(concept.getScopeNote(), created.getScopeNote());
+        assertEquals(concept, underTest.read(concept.getId()).get());
     }
 
     @Test
-    void readShouldRetrieveFromTheDb() throws SkosPersistenceException {
+    void createShouldThrowExceptionIfIdIsNotProvided() throws IOException {
+        // Given
+        ConceptModel concept = buildBaseConcept(null);
+
+        // Then
+        assertThrows(SkosPersistenceException.class, () -> underTest.create(concept));
+    }
+
+    @Test
+    void createShouldThrowExceptionIfIdAlreadyExists()
+            throws IOException, SkosPersistenceException {
         // Given
         ConceptModel concept = buildBaseConcept();
-        ConceptModel created =
-                underTest
-                        .create(concept)
-                        .orElseThrow(() -> new AssertionError("Created concept not found."));
+        underTest
+                .create(concept)
+                .orElseThrow(() -> new AssertionError("Created concept not found."));
+
+        // Then
+        assertThrows(SkosPersistenceException.class, () -> underTest.create(concept));
+    }
+
+    @Test
+    void readShouldRetrieveFromTheDb() throws SkosPersistenceException, IOException {
+        // Given
+        ConceptModel concept = buildBaseConcept();
+        underTest
+                .create(concept)
+                .orElseThrow(() -> new AssertionError("Created concept not found."));
 
         // When
         ConceptModel retrieved =
                 underTest
-                        .read(created.getId())
+                        .read(concept.getId())
                         .orElseThrow(() -> new AssertionError("Concept to retrieve not found."));
 
         // Then
-        assertEquals(created, retrieved);
+        assertEquals(concept, retrieved);
     }
 
     @Test
-    void updateShouldModifyInTheDb() throws SkosPersistenceException {
+    void readShouldReturnEmptyIfIdDoesNotExist() {
+        assertEquals(Optional.empty(), underTest.read(UUID.randomUUID().toString()));
+    }
+
+    @Test
+    void updateShouldModifyInTheDb() throws SkosPersistenceException, IOException {
         // Given
         ConceptModel toCreate = buildBaseConcept();
-        ConceptModel toModify =
+        ConceptModel created =
                 underTest
                         .create(toCreate)
                         .orElseThrow(() -> new AssertionError("Created concept not found."));
 
-        toModify.setPreferredLabel(
-                "[{\"language\":\"en\",\"value\":\"one\"},{\"language\":\"fr\",\"value\":\"un\"}]");
+        ConceptModel toModify =
+                new ConceptModel(
+                        created.getId(),
+                        fromJsonString(
+                                "[{\"language\":\"en\",\"value\":\"one\"},{\"language\":\"fr\",\"value\":\"un\"}]"),
+                        created.getAltLabel(),
+                        created.getHiddenLabel(),
+                        created.getNote(),
+                        created.getChangeNote(),
+                        created.getEditorialNote(),
+                        created.getExample(),
+                        created.getHistoryNote(),
+                        created.getScopeNote());
 
         // When
-        ConceptModel updated =
-                underTest
-                        .update(toModify)
-                        .orElseThrow(() -> new AssertionError("Modified concept not found."));
+        underTest
+                .update(toModify)
+                .orElseThrow(() -> new AssertionError("Modified concept not found."));
 
         // Then
-        // TODO this really doesn't prove anything because update could just return back its arg
-        assertEquals(toModify.getId(), updated.getId());
-        // TODO json fields getting swapped around
-        // assertEquals(toModify, updated);
+        assertEquals(toModify, underTest.read(created.getId()).get());
     }
 
     @Test
-    void deleteShouldRemoveFromTheDb() throws SkosPersistenceException {
+    void updateShouldThrowExceptionIfIdIsNotProvided() throws IOException {
+        // Given
+        ConceptModel toUpdate = buildBaseConcept(null);
+
+        // Then
+        assertThrows(SkosPersistenceException.class, () -> underTest.update(toUpdate));
+    }
+
+    @Test
+    void updateShouldThrowExceptionIfIdDoesNotExistInDb() {
+        assertThrows(SkosPersistenceException.class, () -> underTest.update(buildBaseConcept()));
+    }
+
+    @Test
+    void deleteShouldRemoveFromTheDb() throws SkosPersistenceException, IOException {
         // Given
         ConceptModel toCreate = buildBaseConcept();
         ConceptModel created =
@@ -113,6 +152,13 @@ class ConceptDaoIntegrationTest {
         assertEquals(Optional.empty(), retrieved);
     }
 
+    @Test
+    void deleteShouldThrowExceptionIfIdDoesNotExistInDb() {
+        assertThrows(
+                SkosPersistenceException.class,
+                () -> underTest.delete(UUID.randomUUID().toString()));
+    }
+
     @AfterEach
     void tearDown() {
         try (Connection connection = connectionProvider.getConnection();
@@ -126,22 +172,31 @@ class ConceptDaoIntegrationTest {
         }
     }
 
-    private ConceptModel buildBaseConcept() {
-        return new ConceptModel()
-                .setId(UUID.randomUUID().toString())
-                .setPreferredLabel("[{\"language\":\"en\",\"value\":\"one\"}]")
-                .setAltLabel("[{\"language\":\"en\",\"value\":\"first\"}]")
-                .setHiddenLabel("[{\"language\":\"en\",\"value\":\"1\"}]")
-                .setNote("[{\"language\":\"en\",\"value\":\"the first number\"}]")
-                .setChangeNote(
-                        "[{\"language\":\"en\",\"value\":\"First introduced ~14 billion years ago.\"}]")
-                .setEditorialNote(
-                        "[{\"language\":\"en\",\"value\":\"This is a pretty handy number to have.\"}]")
-                .setExample(
-                        "[{\"language\":\"en\",\"value\":\"The string '1' contains exactly 1 character.\"}]")
-                .setHistoryNote(
-                        "[{\"language\":\"en\",\"value\":\"First introduced ~14 billion years ago. Hasn't changed since.\"}]")
-                .setScopeNote(
-                        "[{\"language\":\"en\",\"value\":\"Used as the basis against which to define all other numbers.\"}]");
+    private ConceptModel buildBaseConcept() throws IOException {
+        return buildBaseConcept(UUID.randomUUID().toString());
+    }
+
+    private ConceptModel buildBaseConcept(String id) throws IOException {
+        return new ConceptModel(
+                id,
+                fromJsonString("[{\"language\":\"en\",\"value\":\"one\"}]"),
+                fromJsonString("[{\"language\":\"en\",\"value\":\"first\"}]"),
+                fromJsonString("[{\"language\":\"en\",\"value\":\"1\"}]"),
+                fromJsonString("[{\"language\":\"en\",\"value\":\"the first number\"}]"),
+                fromJsonString(
+                        "[{\"language\":\"en\",\"value\":\"First introduced ~14 billion years ago.\"}]"),
+                fromJsonString(
+                        "[{\"language\":\"en\",\"value\":\"This is a pretty handy number to have.\"}]"),
+                fromJsonString(
+                        "[{\"language\":\"en\",\"value\":\"The string '1' contains exactly 1 character.\"}]"),
+                fromJsonString(
+                        "[{\"language\":\"en\",\"value\":\"First introduced ~14 billion years ago. Hasn't changed since.\"}]"),
+                fromJsonString(
+                        "[{\"language\":\"en\",\"value\":\"Used as the basis against which to define all other numbers.\"}]"));
+    }
+
+    private JsonNode fromJsonString(String jsonString) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.readTree(jsonString);
     }
 }

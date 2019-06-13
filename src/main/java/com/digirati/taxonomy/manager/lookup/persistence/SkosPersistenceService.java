@@ -58,23 +58,39 @@ public class SkosPersistenceService {
         for (ConceptModel concept : rdfModel.getConcepts()) {
             UUID conceptUuid = UUID.randomUUID();
             idToUuid.put(concept.getId(), conceptUuid.toString());
-            concept.setId(conceptUuid.toString());
-            conceptDao.create(concept);
+            ConceptModel cloneWithUuid =
+                    new ConceptModel(
+                            conceptUuid.toString(),
+                            concept.getPreferredLabel(),
+                            concept.getAltLabel(),
+                            concept.getHiddenLabel(),
+                            concept.getNote(),
+                            concept.getChangeNote(),
+                            concept.getEditorialNote(),
+                            concept.getExample(),
+                            concept.getHistoryNote(),
+                            concept.getScopeNote());
+            conceptDao.create(cloneWithUuid);
         }
 
         for (ConceptSchemeModel conceptScheme : rdfModel.getConceptSchemes()) {
             UUID conceptSchemeUuid = UUID.randomUUID();
-            idToUuid.put(conceptScheme.getId(), conceptScheme.toString());
-            conceptScheme.setId(conceptSchemeUuid.toString());
-            conceptSchemeDao.create(conceptScheme);
+            idToUuid.put(conceptScheme.getId(), conceptSchemeUuid.toString());
+            ConceptSchemeModel cloneWithUuid =
+                    new ConceptSchemeModel(conceptSchemeUuid.toString(), conceptScheme.getTitle());
+            conceptSchemeDao.create(cloneWithUuid);
         }
 
         for (ConceptSemanticRelationModel relationship : rdfModel.getRelationships()) {
             String sourceUuid = idToUuid.get(relationship.getSourceId());
             String targetUuid = idToUuid.get(relationship.getTargetId());
-            relationship.setSourceId(sourceUuid);
-            relationship.setTargetId(targetUuid);
-            relationshipDao.create(relationship);
+            ConceptSemanticRelationModel withUuidLinks =
+                    new ConceptSemanticRelationModel(
+                            sourceUuid,
+                            targetUuid,
+                            relationship.getRelation(),
+                            relationship.isTransitive());
+            relationshipDao.create(withUuidLinks);
         }
     }
 
@@ -147,6 +163,10 @@ public class SkosPersistenceService {
 
         for (ConceptModel conceptModel : rdfModel.getConcepts()) {
             conceptDao.update(conceptModel);
+        }
+
+        for (ConceptSchemeModel conceptScheme : rdfModel.getConceptSchemes()) {
+            conceptSchemeDao.update(conceptScheme);
         }
 
         for (ConceptSemanticRelationModel relationship : rdfModel.getRelationships()) {

@@ -1,4 +1,3 @@
--- TODO work out what to do about setting up DBs
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TYPE semantic_relation_type AS ENUM (
@@ -11,7 +10,8 @@ CREATE TYPE semantic_relation_type AS ENUM (
 
 CREATE TABLE concept_scheme
 (
-  id uuid primary key
+  id uuid primary key,
+  title text
 );
 
 CREATE TABLE concept

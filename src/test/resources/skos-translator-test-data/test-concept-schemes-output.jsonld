@@ -2,6 +2,7 @@
   "@graph" : [ {
     "@id" : "http://example.com/",
     "@type" : "http://www.w3.org/2004/02/skos/core#ConceptScheme",
+    "title" : "Example Scheme",
     "hasTopConcept" : [ "http://example.com/concept#1", "http://example.com/concept#2" ]
   }, {
     "@id" : "http://example.com/concept#1",
@@ -31,6 +32,9 @@
     "hasTopConcept" : {
       "@id" : "http://www.w3.org/2004/02/skos/core#hasTopConcept",
       "@type" : "@id"
+    },
+    "title" : {
+      "@id" : "http://purl.org/dc/terms/1.1/title"
     }
   }
 }

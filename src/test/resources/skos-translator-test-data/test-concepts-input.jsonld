@@ -92,10 +92,6 @@
       "@id" : "http://www.w3.org/2004/02/skos/core#broader",
       "@type" : "@id"
     },
-    "inScheme" : {
-      "@id" : "http://www.w3.org/2004/02/skos/core#inScheme",
-      "@type" : "@id"
-    },
     "altLabel" : {
       "@id" : "http://www.w3.org/2004/02/skos/core#altLabel"
     },
@@ -106,17 +102,10 @@
       "@id" : "http://www.w3.org/2004/02/skos/core#narrower",
       "@type" : "@id"
     },
-    "hasTopConcept" : {
-      "@id" : "http://www.w3.org/2004/02/skos/core#hasTopConcept",
-      "@type" : "@id"
-    },
     "related" : {
       "@id" : "http://www.w3.org/2004/02/skos/core#related",
       "@type" : "@id"
     },
-    "rdf" : "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-    "skos" : "http://www.w3.org/2004/02/skos/core#",
-    "dcterms" : "http://purl.org/dc/terms/",
-    "dc" : "http://purl.org/dc/elements/1.1/"
+    "skos" : "http://www.w3.org/2004/02/skos/core#"
   }
 }

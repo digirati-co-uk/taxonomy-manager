@@ -1,109 +1,83 @@
 package com.digirati.taxonomy.manager.lookup.persistence.model;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import java.util.Objects;
 
 public class ConceptModel {
 
-    private String id;
+    private final String id;
+    private final JsonNode preferredLabel;
+    private final JsonNode altLabel;
+    private final JsonNode hiddenLabel;
+    private final JsonNode note;
+    private final JsonNode changeNote;
+    private final JsonNode editorialNote;
+    private final JsonNode example;
+    private final JsonNode historyNote;
+    private final JsonNode scopeNote;
 
-    private String preferredLabel;
-    private String altLabel;
-    private String hiddenLabel;
-    private String note;
-    private String changeNote;
-    private String editorialNote;
-    private String example;
-    private String historyNote;
-    private String scopeNote;
+    public ConceptModel(
+            String id,
+            JsonNode preferredLabel,
+            JsonNode altLabel,
+            JsonNode hiddenLabel,
+            JsonNode note,
+            JsonNode changeNote,
+            JsonNode editorialNote,
+            JsonNode example,
+            JsonNode historyNote,
+            JsonNode scopeNote) {
+        this.id = id;
+        this.preferredLabel = preferredLabel;
+        this.altLabel = altLabel;
+        this.hiddenLabel = hiddenLabel;
+        this.note = note;
+        this.changeNote = changeNote;
+        this.editorialNote = editorialNote;
+        this.example = example;
+        this.historyNote = historyNote;
+        this.scopeNote = scopeNote;
+    }
 
     public String getId() {
         return id;
     }
 
-    public ConceptModel setId(String id) {
-        this.id = id;
-        return this;
-    }
-
-    public String getPreferredLabel() {
+    public JsonNode getPreferredLabel() {
         return preferredLabel;
     }
 
-    public ConceptModel setPreferredLabel(String preferredLabel) {
-        this.preferredLabel = preferredLabel;
-        return this;
-    }
-
-    public String getAltLabel() {
+    public JsonNode getAltLabel() {
         return altLabel;
     }
 
-    public ConceptModel setAltLabel(String altLabel) {
-        this.altLabel = altLabel;
-        return this;
-    }
-
-    public String getHiddenLabel() {
+    public JsonNode getHiddenLabel() {
         return hiddenLabel;
     }
 
-    public ConceptModel setHiddenLabel(String hiddenLabel) {
-        this.hiddenLabel = hiddenLabel;
-        return this;
-    }
-
-    public String getNote() {
+    public JsonNode getNote() {
         return note;
     }
 
-    public ConceptModel setNote(String note) {
-        this.note = note;
-        return this;
-    }
-
-    public String getChangeNote() {
+    public JsonNode getChangeNote() {
         return changeNote;
     }
 
-    public ConceptModel setChangeNote(String changeNote) {
-        this.changeNote = changeNote;
-        return this;
-    }
-
-    public String getEditorialNote() {
+    public JsonNode getEditorialNote() {
         return editorialNote;
     }
 
-    public ConceptModel setEditorialNote(String editorialNote) {
-        this.editorialNote = editorialNote;
-        return this;
-    }
-
-    public String getExample() {
+    public JsonNode getExample() {
         return example;
     }
 
-    public ConceptModel setExample(String example) {
-        this.example = example;
-        return this;
-    }
-
-    public String getHistoryNote() {
+    public JsonNode getHistoryNote() {
         return historyNote;
     }
 
-    public ConceptModel setHistoryNote(String historyNote) {
-        this.historyNote = historyNote;
-        return this;
-    }
-
-    public String getScopeNote() {
+    public JsonNode getScopeNote() {
         return scopeNote;
-    }
-
-    public ConceptModel setScopeNote(String scopeNote) {
-        this.scopeNote = scopeNote;
-        return this;
     }
 
     @Override

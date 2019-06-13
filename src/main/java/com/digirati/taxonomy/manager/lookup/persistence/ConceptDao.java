@@ -2,9 +2,11 @@ package com.digirati.taxonomy.manager.lookup.persistence;
 
 import com.digirati.taxonomy.manager.lookup.exception.SkosPersistenceException;
 import com.digirati.taxonomy.manager.lookup.persistence.model.ConceptModel;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -38,7 +40,7 @@ public class ConceptDao {
     }
 
     public Optional<ConceptModel> create(ConceptModel toCreate) throws SkosPersistenceException {
-        logger.info(() -> "Preparing to create concept with ID=" + toCreate.getId());
+        logger.info("Preparing to create concept with ID=" + toCreate.getId());
 
         if (toCreate.getId() != null && read(toCreate.getId()).isPresent()) {
             throw SkosPersistenceException.conceptAlreadyExists(toCreate.getId());
@@ -48,42 +50,43 @@ public class ConceptDao {
                 PreparedStatement createStatement = connection.prepareStatement(CREATE_TEMPLATE)) {
 
             createStatement.setString(1, toCreate.getId());
-            createStatement.setString(2, toCreate.getPreferredLabel());
-            createStatement.setString(3, toCreate.getAltLabel());
-            createStatement.setString(4, toCreate.getHiddenLabel());
-            createStatement.setString(5, toCreate.getNote());
-            createStatement.setString(6, toCreate.getChangeNote());
-            createStatement.setString(7, toCreate.getEditorialNote());
-            createStatement.setString(8, toCreate.getExample());
-            createStatement.setString(9, toCreate.getHistoryNote());
-            createStatement.setString(10, toCreate.getScopeNote());
+            createStatement.setString(2, toCreate.getPreferredLabel().toString());
+            createStatement.setString(3, toCreate.getAltLabel().toString());
+            createStatement.setString(4, toCreate.getHiddenLabel().toString());
+            createStatement.setString(5, toCreate.getNote().toString());
+            createStatement.setString(6, toCreate.getChangeNote().toString());
+            createStatement.setString(7, toCreate.getEditorialNote().toString());
+            createStatement.setString(8, toCreate.getExample().toString());
+            createStatement.setString(9, toCreate.getHistoryNote().toString());
+            createStatement.setString(10, toCreate.getScopeNote().toString());
             createStatement.execute();
 
-            logger.info(() -> "Successfully created concept with IRI=" + toCreate.getId());
+            logger.info("Successfully created concept with ID=" + toCreate.getId());
 
             return read(toCreate.getId());
 
         } catch (SQLException e) {
-            logger.error(() -> e);
+            logger.error(e);
             throw SkosPersistenceException.unableToCreateConcept(toCreate.getId(), e);
         }
     }
 
-    private List<ConceptModel> fromResultSet(ResultSet resultSet) throws SQLException {
+    private List<ConceptModel> fromResultSet(ResultSet resultSet) throws SQLException, IOException {
         List<ConceptModel> concepts = new ArrayList<>();
+        ObjectMapper objectMapper = new ObjectMapper();
         while (resultSet.next()) {
             ConceptModel concept =
-                    new ConceptModel()
-                            .setId(resultSet.getString("id"))
-                            .setPreferredLabel(resultSet.getString("preferred_label"))
-                            .setAltLabel(resultSet.getString("alt_label"))
-                            .setHiddenLabel(resultSet.getString("hidden_label"))
-                            .setNote(resultSet.getString("note"))
-                            .setChangeNote(resultSet.getString("change_note"))
-                            .setEditorialNote(resultSet.getString("editorial_note"))
-                            .setExample(resultSet.getString("example"))
-                            .setHistoryNote(resultSet.getString("history_note"))
-                            .setScopeNote(resultSet.getString("scope_note"));
+                    new ConceptModel(
+                            resultSet.getString("id"),
+                            objectMapper.readTree(resultSet.getString("preferred_label")),
+                            objectMapper.readTree(resultSet.getString("alt_label")),
+                            objectMapper.readTree(resultSet.getString("hidden_label")),
+                            objectMapper.readTree(resultSet.getString("note")),
+                            objectMapper.readTree(resultSet.getString("change_note")),
+                            objectMapper.readTree(resultSet.getString("editorial_note")),
+                            objectMapper.readTree(resultSet.getString("example")),
+                            objectMapper.readTree(resultSet.getString("history_note")),
+                            objectMapper.readTree(resultSet.getString("scope_note")));
             concepts.add(concept);
         }
         return concepts;
@@ -102,53 +105,51 @@ public class ConceptDao {
                 return Optional.of(created.get(created.size() - 1));
             }
 
-        } catch (SQLException e) {
-            logger.error(() -> e);
+        } catch (SQLException | IOException e) {
+            logger.error(e);
         }
 
         return Optional.empty();
     }
 
     public Optional<ConceptModel> update(ConceptModel toUpdate) throws SkosPersistenceException {
-        logger.info(() -> "Preparing to update concept with IRI=" + toUpdate.getId());
+        logger.info("Preparing to update concept with ID=" + toUpdate.getId());
 
-        if (toUpdate.getId() == null) {
-            // TODO this could be better
+        if (toUpdate.getId() == null || !read(toUpdate.getId()).isPresent()) {
             throw SkosPersistenceException.conceptNotFound(toUpdate.getId());
         }
 
         try (Connection connection = connectionProvider.getConnection();
                 PreparedStatement updateStatement = connection.prepareStatement(UPDATE_TEMPLATE)) {
 
-            updateStatement.setString(1, toUpdate.getPreferredLabel());
-            updateStatement.setString(2, toUpdate.getAltLabel());
-            updateStatement.setString(3, toUpdate.getHiddenLabel());
-            updateStatement.setString(4, toUpdate.getNote());
-            updateStatement.setString(5, toUpdate.getChangeNote());
-            updateStatement.setString(6, toUpdate.getEditorialNote());
-            updateStatement.setString(7, toUpdate.getExample());
-            updateStatement.setString(8, toUpdate.getHistoryNote());
-            updateStatement.setString(9, toUpdate.getScopeNote());
+            updateStatement.setString(1, toUpdate.getPreferredLabel().toString());
+            updateStatement.setString(2, toUpdate.getAltLabel().toString());
+            updateStatement.setString(3, toUpdate.getHiddenLabel().toString());
+            updateStatement.setString(4, toUpdate.getNote().toString());
+            updateStatement.setString(5, toUpdate.getChangeNote().toString());
+            updateStatement.setString(6, toUpdate.getEditorialNote().toString());
+            updateStatement.setString(7, toUpdate.getExample().toString());
+            updateStatement.setString(8, toUpdate.getHistoryNote().toString());
+            updateStatement.setString(9, toUpdate.getScopeNote().toString());
             updateStatement.setString(10, toUpdate.getId());
             int rowsAffected = updateStatement.executeUpdate();
 
             logger.info(
-                    () ->
-                            "Successfully updated concept with ID="
-                                    + toUpdate.getId()
-                                    + " - number of rows affected: "
-                                    + rowsAffected);
+                    "Successfully updated concept with ID="
+                            + toUpdate.getId()
+                            + " - number of rows affected: "
+                            + rowsAffected);
 
             return read(toUpdate.getId());
 
         } catch (SQLException e) {
-            logger.error(() -> e);
+            logger.error(e);
             throw SkosPersistenceException.unableToUpdateConcept(toUpdate.getId(), e);
         }
     }
 
     public boolean delete(String id) throws SkosPersistenceException {
-        logger.info(() -> "Preparing to delete concept with ID=" + id);
+        logger.info("Preparing to delete concept with ID=" + id);
 
         if (!read(id).isPresent()) {
             throw SkosPersistenceException.conceptNotFound(id);
@@ -161,16 +162,15 @@ public class ConceptDao {
             deleteStatement.close();
 
             logger.info(
-                    () ->
-                            "Successfully deleted concept with ID="
-                                    + id
-                                    + " - number of rows affected: "
-                                    + rowsAffected);
+                    "Successfully deleted concept with ID="
+                            + id
+                            + " - number of rows affected: "
+                            + rowsAffected);
 
             return rowsAffected > 0;
 
         } catch (SQLException e) {
-            logger.error(() -> e);
+            logger.error(e);
             return false;
         }
     }

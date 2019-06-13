@@ -11,19 +11,45 @@ public enum SemanticRelationType {
     HAS_TOP_CONCEPT(SKOS.hasTopConcept, SKOS.hasTopConcept),
     TOP_CONCEPT_OF(SKOS.topConceptOf, SKOS.topConceptOf);
 
-    private final Property nonTransitive;
+    private final Property nonTransitiveRdfProperty;
 
-    private final Property transitive;
+    private final Property transitiveRdfProperty;
 
-    SemanticRelationType(Property nonTransitive, Property transitive) {
-        this.nonTransitive = nonTransitive;
-        this.transitive = transitive;
+    SemanticRelationType(Property nonTransitiveRdfProperty, Property transitiveRdfProperty) {
+        this.nonTransitiveRdfProperty = nonTransitiveRdfProperty;
+        this.transitiveRdfProperty = transitiveRdfProperty;
     }
 
     public Property getProperty(boolean isTransitive) {
-        if (isTransitive) {
-            return transitive;
+        return isTransitive ? transitiveRdfProperty : nonTransitiveRdfProperty;
+    }
+
+    public static boolean isMappableRdfProperty(Property rdfProperty) {
+        for (SemanticRelationType relationType : values()) {
+            if (relationType.transitiveRdfProperty.equals(rdfProperty)
+                    || relationType.nonTransitiveRdfProperty.equals(rdfProperty)) {
+                return true;
+            }
         }
-        return nonTransitive;
+        return false;
+    }
+
+    public static RelationshipGenerator getRelationshipGenerator(Property rdfProperty) {
+        for (SemanticRelationType relationType : values()) {
+            if (relationType.nonTransitiveRdfProperty.equals(rdfProperty)) {
+                return (sourceId, targetId) ->
+                        new ConceptSemanticRelationModel(sourceId, targetId, relationType, false);
+            } else if (relationType.transitiveRdfProperty.equals(rdfProperty)) {
+                return (sourceId, targetId) ->
+                        new ConceptSemanticRelationModel(sourceId, targetId, relationType, true);
+            }
+        }
+        throw new IllegalArgumentException(
+                "Unable to create relationship generator for: " + rdfProperty);
+    }
+
+    @FunctionalInterface
+    public interface RelationshipGenerator {
+        ConceptSemanticRelationModel generate(String sourceId, String targetId);
     }
 }

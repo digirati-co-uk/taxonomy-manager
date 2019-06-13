@@ -11,9 +11,7 @@ import java.sql.SQLException;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ConceptSchemeDaoIntegrationTest {
 
@@ -30,24 +28,42 @@ public class ConceptSchemeDaoIntegrationTest {
     void createShouldWriteToTheDb() throws SkosPersistenceException {
         // Given
         ConceptSchemeModel conceptScheme =
-                new ConceptSchemeModel().setId(UUID.randomUUID().toString());
+                new ConceptSchemeModel(UUID.randomUUID().toString(), "Example Scheme");
 
         // When
-        ConceptSchemeModel created =
-                underTest
-                        .create(conceptScheme)
-                        .orElseThrow(() -> new AssertionError("Created concept scheme not found."));
+        underTest
+                .create(conceptScheme)
+                .orElseThrow(() -> new AssertionError("Created concept scheme not found."));
 
         // Then
-        // TODO how to prove that this actually went via the db?
-        assertEquals(conceptScheme.getId(), created.getId());
+        assertEquals(conceptScheme, underTest.read(conceptScheme.getId()).get());
+    }
+
+    @Test
+    void createShouldThrowExceptionIfNoIdIsProvided() {
+        assertThrows(
+                SkosPersistenceException.class,
+                () -> underTest.create(new ConceptSchemeModel(null, "Example")));
+    }
+
+    @Test
+    void createShouldThrowExceptionIfIdAlreadyExists() throws SkosPersistenceException {
+        // Given
+        ConceptSchemeModel conceptScheme =
+                new ConceptSchemeModel(UUID.randomUUID().toString(), "Example Scheme");
+        underTest
+                .create(conceptScheme)
+                .orElseThrow(() -> new AssertionError("Created concept scheme not found."));
+
+        // Then
+        assertThrows(SkosPersistenceException.class, () -> underTest.create(conceptScheme));
     }
 
     @Test
     void readShouldRetrieveFromTheDb() throws SkosPersistenceException {
         // Given
         ConceptSchemeModel conceptScheme =
-                new ConceptSchemeModel().setId(UUID.randomUUID().toString());
+                new ConceptSchemeModel(UUID.randomUUID().toString(), "Example Scheme");
         ConceptSchemeModel created =
                 underTest
                         .create(conceptScheme)
@@ -65,10 +81,54 @@ public class ConceptSchemeDaoIntegrationTest {
     }
 
     @Test
+    void readShouldReturnEmptyIfIdCannotBeFound() {
+        assertEquals(Optional.empty(), underTest.read(UUID.randomUUID().toString()));
+    }
+
+    @Test
+    void updateShouldModifyInTheDb() throws SkosPersistenceException {
+        // Given
+        String id = UUID.randomUUID().toString();
+        ConceptSchemeModel toCreate = new ConceptSchemeModel(id, "Initial Title");
+        underTest.create(toCreate);
+
+        ConceptSchemeModel toUpdate = new ConceptSchemeModel(id, "Updated Title");
+
+        // When
+        underTest.update(toUpdate);
+
+        // Then
+        assertEquals(toUpdate, underTest.read(id).get());
+    }
+
+    @Test
+    void updateShouldThrowExceptionIfIdIsNotPresent() throws SkosPersistenceException {
+        // Given
+        String id = UUID.randomUUID().toString();
+        ConceptSchemeModel toCreate = new ConceptSchemeModel(id, "Initial Title");
+        underTest.create(toCreate);
+
+        ConceptSchemeModel toUpdate = new ConceptSchemeModel(null, "Updated Title");
+
+        // Then
+        assertThrows(SkosPersistenceException.class, () -> underTest.update(toUpdate));
+    }
+
+    @Test
+    void updateShouldThrowExceptionIfConceptIsNotStored() {
+        // Given
+        ConceptSchemeModel toUpdate =
+                new ConceptSchemeModel(UUID.randomUUID().toString(), "Updated Title");
+
+        // Then
+        assertThrows(SkosPersistenceException.class, () -> underTest.update(toUpdate));
+    }
+
+    @Test
     void deleteShouldRemoveFromTheDb() throws SkosPersistenceException {
         // Given
         ConceptSchemeModel conceptScheme =
-                new ConceptSchemeModel().setId(UUID.randomUUID().toString());
+                new ConceptSchemeModel(UUID.randomUUID().toString(), "Example Scheme");
         ConceptSchemeModel created =
                 underTest
                         .create(conceptScheme)
@@ -81,6 +141,13 @@ public class ConceptSchemeDaoIntegrationTest {
         assertTrue(deleted);
         Optional<ConceptSchemeModel> retrieved = underTest.read(created.getId());
         assertEquals(Optional.empty(), retrieved);
+    }
+
+    @Test
+    void deleteShouldThrowExceptionIfIdDoesNotExistInDb() {
+        assertThrows(
+                SkosPersistenceException.class,
+                () -> underTest.delete(UUID.randomUUID().toString()));
     }
 
     @AfterEach

@@ -30,7 +30,7 @@ class ConnectionProvider {
             Properties properties = loadDbProperties("db-credentials.properties");
             return DriverManager.getConnection(connectionString, properties);
         } catch (SQLException e) {
-            logger.error(() -> "Unable to connect to database", e);
+            logger.error("Unable to connect to database", e);
             throw e;
         }
     }
@@ -42,7 +42,7 @@ class ConnectionProvider {
             properties.load(dbCredentials);
             return properties;
         } catch (IOException e) {
-            logger.error(() -> "Unable to load database credentials", e);
+            logger.error("Unable to load database credentials", e);
             throw new RuntimeException(e);
         }
     }
