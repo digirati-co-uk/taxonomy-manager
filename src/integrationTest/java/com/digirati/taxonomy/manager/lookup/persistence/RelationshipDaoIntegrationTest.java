@@ -28,12 +28,12 @@ public class RelationshipDaoIntegrationTest {
     }
 
     @Test
-    void createShouldWriteToDb() throws SkosPersistenceException {
+    void createShouldWriteToDb() throws Exception {
         // Given
         ConceptSemanticRelationModel relationship = createBaseModel(SemanticRelationType.RELATED);
 
         // When
-        underTest.create(relationship);
+        underTest.create(relationship, connectionProvider.getConnection());
 
         // Then
         assertEquals(
@@ -43,28 +43,31 @@ public class RelationshipDaoIntegrationTest {
 
     @Test
     void createShouldThrowExceptionWhenARelationshipAlreadyExistsBetweenSourceAndTarget()
-            throws SkosPersistenceException {
+            throws Exception {
         // Given
-        underTest.create(createBaseModel(SemanticRelationType.RELATED));
+        underTest.create(
+                createBaseModel(SemanticRelationType.RELATED), connectionProvider.getConnection());
 
         ConceptSemanticRelationModel duplicate = createBaseModel(SemanticRelationType.BROADER);
 
         // Then
-        assertThrows(SkosPersistenceException.class, () -> underTest.create(duplicate));
+        assertThrows(
+                SkosPersistenceException.class,
+                () -> underTest.create(duplicate, connectionProvider.getConnection()));
     }
 
     @Test
-    void readShouldRetrieveFromDb() throws SkosPersistenceException {
+    void readShouldRetrieveFromDb() throws Exception {
         // Given
         ConceptSemanticRelationModel relationship = createBaseModel(SemanticRelationType.RELATED);
-        ConceptSemanticRelationModel created = underTest.create(relationship);
+        underTest.create(relationship, connectionProvider.getConnection());
 
         // When
         Optional<ConceptSemanticRelationModel> retrieved =
                 underTest.read(relationship.getSourceId(), relationship.getTargetId());
 
         // Then
-        assertEquals(created, retrieved.get());
+        assertEquals(relationship, retrieved.get());
     }
 
     @Test
@@ -81,8 +84,7 @@ public class RelationshipDaoIntegrationTest {
     }
 
     @Test
-    void getRelationshipsShouldReturnAllRelationshipsInvolvingInputId()
-            throws SkosPersistenceException {
+    void getRelationshipsShouldReturnAllRelationshipsInvolvingInputId() throws Exception {
         // Given
         String id = UUID.randomUUID().toString();
         ConceptSemanticRelationModel oneRelatedToTwo =
@@ -92,8 +94,8 @@ public class RelationshipDaoIntegrationTest {
                 new ConceptSemanticRelationModel(
                         id, UUID.randomUUID().toString(), SemanticRelationType.BROADER, false);
 
-        underTest.create(oneRelatedToTwo);
-        underTest.create(twoBroaderThanThree);
+        underTest.create(oneRelatedToTwo, connectionProvider.getConnection());
+        underTest.create(twoBroaderThanThree, connectionProvider.getConnection());
 
         // When
         Collection<ConceptSemanticRelationModel> actual = underTest.getRelationships(id);
@@ -105,20 +107,20 @@ public class RelationshipDaoIntegrationTest {
     }
 
     @Test
-    void updateShouldModifyInDb() throws SkosPersistenceException {
+    void updateShouldModifyInDb() throws Exception {
         // Given
         ConceptSemanticRelationModel relationship = createBaseModel(SemanticRelationType.RELATED);
-        ConceptSemanticRelationModel created = underTest.create(relationship);
+        underTest.create(relationship, connectionProvider.getConnection());
 
         ConceptSemanticRelationModel toModify =
                 new ConceptSemanticRelationModel(
-                        created.getSourceId(),
-                        created.getTargetId(),
+                        relationship.getSourceId(),
+                        relationship.getTargetId(),
                         SemanticRelationType.BROADER,
-                        created.isTransitive());
+                        relationship.isTransitive());
 
         // When
-        underTest.update(toModify);
+        underTest.update(toModify, connectionProvider.getConnection());
 
         // Then
         assertEquals(
@@ -132,22 +134,27 @@ public class RelationshipDaoIntegrationTest {
         ConceptSemanticRelationModel relationship = createBaseModel(SemanticRelationType.RELATED);
 
         // Then
-        assertThrows(SkosPersistenceException.class, () -> underTest.update(relationship));
+        assertThrows(
+                SkosPersistenceException.class,
+                () -> underTest.update(relationship, connectionProvider.getConnection()));
     }
 
     @Test
-    void deleteShouldRemoveFromDb() throws SkosPersistenceException {
+    void deleteShouldRemoveFromDb() throws Exception {
         // Given
         ConceptSemanticRelationModel relationship = createBaseModel(SemanticRelationType.RELATED);
-        ConceptSemanticRelationModel created = underTest.create(relationship);
+        underTest.create(relationship, connectionProvider.getConnection());
 
         // When
-        boolean deleted = underTest.delete(created.getSourceId(), created.getTargetId());
+        underTest.delete(
+                relationship.getSourceId(),
+                relationship.getTargetId(),
+                connectionProvider.getConnection());
 
         // Then
-        assertTrue(deleted);
         assertEquals(
-                Optional.empty(), underTest.read(created.getSourceId(), created.getTargetId()));
+                Optional.empty(),
+                underTest.read(relationship.getSourceId(), relationship.getTargetId()));
     }
 
     @Test
@@ -158,7 +165,11 @@ public class RelationshipDaoIntegrationTest {
         // Then
         assertThrows(
                 SkosPersistenceException.class,
-                () -> underTest.delete(relationship.getSourceId(), relationship.getTargetId()));
+                () ->
+                        underTest.delete(
+                                relationship.getSourceId(),
+                                relationship.getTargetId(),
+                                connectionProvider.getConnection()));
     }
 
     @AfterEach

@@ -21,6 +21,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -35,9 +37,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class SkosPersistenceServiceTest {
@@ -62,6 +62,8 @@ class SkosPersistenceServiceTest {
                     "http://example.com/concept#2",
                     SemanticRelationType.RELATED);
 
+    @Mock private Connection connection;
+
     @Mock private SkosTranslator skosTranslator;
 
     @Mock private ConceptDao conceptDao;
@@ -73,10 +75,16 @@ class SkosPersistenceServiceTest {
     private SkosPersistenceService underTest;
 
     @BeforeEach
-    void setup() {
+    void setup() throws SQLException {
+        ConnectionProvider connectionProvider = mock(ConnectionProvider.class);
+        lenient().when(connectionProvider.getConnection()).thenReturn(connection);
         underTest =
                 new SkosPersistenceService(
-                        conceptDao, conceptSchemeDao, relationshipDao, skosTranslator);
+                        connectionProvider,
+                        conceptDao,
+                        conceptSchemeDao,
+                        relationshipDao,
+                        skosTranslator);
     }
 
     @Test
@@ -98,7 +106,8 @@ class SkosPersistenceServiceTest {
         // Then
         Map<String, String> originalIdsToGeneratedIds = new HashMap<>();
         ArgumentCaptor<ConceptModel> conceptCaptor = ArgumentCaptor.forClass(ConceptModel.class);
-        verify(conceptDao, times(rdfModel.getConcepts().size())).create(conceptCaptor.capture());
+        verify(conceptDao, times(rdfModel.getConcepts().size()))
+                .create(conceptCaptor.capture(), eq(connection));
         List<ConceptModel> persistedConcepts = conceptCaptor.getAllValues();
         for (int i = 0; i < persistedConcepts.size(); i++) {
             ConceptModel actual = persistedConcepts.get(i);
@@ -118,7 +127,7 @@ class SkosPersistenceServiceTest {
         ArgumentCaptor<ConceptSchemeModel> conceptSchemeCaptor =
                 ArgumentCaptor.forClass(ConceptSchemeModel.class);
         verify(conceptSchemeDao, times(rdfModel.getConceptSchemes().size()))
-                .create(conceptSchemeCaptor.capture());
+                .create(conceptSchemeCaptor.capture(), eq(connection));
         List<ConceptSchemeModel> persistedSchemes = conceptSchemeCaptor.getAllValues();
         for (int i = 0; i < persistedSchemes.size(); i++) {
             ConceptSchemeModel actual = persistedSchemes.get(i);
@@ -131,7 +140,7 @@ class SkosPersistenceServiceTest {
         ArgumentCaptor<ConceptSemanticRelationModel> relationshipCaptor =
                 ArgumentCaptor.forClass(ConceptSemanticRelationModel.class);
         verify(relationshipDao, times(rdfModel.getRelationships().size()))
-                .create(relationshipCaptor.capture());
+                .create(relationshipCaptor.capture(), eq(connection));
         List<ConceptSemanticRelationModel> persistedRelationships =
                 relationshipCaptor.getAllValues();
         for (int i = 0; i < persistedRelationships.size(); i++) {
@@ -261,61 +270,34 @@ class SkosPersistenceServiceTest {
 
         // Then
         for (ConceptModel concept : rdfModel.getConcepts()) {
-            verify(conceptDao).update(concept);
+            verify(conceptDao).update(concept, connection);
         }
         for (ConceptSchemeModel conceptScheme : rdfModel.getConceptSchemes()) {
-            verify(conceptSchemeDao).update(conceptScheme);
+            verify(conceptSchemeDao).update(conceptScheme, connection);
         }
         for (ConceptSemanticRelationModel relationship : rdfModel.getRelationships()) {
-            verify(relationshipDao).update(relationship);
+            verify(relationshipDao).update(relationship, connection);
         }
     }
 
     @Test
     void deleteConceptSchemeShouldDeleteSchemeAndRelationships() throws SkosPersistenceException {
-        // Given
-        given(conceptSchemeDao.read(conceptScheme.getId())).willReturn(Optional.of(conceptScheme));
-
         // When
         underTest.deleteConceptScheme(conceptScheme.getId());
 
         // Then
-        verify(relationshipDao).delete(conceptScheme.getId());
-        verify(conceptSchemeDao).delete(conceptScheme.getId());
-    }
-
-    @Test
-    void deleteConceptSchemeShouldThrowExceptionIfSchemeDoesNotExist() {
-        // Given
-        given(conceptSchemeDao.read(conceptScheme.getId())).willReturn(Optional.empty());
-
-        // Then
-        assertThrows(
-                SkosPersistenceException.class,
-                () -> underTest.deleteConceptScheme(conceptScheme.getId()));
+        verify(relationshipDao).delete(conceptScheme.getId(), connection);
+        verify(conceptSchemeDao).delete(conceptScheme.getId(), connection);
     }
 
     @Test
     void deleteConceptShouldDeleteConceptAndRelationships() throws SkosPersistenceException {
-        // Given
-        given(conceptDao.read(conceptOne.getId())).willReturn(Optional.of(conceptOne));
-
         // When
         underTest.deleteConcept(conceptOne.getId());
 
         // Then
-        verify(relationshipDao).delete(conceptOne.getId());
-        verify(conceptDao).delete(conceptOne.getId());
-    }
-
-    @Test
-    void deleteConceptShouldThrowExceptionIfConceptDoesNotExist() {
-        // Given
-        given(conceptDao.read(conceptOne.getId())).willReturn(Optional.empty());
-
-        // Then
-        assertThrows(
-                SkosPersistenceException.class, () -> underTest.deleteConcept(conceptOne.getId()));
+        verify(relationshipDao).delete(conceptOne.getId(), connection);
+        verify(conceptDao).delete(conceptOne.getId(), connection);
     }
 
     private static ConceptSchemeModel initialiseConceptScheme() {

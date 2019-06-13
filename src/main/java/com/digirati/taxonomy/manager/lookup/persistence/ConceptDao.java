@@ -39,15 +39,15 @@ public class ConceptDao {
         this.connectionProvider = connectionProvider;
     }
 
-    public Optional<ConceptModel> create(ConceptModel toCreate) throws SkosPersistenceException {
+    public void create(ConceptModel toCreate, Connection connection)
+            throws SkosPersistenceException {
         logger.info("Preparing to create concept with ID=" + toCreate.getId());
 
         if (toCreate.getId() != null && read(toCreate.getId()).isPresent()) {
             throw SkosPersistenceException.conceptAlreadyExists(toCreate.getId());
         }
 
-        try (Connection connection = connectionProvider.getConnection();
-                PreparedStatement createStatement = connection.prepareStatement(CREATE_TEMPLATE)) {
+        try (PreparedStatement createStatement = connection.prepareStatement(CREATE_TEMPLATE)) {
 
             createStatement.setString(1, toCreate.getId());
             createStatement.setString(2, toCreate.getPreferredLabel().toString());
@@ -62,8 +62,6 @@ public class ConceptDao {
             createStatement.execute();
 
             logger.info("Successfully created concept with ID=" + toCreate.getId());
-
-            return read(toCreate.getId());
 
         } catch (SQLException e) {
             logger.error(e);
@@ -112,15 +110,15 @@ public class ConceptDao {
         return Optional.empty();
     }
 
-    public Optional<ConceptModel> update(ConceptModel toUpdate) throws SkosPersistenceException {
+    public void update(ConceptModel toUpdate, Connection connection)
+            throws SkosPersistenceException {
         logger.info("Preparing to update concept with ID=" + toUpdate.getId());
 
         if (toUpdate.getId() == null || !read(toUpdate.getId()).isPresent()) {
             throw SkosPersistenceException.conceptNotFound(toUpdate.getId());
         }
 
-        try (Connection connection = connectionProvider.getConnection();
-                PreparedStatement updateStatement = connection.prepareStatement(UPDATE_TEMPLATE)) {
+        try (PreparedStatement updateStatement = connection.prepareStatement(UPDATE_TEMPLATE)) {
 
             updateStatement.setString(1, toUpdate.getPreferredLabel().toString());
             updateStatement.setString(2, toUpdate.getAltLabel().toString());
@@ -140,23 +138,20 @@ public class ConceptDao {
                             + " - number of rows affected: "
                             + rowsAffected);
 
-            return read(toUpdate.getId());
-
         } catch (SQLException e) {
             logger.error(e);
             throw SkosPersistenceException.unableToUpdateConcept(toUpdate.getId(), e);
         }
     }
 
-    public boolean delete(String id) throws SkosPersistenceException {
+    public void delete(String id, Connection connection) throws SkosPersistenceException {
         logger.info("Preparing to delete concept with ID=" + id);
 
         if (!read(id).isPresent()) {
             throw SkosPersistenceException.conceptNotFound(id);
         }
 
-        try (Connection connection = connectionProvider.getConnection();
-                PreparedStatement deleteStatement = connection.prepareStatement(DELETE_TEMPLATE)) {
+        try (PreparedStatement deleteStatement = connection.prepareStatement(DELETE_TEMPLATE)) {
             deleteStatement.setString(1, id);
             int rowsAffected = deleteStatement.executeUpdate();
             deleteStatement.close();
@@ -167,11 +162,8 @@ public class ConceptDao {
                             + " - number of rows affected: "
                             + rowsAffected);
 
-            return rowsAffected > 0;
-
         } catch (SQLException e) {
             logger.error(e);
-            return false;
         }
     }
 }

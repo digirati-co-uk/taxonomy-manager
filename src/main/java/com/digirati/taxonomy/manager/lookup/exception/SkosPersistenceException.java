@@ -58,13 +58,12 @@ public class SkosPersistenceException extends Exception {
     }
 
     public static SkosPersistenceException unableToCreateRelationship(
-            ConceptSemanticRelationModel relationship) {
-        return new SkosPersistenceException("Unable to create relationship: " + relationship);
-    }
-
-    public static SkosPersistenceException unableToCreateRelationship(
             ConceptSemanticRelationModel relationship, Throwable t) {
         return new SkosPersistenceException("Unable to create relationship: " + relationship, t);
+    }
+
+    public static SkosPersistenceException unableToPersistSkos(Throwable t) {
+        return new SkosPersistenceException("Unable to persist skos", t);
     }
 
     public static SkosPersistenceException unableToGetRelationships(String id) {
@@ -80,12 +79,12 @@ public class SkosPersistenceException extends Exception {
     }
 
     public static SkosPersistenceException unableToUpdateRelationship(
-            ConceptSemanticRelationModel relationship) {
-        return new SkosPersistenceException("Unable to update relationship: " + relationship);
-    }
-
-    public static SkosPersistenceException unableToUpdateRelationship(
             ConceptSemanticRelationModel relationship, Throwable t) {
         return new SkosPersistenceException("Unable to update relationship: " + relationship, t);
+    }
+
+    public static SkosPersistenceException unableToRemoveRelationships(String id, Throwable t) {
+        return new SkosPersistenceException(
+                "Unable to delete relationships involving entity with ID=" + id, t);
     }
 }

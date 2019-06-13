@@ -30,14 +30,12 @@ class ConceptDaoIntegrationTest {
     }
 
     @Test
-    void createShouldWriteToTheDb() throws SkosPersistenceException, IOException {
+    void createShouldWriteToTheDb() throws Exception {
         // Given
         ConceptModel concept = buildBaseConcept();
 
         // When
-        underTest
-                .create(concept)
-                .orElseThrow(() -> new AssertionError("Created concept not found."));
+        underTest.create(concept, connectionProvider.getConnection());
 
         // Then
         assertEquals(concept, underTest.read(concept.getId()).get());
@@ -49,29 +47,28 @@ class ConceptDaoIntegrationTest {
         ConceptModel concept = buildBaseConcept(null);
 
         // Then
-        assertThrows(SkosPersistenceException.class, () -> underTest.create(concept));
+        assertThrows(
+                SkosPersistenceException.class,
+                () -> underTest.create(concept, connectionProvider.getConnection()));
     }
 
     @Test
-    void createShouldThrowExceptionIfIdAlreadyExists()
-            throws IOException, SkosPersistenceException {
+    void createShouldThrowExceptionIfIdAlreadyExists() throws Exception {
         // Given
         ConceptModel concept = buildBaseConcept();
-        underTest
-                .create(concept)
-                .orElseThrow(() -> new AssertionError("Created concept not found."));
+        underTest.create(concept, connectionProvider.getConnection());
 
         // Then
-        assertThrows(SkosPersistenceException.class, () -> underTest.create(concept));
+        assertThrows(
+                SkosPersistenceException.class,
+                () -> underTest.create(concept, connectionProvider.getConnection()));
     }
 
     @Test
-    void readShouldRetrieveFromTheDb() throws SkosPersistenceException, IOException {
+    void readShouldRetrieveFromTheDb() throws Exception {
         // Given
         ConceptModel concept = buildBaseConcept();
-        underTest
-                .create(concept)
-                .orElseThrow(() -> new AssertionError("Created concept not found."));
+        underTest.create(concept, connectionProvider.getConnection());
 
         // When
         ConceptModel retrieved =
@@ -89,35 +86,30 @@ class ConceptDaoIntegrationTest {
     }
 
     @Test
-    void updateShouldModifyInTheDb() throws SkosPersistenceException, IOException {
+    void updateShouldModifyInTheDb() throws Exception {
         // Given
         ConceptModel toCreate = buildBaseConcept();
-        ConceptModel created =
-                underTest
-                        .create(toCreate)
-                        .orElseThrow(() -> new AssertionError("Created concept not found."));
+        underTest.create(toCreate, connectionProvider.getConnection());
 
         ConceptModel toModify =
                 new ConceptModel(
-                        created.getId(),
+                        toCreate.getId(),
                         fromJsonString(
                                 "[{\"language\":\"en\",\"value\":\"one\"},{\"language\":\"fr\",\"value\":\"un\"}]"),
-                        created.getAltLabel(),
-                        created.getHiddenLabel(),
-                        created.getNote(),
-                        created.getChangeNote(),
-                        created.getEditorialNote(),
-                        created.getExample(),
-                        created.getHistoryNote(),
-                        created.getScopeNote());
+                        toCreate.getAltLabel(),
+                        toCreate.getHiddenLabel(),
+                        toCreate.getNote(),
+                        toCreate.getChangeNote(),
+                        toCreate.getEditorialNote(),
+                        toCreate.getExample(),
+                        toCreate.getHistoryNote(),
+                        toCreate.getScopeNote());
 
         // When
-        underTest
-                .update(toModify)
-                .orElseThrow(() -> new AssertionError("Modified concept not found."));
+        underTest.update(toModify, connectionProvider.getConnection());
 
         // Then
-        assertEquals(toModify, underTest.read(created.getId()).get());
+        assertEquals(toModify, underTest.read(toCreate.getId()).get());
     }
 
     @Test
@@ -126,37 +118,37 @@ class ConceptDaoIntegrationTest {
         ConceptModel toUpdate = buildBaseConcept(null);
 
         // Then
-        assertThrows(SkosPersistenceException.class, () -> underTest.update(toUpdate));
+        assertThrows(
+                SkosPersistenceException.class,
+                () -> underTest.update(toUpdate, connectionProvider.getConnection()));
     }
 
     @Test
     void updateShouldThrowExceptionIfIdDoesNotExistInDb() {
-        assertThrows(SkosPersistenceException.class, () -> underTest.update(buildBaseConcept()));
+        assertThrows(
+                SkosPersistenceException.class,
+                () -> underTest.update(buildBaseConcept(), connectionProvider.getConnection()));
     }
 
     @Test
-    void deleteShouldRemoveFromTheDb() throws SkosPersistenceException, IOException {
+    void deleteShouldRemoveFromTheDb() throws Exception {
         // Given
         ConceptModel toCreate = buildBaseConcept();
-        ConceptModel created =
-                underTest
-                        .create(toCreate)
-                        .orElseThrow(() -> new AssertionError("Created concept not found."));
+        underTest.create(toCreate, connectionProvider.getConnection());
 
         // When
-        boolean deleted = underTest.delete(created.getId());
+        underTest.delete(toCreate.getId(), connectionProvider.getConnection());
 
         // Then
-        Assertions.assertTrue(deleted);
-        Optional<ConceptModel> retrieved = underTest.read(created.getId());
-        assertEquals(Optional.empty(), retrieved);
+        assertEquals(Optional.empty(), underTest.read(toCreate.getId()));
     }
 
     @Test
     void deleteShouldThrowExceptionIfIdDoesNotExistInDb() {
+        String newId = UUID.randomUUID().toString();
         assertThrows(
                 SkosPersistenceException.class,
-                () -> underTest.delete(UUID.randomUUID().toString()));
+                () -> underTest.delete(newId, connectionProvider.getConnection()));
     }
 
     @AfterEach
