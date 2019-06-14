@@ -17,6 +17,7 @@ The following key dependencies are used in this application:
 
 - [**aho-corasick**](https://github.com/robert-bor/aho-corasick): an implementation library of the [Aho-Corasick algorithm](https://en.wikipedia.org/wiki/Aho%E2%80%93Corasick_algorithm) for use in looking up taxonomy terms within a piece of input text.
 - [**Stanford CoreNLP**](https://github.com/stanfordnlp/CoreNLP): a natural language processing library for use in normalising both taxonomy terms and query text.
+- [**Apache Jena**](https://jena.apache.org/): a library used for serialising and deserialising the [SKOS](https://www.w3.org/2004/02/skos/) containing the concepts to be searched for in a piece of input text.
 
 ## Contributing
 
