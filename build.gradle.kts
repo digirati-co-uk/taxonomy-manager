@@ -17,6 +17,7 @@ java {
 
 val ahoCorasickVersion: String by project
 val guavaVersion: String by project
+val stanfordNlpVersion: String by project
 val jenaVersion: String by project
 val log4jVersion: String by project
 val jacksonVersion: String by project
@@ -30,12 +31,15 @@ dependencies {
 
     compile("org.ahocorasick", "ahocorasick", ahoCorasickVersion)
     compile("com.google.guava", "guava", guavaVersion)
+    compile("edu.stanford.nlp", "stanford-corenlp", stanfordNlpVersion)
+    compile("edu.stanford.nlp:stanford-corenlp:$stanfordNlpVersion:models")
     compile("org.apache.jena", "jena-core", jenaVersion)
     compile("org.apache.jena", "apache-jena-libs", jenaVersion)
     compile("org.apache.logging.log4j", "log4j-core", log4jVersion)
     compile("org.apache.logging.log4j", "log4j-api", log4jVersion)
     compile("com.fasterxml.jackson.core", "jackson-databind", jacksonVersion)
     compile("org.postgresql", "postgresql", postgresDriverVersion)
+
 
     testCompile("org.junit.jupiter", "junit-jupiter", junitVersion)
     testCompile("org.hamcrest", "hamcrest", hamcrestVersion)
@@ -44,6 +48,10 @@ dependencies {
 
 tasks.named<Test>("test") {
     useJUnitPlatform()
+}
+
+tasks.withType<JavaCompile> {
+    options.encoding = "UTF-8"
 }
 
 spotbugs {
