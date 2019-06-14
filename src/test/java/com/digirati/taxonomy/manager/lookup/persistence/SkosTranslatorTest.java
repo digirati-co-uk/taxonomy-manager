@@ -3,12 +3,11 @@ package com.digirati.taxonomy.manager.lookup.persistence;
 import com.digirati.taxonomy.manager.lookup.persistence.model.ConceptModel;
 import com.digirati.taxonomy.manager.lookup.persistence.model.ConceptSchemeModel;
 import com.digirati.taxonomy.manager.lookup.persistence.model.ConceptSemanticRelationModel;
-import com.digirati.taxonomy.manager.lookup.persistence.model.RdfModel;
+import com.digirati.taxonomy.manager.lookup.persistence.model.SkosModel;
 import com.digirati.taxonomy.manager.lookup.persistence.model.SemanticRelationType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.CharStreams;
-import org.apache.commons.io.IOUtils;
 import org.apache.jena.rdf.model.Model;
 import org.junit.jupiter.api.Test;
 
@@ -17,18 +16,16 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SkosTranslatorTest {
 
-    private static final RdfModel conceptSchemesRdfModel = createConceptSchemesModel();
+    private static final SkosModel conceptSchemesSkosModel = createConceptSchemesModel();
 
-    private static final RdfModel conceptsRdfModel = createConceptsModel();
+    private static final SkosModel conceptsSkosModel = createConceptsModel();
 
     private SkosTranslator underTest = new SkosTranslator();
 
@@ -38,20 +35,20 @@ class SkosTranslatorTest {
         InputStream testConceptSchemesInput = load("test-concept-schemes-input.jsonld");
 
         // When
-        RdfModel actual =
+        SkosModel actual =
                 underTest.translate(
                         testConceptSchemesInput, "http://example.com/", SkosFileType.JSON_LD);
 
         // Then
-        assertEquals(conceptSchemesRdfModel.getConcepts(), actual.getConcepts());
-        assertEquals(conceptSchemesRdfModel.getConceptSchemes(), actual.getConceptSchemes());
-        assertEquals(conceptSchemesRdfModel.getRelationships(), actual.getRelationships());
+        assertEquals(conceptSchemesSkosModel.getConcepts(), actual.getConcepts());
+        assertEquals(conceptSchemesSkosModel.getConceptSchemes(), actual.getConceptSchemes());
+        assertEquals(conceptSchemesSkosModel.getRelationships(), actual.getRelationships());
     }
 
     @Test
     void shouldSerialiseConceptSchemesToRdf() throws IOException {
         // When
-        Model actualModel = underTest.translate(conceptSchemesRdfModel);
+        Model actualModel = underTest.translate(conceptSchemesSkosModel);
         StringWriter actualWriter = new StringWriter();
         actualModel.write(actualWriter, SkosFileType.JSON_LD.getFileTypeName());
         String actual = actualWriter.toString().trim();
@@ -72,31 +69,34 @@ class SkosTranslatorTest {
         InputStream testConceptsInput = load("test-concepts-input.jsonld");
 
         // When
-        RdfModel actual =
+        SkosModel actual =
                 underTest.translate(testConceptsInput, "http://example.com/", SkosFileType.JSON_LD);
 
         // Then
-        assertEquals(conceptsRdfModel.getConcepts(), actual.getConcepts());
-        assertEquals(conceptsRdfModel.getConceptSchemes(), actual.getConceptSchemes());
-        assertEquals(conceptsRdfModel.getRelationships(), actual.getRelationships());
+        assertEquals(conceptsSkosModel.getConcepts(), actual.getConcepts());
+        assertEquals(conceptsSkosModel.getConceptSchemes(), actual.getConceptSchemes());
+        assertEquals(conceptsSkosModel.getRelationships(), actual.getRelationships());
     }
 
     @Test
     void shouldSerialiseConceptsToRdf() throws IOException {
         // When
-        Model actualModel = underTest.translate(conceptsRdfModel);
+        Model actualModel = underTest.translate(conceptsSkosModel);
         StringWriter actualWriter = new StringWriter();
         actualModel.write(actualWriter, SkosFileType.JSON_LD.getFileTypeName());
         String actual = actualWriter.toString().trim();
 
         // Then
         InputStream expectedStream = load("test-concepts-output.jsonld");
-        String expected = IOUtils.toString(expectedStream, StandardCharsets.UTF_8).trim();
+        String expected;
+        try (Reader reader = new InputStreamReader(expectedStream)) {
+            expected = CharStreams.toString(reader).trim();
+        }
 
         assertEquals(expected, actual);
     }
 
-    private static RdfModel createConceptSchemesModel() {
+    private static SkosModel createConceptSchemesModel() {
         ConceptSchemeModel conceptSchemeModel =
                 new ConceptSchemeModel("http://example.com/", "Example Scheme");
 
@@ -140,10 +140,10 @@ class SkosTranslatorTest {
                         SemanticRelationType.HAS_TOP_CONCEPT,
                         false);
 
-        return new RdfModel(
-                Arrays.asList(one, two),
-                Collections.singletonList(conceptSchemeModel),
-                Arrays.asList(schemeHasTopConceptTwo, schemeHasTopConceptOne));
+        return new SkosModel(
+                List.of(one, two),
+                List.of(conceptSchemeModel),
+                List.of(schemeHasTopConceptTwo, schemeHasTopConceptOne));
     }
 
     private static JsonNode jsonForString(String jsonString) {
@@ -155,7 +155,7 @@ class SkosTranslatorTest {
         }
     }
 
-    private static RdfModel createConceptsModel() {
+    private static SkosModel createConceptsModel() {
         ConceptModel one =
                 new ConceptModel(
                         "http://example.com/concept#1",
@@ -250,10 +250,10 @@ class SkosTranslatorTest {
                         SemanticRelationType.BROADER,
                         false);
 
-        return new RdfModel(
-                Arrays.asList(one, three, two, four),
+        return new SkosModel(
+                List.of(one, three, two, four),
                 new ArrayList<>(),
-                Arrays.asList(
+                List.of(
                         twoIsRelatedToFour,
                         twoIsRelatedToThree,
                         oneIsNarrowerThanTwo,

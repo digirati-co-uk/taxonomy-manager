@@ -4,7 +4,7 @@ import com.digirati.taxonomy.manager.lookup.exception.SkosPersistenceException;
 import com.digirati.taxonomy.manager.lookup.persistence.model.ConceptModel;
 import com.digirati.taxonomy.manager.lookup.persistence.model.ConceptSchemeModel;
 import com.digirati.taxonomy.manager.lookup.persistence.model.ConceptSemanticRelationModel;
-import com.digirati.taxonomy.manager.lookup.persistence.model.RdfModel;
+import com.digirati.taxonomy.manager.lookup.persistence.model.SkosModel;
 import org.apache.jena.rdf.model.Model;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -76,19 +76,19 @@ public class SkosPersistenceService {
     public void create(InputStream skos, String baseUrl, SkosFileType fileType)
             throws SkosPersistenceException {
         Map<String, String> idToUuid = new HashMap<>();
-        RdfModel rdfModel = parseSkos(skos, baseUrl, fileType, idToUuid);
+        SkosModel skosModel = parseSkos(skos, baseUrl, fileType, idToUuid);
 
         try (Connection connection = connectionProvider.getConnection()) {
             connection.setAutoCommit(false);
 
             try {
-                for (ConceptModel concept : rdfModel.getConcepts()) {
+                for (ConceptModel concept : skosModel.getConcepts()) {
                     conceptDao.create(concept, connection);
                 }
-                for (ConceptSchemeModel conceptScheme : rdfModel.getConceptSchemes()) {
+                for (ConceptSchemeModel conceptScheme : skosModel.getConceptSchemes()) {
                     conceptSchemeDao.create(conceptScheme, connection);
                 }
-                for (ConceptSemanticRelationModel relationship : rdfModel.getRelationships()) {
+                for (ConceptSemanticRelationModel relationship : skosModel.getRelationships()) {
                     relationshipDao.create(relationship, connection);
                 }
 
@@ -105,22 +105,22 @@ public class SkosPersistenceService {
         }
     }
 
-    private RdfModel parseSkos(
+    private SkosModel parseSkos(
             InputStream skos, String baseUrl, SkosFileType fileType, Map<String, String> idToUuid) {
-        RdfModel rdfModel = skosTranslator.translate(skos, baseUrl, fileType);
+        SkosModel skosModel = skosTranslator.translate(skos, baseUrl, fileType);
         List<ConceptModel> conceptsWithGeneratedUuids =
-                rdfModel.getConcepts().stream()
+                skosModel.getConcepts().stream()
                         .map(originalConcept -> generateUuid(originalConcept, idToUuid))
                         .collect(Collectors.toList());
         List<ConceptSchemeModel> schemesWithGeneratedUuids =
-                rdfModel.getConceptSchemes().stream()
+                skosModel.getConceptSchemes().stream()
                         .map(originalScheme -> generateUuid(originalScheme, idToUuid))
                         .collect(Collectors.toList());
         List<ConceptSemanticRelationModel> relationshipsWithGeneratedUuids =
-                rdfModel.getRelationships().stream()
+                skosModel.getRelationships().stream()
                         .map(originalRelationship -> fixUuids(originalRelationship, idToUuid))
                         .collect(Collectors.toList());
-        return new RdfModel(
+        return new SkosModel(
                 conceptsWithGeneratedUuids,
                 schemesWithGeneratedUuids,
                 relationshipsWithGeneratedUuids);
@@ -182,9 +182,9 @@ public class SkosPersistenceService {
             Collection<ConceptSemanticRelationModel> relationships =
                     relationshipDao.getRelationships(concept.getId(), connection);
 
-            RdfModel rdfModel = getRelatedEntities(concept.getId(), relationships, connection);
-            rdfModel.getConcepts().add(concept);
-            Model model = skosTranslator.translate(rdfModel);
+            SkosModel skosModel = getRelatedEntities(concept.getId(), relationships, connection);
+            skosModel.getConcepts().add(concept);
+            Model model = skosTranslator.translate(skosModel);
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             model.write(outputStream, outputFileType.getFileTypeName());
             return outputStream;
@@ -195,7 +195,7 @@ public class SkosPersistenceService {
         }
     }
 
-    private RdfModel getRelatedEntities(
+    private SkosModel getRelatedEntities(
             String originalEntityId,
             Collection<ConceptSemanticRelationModel> relationships,
             Connection connection)
@@ -203,7 +203,7 @@ public class SkosPersistenceService {
         Set<ConceptModel> concepts = new HashSet<>();
         Set<ConceptSchemeModel> conceptSchemes = new HashSet<>();
 
-        for (String id : getRelatedIris(originalEntityId, relationships)) {
+        for (String id : getRelatedIds(originalEntityId, relationships)) {
             Optional<ConceptModel> concept = conceptDao.read(id, connection);
             if (concept.isPresent()) {
                 concepts.add(concept.get());
@@ -215,14 +215,14 @@ public class SkosPersistenceService {
             }
         }
 
-        return new RdfModel(concepts, conceptSchemes, relationships);
+        return new SkosModel(concepts, conceptSchemes, relationships);
     }
 
-    private Collection<String> getRelatedIris(
-            String originalEntityIri, Collection<ConceptSemanticRelationModel> relationships) {
+    private Collection<String> getRelatedIds(
+            String originalEntityId, Collection<ConceptSemanticRelationModel> relationships) {
         return relationships.stream()
                 .flatMap(r -> Stream.of(r.getSourceId(), r.getTargetId()))
-                .filter(iri -> !originalEntityIri.equals(iri))
+                .filter(id -> !originalEntityId.equals(id))
                 .collect(Collectors.toSet());
     }
 
@@ -248,10 +248,10 @@ public class SkosPersistenceService {
             Collection<ConceptSemanticRelationModel> relationships =
                     relationshipDao.getRelationships(conceptScheme.getId(), connection);
 
-            RdfModel rdfModel =
+            SkosModel skosModel =
                     getRelatedEntities(conceptScheme.getId(), relationships, connection);
-            rdfModel.getConceptSchemes().add(conceptScheme);
-            Model model = skosTranslator.translate(rdfModel);
+            skosModel.getConceptSchemes().add(conceptScheme);
+            Model model = skosTranslator.translate(skosModel);
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             model.write(outputStream, outputFileType.getFileTypeName());
             return outputStream;
@@ -273,18 +273,18 @@ public class SkosPersistenceService {
      */
     public void update(InputStream skos, String baseUrl, SkosFileType fileType)
             throws SkosPersistenceException {
-        RdfModel rdfModel = skosTranslator.translate(skos, baseUrl, fileType);
+        SkosModel skosModel = skosTranslator.translate(skos, baseUrl, fileType);
 
         try (Connection connection = connectionProvider.getConnection()) {
             connection.setAutoCommit(false);
             try {
-                for (ConceptModel conceptModel : rdfModel.getConcepts()) {
+                for (ConceptModel conceptModel : skosModel.getConcepts()) {
                     conceptDao.update(conceptModel, connection);
                 }
-                for (ConceptSchemeModel conceptScheme : rdfModel.getConceptSchemes()) {
+                for (ConceptSchemeModel conceptScheme : skosModel.getConceptSchemes()) {
                     conceptSchemeDao.update(conceptScheme, connection);
                 }
-                for (ConceptSemanticRelationModel relationship : rdfModel.getRelationships()) {
+                for (ConceptSemanticRelationModel relationship : skosModel.getRelationships()) {
                     relationshipDao.update(relationship, connection);
                 }
             } catch (SkosPersistenceException e) {

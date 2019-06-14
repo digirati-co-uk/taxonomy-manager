@@ -104,7 +104,8 @@ class ConceptDao {
      * @return an {@link Optional} containing the retrieved concept if present in the database; an
      *     empty Optional if not.
      */
-    public Optional<ConceptModel> read(String id, Connection connection) {
+    public Optional<ConceptModel> read(String id, Connection connection)
+            throws SkosPersistenceException {
         try (PreparedStatement readStatement =
                 connection.prepareStatement(SELECT_BY_IRI_TEMPLATE)) {
 
@@ -115,12 +116,12 @@ class ConceptDao {
             if (!created.isEmpty()) {
                 return Optional.of(created.get(created.size() - 1));
             }
+            return Optional.empty();
 
         } catch (SQLException | IOException e) {
             logger.error(e);
+            throw SkosPersistenceException.unableToGetConcept(id, e);
         }
-
-        return Optional.empty();
     }
 
     /**

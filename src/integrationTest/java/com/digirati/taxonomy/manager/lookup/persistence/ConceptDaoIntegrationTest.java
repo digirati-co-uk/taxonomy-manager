@@ -81,7 +81,7 @@ class ConceptDaoIntegrationTest {
     }
 
     @Test
-    void readShouldReturnEmptyIfIdDoesNotExist() {
+    void readShouldReturnEmptyIfIdDoesNotExist() throws SkosPersistenceException {
         assertEquals(Optional.empty(), underTest.read(UUID.randomUUID().toString(), connection));
     }
 

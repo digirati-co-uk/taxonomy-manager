@@ -3,7 +3,7 @@ package com.digirati.taxonomy.manager.lookup.persistence;
 import com.digirati.taxonomy.manager.lookup.persistence.model.ConceptModel;
 import com.digirati.taxonomy.manager.lookup.persistence.model.ConceptSchemeModel;
 import com.digirati.taxonomy.manager.lookup.persistence.model.ConceptSemanticRelationModel;
-import com.digirati.taxonomy.manager.lookup.persistence.model.RdfModel;
+import com.digirati.taxonomy.manager.lookup.persistence.model.SkosModel;
 import com.digirati.taxonomy.manager.lookup.persistence.model.SemanticRelationType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,7 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Translates SKOS into an {@link RdfModel} modelling all of the entities defined in that SKOS, and
+ * Translates SKOS into an {@link SkosModel} modelling all of the entities defined in that SKOS, and
  * vice-versa.
  */
 class SkosTranslator {
@@ -38,14 +38,14 @@ class SkosTranslator {
                     .createProperty("http://purl.org/dc/terms/1.1/", "title");
 
     /**
-     * Translates a SKOS input into an {@link RdfModel}
+     * Translates a SKOS input into an {@link SkosModel}
      *
      * @param skos an {@link InputStream} of the SKOS to translate.
      * @param baseUrl the base URL of the SKOS, against which to resolve any relative URLs.
      * @param skosFileType the file type of the SKOS input.
-     * @return an {@link RdfModel} containing all entities defined in the input SKOS.
+     * @return an {@link SkosModel} containing all entities defined in the input SKOS.
      */
-    public RdfModel translate(InputStream skos, String baseUrl, SkosFileType skosFileType) {
+    public SkosModel translate(InputStream skos, String baseUrl, SkosFileType skosFileType) {
         Model model = read(skos, baseUrl, skosFileType);
         List<ConceptModel> concepts = new ArrayList<>();
         List<ConceptSchemeModel> conceptSchemes = new ArrayList<>();
@@ -65,7 +65,7 @@ class SkosTranslator {
                 logger.debug("Found an unsupported RDF type when deserialising RDF: {}", rdfType);
             }
         }
-        return new RdfModel(concepts, conceptSchemes, conceptSemanticRelations);
+        return new SkosModel(concepts, conceptSchemes, conceptSemanticRelations);
     }
 
     private Model read(InputStream rdf, String baseUrl, SkosFileType skosFileType) {
@@ -121,21 +121,21 @@ class SkosTranslator {
             String targetId = statement.getObject().asResource().getURI();
             ConceptSemanticRelationModel relationship =
                     SemanticRelationType.getRelationshipGenerator(statement.getPredicate())
-                            .generate(sourceId, targetId);
+                            .apply(sourceId, targetId);
             conceptSemanticRelations.add(relationship);
         }
         return conceptSemanticRelations;
     }
 
     /**
-     * Translates an {@link RdfModel} into a {@link Model} representing the SKOS.
+     * Translates an {@link SkosModel} into a {@link Model} representing the SKOS.
      *
-     * @param rdfModel a model of the entities to describe as SKOS.
+     * @param skosModel a model of the entities to describe as SKOS.
      * @return a {@link Model} representing the translated SKOS.
      */
-    public Model translate(RdfModel rdfModel) {
+    public Model translate(SkosModel skosModel) {
         Model model = ModelFactory.createDefaultModel();
-        for (ConceptModel concept : rdfModel.getConcepts()) {
+        for (ConceptModel concept : skosModel.getConcepts()) {
             Resource conceptResource = model.createResource(concept.getId(), SKOS.Concept);
             addConceptProperties(conceptResource, SKOS.prefLabel, concept.getPreferredLabel());
             addConceptProperties(conceptResource, SKOS.altLabel, concept.getAltLabel());
@@ -148,11 +148,11 @@ class SkosTranslator {
             addConceptProperties(conceptResource, SKOS.scopeNote, concept.getScopeNote());
         }
 
-        for (ConceptSchemeModel conceptScheme : rdfModel.getConceptSchemes()) {
+        for (ConceptSchemeModel conceptScheme : skosModel.getConceptSchemes()) {
             Resource conceptSchemeResource =
                     model.createResource(conceptScheme.getId(), SKOS.ConceptScheme);
             conceptSchemeResource.addProperty(dcTermsTitle, conceptScheme.getTitle());
-            rdfModel.getRelationships().stream()
+            skosModel.getRelationships().stream()
                     .filter(
                             relationship ->
                                     conceptScheme.getId().equals(relationship.getSourceId()))
@@ -162,18 +162,18 @@ class SkosTranslator {
                                             model, relationship, conceptSchemeResource));
         }
 
-        for (ConceptSemanticRelationModel conceptSemanticRelation : rdfModel.getRelationships()) {
+        for (ConceptSemanticRelationModel conceptSemanticRelation : skosModel.getRelationships()) {
             Property predicate = conceptSemanticRelation.getRelationPredicate();
             Resource subject = getResource(model, conceptSemanticRelation.getSourceId());
             if (subject == null) {
                 logger.debug(
-                        getResourceNotFoundMessage("subject", rdfModel, conceptSemanticRelation));
+                        getResourceNotFoundMessage("subject", skosModel, conceptSemanticRelation));
                 continue;
             }
             Resource object = getResource(model, conceptSemanticRelation.getTargetId());
             if (object == null) {
                 logger.debug(
-                        getResourceNotFoundMessage("object", rdfModel, conceptSemanticRelation));
+                        getResourceNotFoundMessage("object", skosModel, conceptSemanticRelation));
                 continue;
             }
             subject.addProperty(predicate, object);
@@ -219,10 +219,12 @@ class SkosTranslator {
     }
 
     private String getResourceNotFoundMessage(
-            String type, RdfModel rdfModel, ConceptSemanticRelationModel conceptSemanticRelation) {
+            String type,
+            SkosModel skosModel,
+            ConceptSemanticRelationModel conceptSemanticRelation) {
         String baseWarning =
                 "Unable to locate " + type + " for relation: " + conceptSemanticRelation;
-        if (rdfModel.getConcepts().stream()
+        if (skosModel.getConcepts().stream()
                 .anyMatch(
                         conceptModel ->
                                 conceptModel

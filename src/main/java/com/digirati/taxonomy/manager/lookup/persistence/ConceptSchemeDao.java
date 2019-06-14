@@ -79,7 +79,8 @@ class ConceptSchemeDao {
      * @return an {@link Optional} containing the retrieved concept scheme if present in the
      *     database; an empty Optional if not.
      */
-    public Optional<ConceptSchemeModel> read(String id, Connection connection) {
+    public Optional<ConceptSchemeModel> read(String id, Connection connection)
+            throws SkosPersistenceException {
         try (PreparedStatement readStatement = connection.prepareStatement(SELECT_TEMPLATE)) {
 
             readStatement.setString(1, id);
@@ -89,12 +90,12 @@ class ConceptSchemeDao {
             if (!readResults.isEmpty()) {
                 return Optional.of(readResults.get(readResults.size() - 1));
             }
+            return Optional.empty();
 
         } catch (SQLException e) {
             logger.error(e);
+            throw SkosPersistenceException.unableToGetConceptScheme(id, e);
         }
-
-        return Optional.empty();
     }
 
     /**

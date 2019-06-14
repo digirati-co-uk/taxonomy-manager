@@ -3,6 +3,8 @@ package com.digirati.taxonomy.manager.lookup.persistence.model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.vocabulary.SKOS;
 
+import java.util.function.BiFunction;
+
 /**
  * Enum of all possible relationships between SKOS entities that we are interested in processing.
  */
@@ -51,15 +53,16 @@ public enum SemanticRelationType {
     }
 
     /**
-     * Creates a {@link RelationshipGenerator} from which a {@link ConceptSemanticRelationModel}
-     * corresponding to the input RDF property can be retrieved.
+     * Creates a {@link BiFunction} from which a {@link ConceptSemanticRelationModel} corresponding
+     * to the input RDF property can be retrieved.
      *
      * @param rdfProperty the RDF property for which to generate the relationship.
-     * @return a {@link RelationshipGenerator} capable of generating the desired relationship.
+     * @return a {@link BiFunction} capable of generating the desired relationship.
      * @throws IllegalArgumentException if the input RDF property does not correspond to a relation
      *     type.
      */
-    public static RelationshipGenerator getRelationshipGenerator(Property rdfProperty) {
+    public static BiFunction<String, String, ConceptSemanticRelationModel> getRelationshipGenerator(
+            Property rdfProperty) {
         for (SemanticRelationType relationType : values()) {
             if (relationType.nonTransitiveRdfProperty.equals(rdfProperty)) {
                 return (sourceId, targetId) ->
@@ -71,14 +74,5 @@ public enum SemanticRelationType {
         }
         throw new IllegalArgumentException(
                 "Unable to create relationship generator for: " + rdfProperty);
-    }
-
-    /**
-     * Functional interface to generate a {@link ConceptSemanticRelationModel} given the IDs of the
-     * related entities.
-     */
-    @FunctionalInterface
-    public interface RelationshipGenerator {
-        ConceptSemanticRelationModel generate(String sourceId, String targetId);
     }
 }

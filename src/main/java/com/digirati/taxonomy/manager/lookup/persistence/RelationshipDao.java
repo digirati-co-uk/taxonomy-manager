@@ -263,15 +263,11 @@ class RelationshipDao {
                 PreparedStatement deleteByTargetIri =
                         connection.prepareStatement(DELETE_RELATED_TO_TARGET_TEMPLATE)) {
 
-            connection.setAutoCommit(false);
-
             deleteBySourceIri.setString(1, id);
             int sourceRowsAffected = deleteBySourceIri.executeUpdate();
 
             deleteByTargetIri.setString(1, id);
             int targetRowsAffected = deleteByTargetIri.executeUpdate();
-
-            connection.commit();
 
             logger.info(
                     "Successfully deleted all relationships involving {} - number of source relationships deleted: {}, number of target relationships deleted: {}",

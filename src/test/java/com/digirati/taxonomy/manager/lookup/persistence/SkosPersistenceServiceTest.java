@@ -4,7 +4,7 @@ import com.digirati.taxonomy.manager.lookup.exception.SkosPersistenceException;
 import com.digirati.taxonomy.manager.lookup.persistence.model.ConceptModel;
 import com.digirati.taxonomy.manager.lookup.persistence.model.ConceptSchemeModel;
 import com.digirati.taxonomy.manager.lookup.persistence.model.ConceptSemanticRelationModel;
-import com.digirati.taxonomy.manager.lookup.persistence.model.RdfModel;
+import com.digirati.taxonomy.manager.lookup.persistence.model.SkosModel;
 import com.digirati.taxonomy.manager.lookup.persistence.model.SemanticRelationType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -90,15 +90,15 @@ class SkosPersistenceServiceTest {
     @Test
     void createShouldPersistEachEntityFromSkosInput() throws SkosPersistenceException {
         // Given
-        RdfModel rdfModel =
-                new RdfModel(
+        SkosModel skosModel =
+                new SkosModel(
                         List.of(conceptOne, conceptTwo, conceptThree),
                         Collections.singletonList(conceptScheme),
                         List.of(
                                 schemeHasTopConceptOne,
                                 schemeHasTopConceptTwo,
                                 threeIsRelatedToTwo));
-        InputStream skosInput = givenSkosInput(rdfModel);
+        InputStream skosInput = givenSkosInput(skosModel);
 
         // When
         underTest.create(skosInput, "http://example.com/", SkosFileType.JSON_LD);
@@ -106,12 +106,12 @@ class SkosPersistenceServiceTest {
         // Then
         Map<String, String> originalIdsToGeneratedIds = new HashMap<>();
         ArgumentCaptor<ConceptModel> conceptCaptor = ArgumentCaptor.forClass(ConceptModel.class);
-        verify(conceptDao, times(rdfModel.getConcepts().size()))
+        verify(conceptDao, times(skosModel.getConcepts().size()))
                 .create(conceptCaptor.capture(), eq(connection));
         List<ConceptModel> persistedConcepts = conceptCaptor.getAllValues();
         for (int i = 0; i < persistedConcepts.size(); i++) {
             ConceptModel actual = persistedConcepts.get(i);
-            ConceptModel expected = ((List<ConceptModel>) rdfModel.getConcepts()).get(i);
+            ConceptModel expected = ((List<ConceptModel>) skosModel.getConcepts()).get(i);
             originalIdsToGeneratedIds.put(expected.getId(), actual.getId());
             assertEquals(expected.getPreferredLabel(), actual.getPreferredLabel());
             assertEquals(expected.getAltLabel(), actual.getAltLabel());
@@ -126,27 +126,27 @@ class SkosPersistenceServiceTest {
 
         ArgumentCaptor<ConceptSchemeModel> conceptSchemeCaptor =
                 ArgumentCaptor.forClass(ConceptSchemeModel.class);
-        verify(conceptSchemeDao, times(rdfModel.getConceptSchemes().size()))
+        verify(conceptSchemeDao, times(skosModel.getConceptSchemes().size()))
                 .create(conceptSchemeCaptor.capture(), eq(connection));
         List<ConceptSchemeModel> persistedSchemes = conceptSchemeCaptor.getAllValues();
         for (int i = 0; i < persistedSchemes.size(); i++) {
             ConceptSchemeModel actual = persistedSchemes.get(i);
             ConceptSchemeModel expected =
-                    ((List<ConceptSchemeModel>) rdfModel.getConceptSchemes()).get(i);
+                    ((List<ConceptSchemeModel>) skosModel.getConceptSchemes()).get(i);
             originalIdsToGeneratedIds.put(expected.getId(), actual.getId());
             assertEquals(expected.getTitle(), actual.getTitle());
         }
 
         ArgumentCaptor<ConceptSemanticRelationModel> relationshipCaptor =
                 ArgumentCaptor.forClass(ConceptSemanticRelationModel.class);
-        verify(relationshipDao, times(rdfModel.getRelationships().size()))
+        verify(relationshipDao, times(skosModel.getRelationships().size()))
                 .create(relationshipCaptor.capture(), eq(connection));
         List<ConceptSemanticRelationModel> persistedRelationships =
                 relationshipCaptor.getAllValues();
         for (int i = 0; i < persistedRelationships.size(); i++) {
             ConceptSemanticRelationModel actual = persistedRelationships.get(i);
             ConceptSemanticRelationModel expected =
-                    ((List<ConceptSemanticRelationModel>) rdfModel.getRelationships()).get(i);
+                    ((List<ConceptSemanticRelationModel>) skosModel.getRelationships()).get(i);
             assertEquals(
                     originalIdsToGeneratedIds.get(expected.getSourceId()), actual.getSourceId());
             assertEquals(
@@ -157,11 +157,35 @@ class SkosPersistenceServiceTest {
     }
 
     @Test
+    void createShouldRollbackInTheEventOfAnError() throws Exception {
+        // Given
+        SkosModel skosModel =
+                new SkosModel(
+                        List.of(conceptOne, conceptTwo, conceptThree),
+                        Collections.singletonList(conceptScheme),
+                        List.of(
+                                schemeHasTopConceptOne,
+                                schemeHasTopConceptTwo,
+                                threeIsRelatedToTwo));
+        InputStream skosInput = givenSkosInput(skosModel);
+
+        doThrow(SkosPersistenceException.conceptSchemeAlreadyExists(conceptScheme.getId()))
+                .when(conceptSchemeDao)
+                .create(any(ConceptSchemeModel.class), eq(connection));
+
+        // Then
+        assertThrows(
+                SkosPersistenceException.class,
+                () -> underTest.create(skosInput, "http://example.com/", SkosFileType.JSON_LD));
+        verify(connection).rollback();
+    }
+
+    @Test
     void getConceptShouldRetrieveConceptAndRelatedEntities() throws SkosPersistenceException {
         // Given
         givenEntitiesRelatedToConceptTwoExist();
-        RdfModel relatedToConceptTwo =
-                new RdfModel(
+        SkosModel relatedToConceptTwo =
+                new SkosModel(
                         Sets.newHashSet(conceptTwo, conceptThree),
                         Sets.newHashSet(conceptScheme),
                         Sets.newHashSet(schemeHasTopConceptTwo, threeIsRelatedToTwo));
@@ -178,7 +202,7 @@ class SkosPersistenceServiceTest {
     }
 
     @Test
-    void getConceptShouldThrowExceptionIfConceptCannotBeFound() {
+    void getConceptShouldThrowExceptionIfConceptCannotBeFound() throws SkosPersistenceException {
         // Given
         given(conceptDao.read(conceptTwo.getId(), connection)).willReturn(Optional.empty());
 
@@ -209,8 +233,8 @@ class SkosPersistenceServiceTest {
     void getConceptSchemeShouldRetrieveConceptAndRelatedEntities() throws SkosPersistenceException {
         // Given
         givenEntitiesRelatedToConceptSchemeExist();
-        RdfModel relatedToConceptScheme =
-                new RdfModel(
+        SkosModel relatedToConceptScheme =
+                new SkosModel(
                         Sets.newHashSet(conceptOne, conceptTwo),
                         Sets.newHashSet(conceptScheme),
                         Sets.newHashSet(schemeHasTopConceptOne, schemeHasTopConceptTwo));
@@ -227,7 +251,8 @@ class SkosPersistenceServiceTest {
     }
 
     @Test
-    void getConceptSchemeShouldThrowExceptionIfConceptCannotBeFound() {
+    void getConceptSchemeShouldThrowExceptionIfConceptCannotBeFound()
+            throws SkosPersistenceException {
         // Given
         given(conceptSchemeDao.read(conceptScheme.getId(), connection))
                 .willReturn(Optional.empty());
@@ -258,29 +283,52 @@ class SkosPersistenceServiceTest {
     @Test
     void updateShouldPersistEachEntityFromSkosInput() throws SkosPersistenceException {
         // Given
-        RdfModel rdfModel =
-                new RdfModel(
+        SkosModel skosModel =
+                new SkosModel(
                         Arrays.asList(conceptOne, conceptTwo, conceptThree),
                         Collections.singletonList(conceptScheme),
                         Arrays.asList(
                                 schemeHasTopConceptOne,
                                 schemeHasTopConceptTwo,
                                 threeIsRelatedToTwo));
-        InputStream skosInput = givenSkosInput(rdfModel);
+        InputStream skosInput = givenSkosInput(skosModel);
 
         // When
         underTest.update(skosInput, "http://example.com/", SkosFileType.JSON_LD);
 
         // Then
-        for (ConceptModel concept : rdfModel.getConcepts()) {
+        for (ConceptModel concept : skosModel.getConcepts()) {
             verify(conceptDao).update(concept, connection);
         }
-        for (ConceptSchemeModel conceptScheme : rdfModel.getConceptSchemes()) {
+        for (ConceptSchemeModel conceptScheme : skosModel.getConceptSchemes()) {
             verify(conceptSchemeDao).update(conceptScheme, connection);
         }
-        for (ConceptSemanticRelationModel relationship : rdfModel.getRelationships()) {
+        for (ConceptSemanticRelationModel relationship : skosModel.getRelationships()) {
             verify(relationshipDao).update(relationship, connection);
         }
+    }
+
+    @Test
+    void updateShouldRollbackInTheEventOfAnError() throws Exception {
+        // Given
+        SkosModel skosModel =
+                new SkosModel(
+                        Arrays.asList(conceptOne, conceptTwo, conceptThree),
+                        Collections.singletonList(conceptScheme),
+                        Arrays.asList(
+                                schemeHasTopConceptOne,
+                                schemeHasTopConceptTwo,
+                                threeIsRelatedToTwo));
+        InputStream skosInput = givenSkosInput(skosModel);
+        doThrow(SkosPersistenceException.conceptSchemeNotFound(conceptScheme.getId()))
+                .when(conceptSchemeDao)
+                .update(any(ConceptSchemeModel.class), eq(connection));
+
+        // When
+        assertThrows(
+                SkosPersistenceException.class,
+                () -> underTest.update(skosInput, "http://example.com/", SkosFileType.JSON_LD));
+        verify(connection).rollback();
     }
 
     @Test
@@ -294,6 +342,20 @@ class SkosPersistenceServiceTest {
     }
 
     @Test
+    void deleteConceptSchemeShouldRollbackInTheEventOfAnError() throws Exception {
+        // Given
+        doThrow(SkosPersistenceException.conceptSchemeNotFound(conceptScheme.getId()))
+                .when(conceptSchemeDao)
+                .delete(conceptScheme.getId(), connection);
+
+        // Then
+        assertThrows(
+                SkosPersistenceException.class,
+                () -> underTest.deleteConceptScheme(conceptScheme.getId()));
+        verify(connection).rollback();
+    }
+
+    @Test
     void deleteConceptShouldDeleteConceptAndRelationships() throws SkosPersistenceException {
         // When
         underTest.deleteConcept(conceptOne.getId());
@@ -301,6 +363,19 @@ class SkosPersistenceServiceTest {
         // Then
         verify(relationshipDao).delete(conceptOne.getId(), connection);
         verify(conceptDao).delete(conceptOne.getId(), connection);
+    }
+
+    @Test
+    void deleteConceptShouldRollbackInTheEventOfAnError() throws Exception {
+        // Given
+        doThrow(SkosPersistenceException.conceptNotFound(conceptOne.getId()))
+                .when(conceptDao)
+                .delete(conceptOne.getId(), connection);
+
+        // Then
+        assertThrows(
+                SkosPersistenceException.class, () -> underTest.deleteConcept(conceptOne.getId()));
+        verify(connection).rollback();
     }
 
     private static ConceptSchemeModel initialiseConceptScheme() {
@@ -341,10 +416,10 @@ class SkosPersistenceServiceTest {
         return new ConceptSemanticRelationModel(sourceId, targetId, relationType, false);
     }
 
-    private InputStream givenSkosInput(RdfModel rdfModel) {
+    private InputStream givenSkosInput(SkosModel skosModel) {
         InputStream i = mock(InputStream.class);
         given(skosTranslator.translate(eq(i), eq("http://example.com/"), eq(SkosFileType.JSON_LD)))
-                .willReturn(rdfModel);
+                .willReturn(skosModel);
         return i;
     }
 
@@ -368,22 +443,22 @@ class SkosPersistenceServiceTest {
                 .willReturn(Sets.newHashSet(schemeHasTopConceptOne, schemeHasTopConceptTwo));
     }
 
-    private Model givenSkosOutput(RdfModel input) {
+    private Model givenSkosOutput(SkosModel input) {
         Model model = mock(Model.class);
         given(skosTranslator.translate(argThat(new EqualsRdfModel(input)))).willReturn(model);
         return model;
     }
 
-    private class EqualsRdfModel implements ArgumentMatcher<RdfModel> {
+    private class EqualsRdfModel implements ArgumentMatcher<SkosModel> {
 
-        private RdfModel expected;
+        private SkosModel expected;
 
-        private EqualsRdfModel(RdfModel expected) {
+        private EqualsRdfModel(SkosModel expected) {
             this.expected = expected;
         }
 
         @Override
-        public boolean matches(RdfModel argument) {
+        public boolean matches(SkosModel argument) {
             return expected.getConcepts().equals(argument.getConcepts())
                     && expected.getConceptSchemes().equals(argument.getConceptSchemes())
                     && expected.getRelationships().equals(argument.getRelationships());

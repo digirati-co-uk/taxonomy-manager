@@ -3,7 +3,7 @@ package com.digirati.taxonomy.manager.lookup.persistence.model;
 import java.util.Collection;
 
 /** Models the contents of a SKOS file. */
-public class RdfModel {
+public class SkosModel {
 
     private final Collection<ConceptModel> concepts;
 
@@ -11,7 +11,7 @@ public class RdfModel {
 
     private final Collection<ConceptSemanticRelationModel> relationships;
 
-    public RdfModel(
+    public SkosModel(
             Collection<ConceptModel> concepts,
             Collection<ConceptSchemeModel> conceptSchemes,
             Collection<ConceptSemanticRelationModel> relationships) {

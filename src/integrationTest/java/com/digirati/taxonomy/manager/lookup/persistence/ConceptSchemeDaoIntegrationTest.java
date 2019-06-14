@@ -79,7 +79,7 @@ public class ConceptSchemeDaoIntegrationTest {
     }
 
     @Test
-    void readShouldReturnEmptyIfIdCannotBeFound() {
+    void readShouldReturnEmptyIfIdCannotBeFound() throws SkosPersistenceException {
         assertEquals(Optional.empty(), underTest.read(UUID.randomUUID().toString(), connection));
     }
 
