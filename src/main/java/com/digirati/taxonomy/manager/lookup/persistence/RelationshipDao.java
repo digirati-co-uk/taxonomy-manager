@@ -15,6 +15,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * DAO for managing everything to do with persisting and retrieving a {@link
+ * ConceptSemanticRelationModel} to/from the database.
+ */
 class RelationshipDao {
 
     private static final Logger logger = LogManager.getLogger(RelationshipDao.class);
@@ -45,6 +49,14 @@ class RelationshipDao {
     private static final String DELETE_RELATED_TO_TARGET_TEMPLATE =
             "DELETE FROM concept_semantic_relation WHERE target_id=?::UUID";
 
+    /**
+     * Persists a new relationship to the database.
+     *
+     * @param relationship the relationship to persist.
+     * @param connection a connection to the database.
+     * @throws SkosPersistenceException if a relationship between the two entities already exists,
+     *     or an error occurs executing the write.
+     */
     public void create(ConceptSemanticRelationModel relationship, Connection connection)
             throws SkosPersistenceException {
         if (read(relationship.getSourceId(), relationship.getTargetId(), connection).isPresent()) {
@@ -69,6 +81,18 @@ class RelationshipDao {
         }
     }
 
+    /**
+     * Retrieves the relationship between two given entities. Note that the source and target IDs
+     * must be provided in the correct order - if no relationship exists in the specified direction
+     * but one exists in the opposite direction, this will not be aware of this.
+     *
+     * @param sourceId the ID of the source entity (also known as the "object" of the relationship)
+     * @param targetId the ID of the target entity (also known as the "subject" of the relationship)
+     * @param connection a connection to the database.
+     * @return an {@link Optional} containing the specified relationship if one exists; an empty
+     *     optional if not.
+     * @throws SkosPersistenceException if an error occurs while executing the read.
+     */
     public Optional<ConceptSemanticRelationModel> read(
             String sourceId, String targetId, Connection connection)
             throws SkosPersistenceException {
@@ -107,6 +131,15 @@ class RelationshipDao {
         return relationships;
     }
 
+    /**
+     * Gets all relationships involving a given entity. Note that this will return any relationships
+     * in which this entity is either the source or the target.
+     *
+     * @param sourceId the ID of the entity to get the relationships for.
+     * @param connection a connection to the database.
+     * @return a collection of all relationships involving the given entity.
+     * @throws SkosPersistenceException if an error occurs trying to read from the database.
+     */
     public Collection<ConceptSemanticRelationModel> getRelationships(
             String sourceId, Connection connection) throws SkosPersistenceException {
         List<ConceptSemanticRelationModel> relationships = new ArrayList<>();
@@ -146,6 +179,14 @@ class RelationshipDao {
         }
     }
 
+    /**
+     * Updates a relationship in the database.
+     *
+     * @param relationship a model of the updated relationship.
+     * @param connection a connection to the database.
+     * @throws SkosPersistenceException if no relationship exists between the source and target of
+     *     the updated relationship, or if something goes wrong executing the update.
+     */
     public void update(ConceptSemanticRelationModel relationship, Connection connection)
             throws SkosPersistenceException {
         if (!read(relationship.getSourceId(), relationship.getTargetId(), connection).isPresent()) {
@@ -170,6 +211,17 @@ class RelationshipDao {
         }
     }
 
+    /**
+     * Deletes a relationship between two given entities. Note that the source and target IDs must
+     * be provided in the correct order - if no relationship exists in the specified direction but
+     * one exists in the opposite direction, the one in the opposite direction will not be removed.
+     *
+     * @param sourceId the ID of the source entity.
+     * @param targetId the ID of the target entity.
+     * @param connection a connection to the database.
+     * @throws SkosPersistenceException if no such relationship exists, or if an error occurs during
+     *     the update.
+     */
     public void delete(String sourceId, String targetId, Connection connection)
             throws SkosPersistenceException {
         if (!read(sourceId, targetId, connection).isPresent()) {
@@ -195,10 +247,18 @@ class RelationshipDao {
 
         } catch (SQLException e) {
             logger.error(e);
+            throw SkosPersistenceException.unableToRemoveRelationship(sourceId, targetId, e);
         }
     }
 
-    public void delete(String id, Connection connection) {
+    /**
+     * Deletes all relationships involving a given entity.
+     *
+     * @param id the ID of the entity for which to remove all relationships.
+     * @param connection a connection to the database.
+     * @throws SkosPersistenceException if an error occurs while executing the update.
+     */
+    public void delete(String id, Connection connection) throws SkosPersistenceException {
         logger.info("Preparing to delete all relationships involving " + id);
 
         try (PreparedStatement deleteBySourceIri =
@@ -226,6 +286,7 @@ class RelationshipDao {
 
         } catch (SQLException e) {
             logger.error(e);
+            throw SkosPersistenceException.unableToRemoveRelationships(id, e);
         }
     }
 }

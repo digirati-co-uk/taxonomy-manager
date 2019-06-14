@@ -1,5 +1,9 @@
 package com.digirati.taxonomy.manager.lookup.persistence;
 
+/**
+ * Enum of all supported file types from which SKOS can be parsed, and to which the model of the
+ * SKOS entities can be written.
+ */
 public enum SkosFileType {
     RDF_XML("RDF/XML"),
     N_TRIPLE("N-TRIPLE"),

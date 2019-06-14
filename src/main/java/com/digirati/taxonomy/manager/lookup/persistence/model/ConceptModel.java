@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.Objects;
 
+/** Models a SKOS concept. */
 public class ConceptModel {
 
     private final String id;

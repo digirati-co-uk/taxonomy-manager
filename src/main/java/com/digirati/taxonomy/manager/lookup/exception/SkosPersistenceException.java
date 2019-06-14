@@ -2,6 +2,10 @@ package com.digirati.taxonomy.manager.lookup.exception;
 
 import com.digirati.taxonomy.manager.lookup.persistence.model.ConceptSemanticRelationModel;
 
+/**
+ * Exception to indicate that some error pertaining to storing or retrieving some SKOS entity has
+ * occurred.
+ */
 public class SkosPersistenceException extends Exception {
 
     protected SkosPersistenceException(String message) {
@@ -88,11 +92,25 @@ public class SkosPersistenceException extends Exception {
                 "Unable to delete relationships involving entity with ID=" + id, t);
     }
 
+    public static SkosPersistenceException unableToRemoveRelationship(
+            String sourceId, String targetId, Throwable t) {
+        return new SkosPersistenceException(
+                "Unable to delete relationship between " + sourceId + " and " + targetId, t);
+    }
+
     public static SkosPersistenceException unableToGetConcept(String id, Throwable t) {
         return new SkosPersistenceException("Unable to get concept with ID=" + id, t);
     }
 
     public static SkosPersistenceException unableToGetConceptScheme(String id, Throwable t) {
         return new SkosPersistenceException("Unable to get concept scheme with ID=" + id, t);
+    }
+
+    public static SkosPersistenceException unableToDeleteConcept(String id, Throwable t) {
+        return new SkosPersistenceException("Unable to delete concept with ID=" + id, t);
+    }
+
+    public static SkosPersistenceException unableToDeleteConceptScheme(String id, Throwable t) {
+        return new SkosPersistenceException("Unable to delete concept scheme with ID=" + id, t);
     }
 }

@@ -15,6 +15,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * DAO for managing everything to do with persisting and retrieving a {@link ConceptModel} to/from
+ * the database.
+ */
 class ConceptDao {
 
     private static final Logger logger = LogManager.getLogger(ConceptDao.class);
@@ -33,6 +37,14 @@ class ConceptDao {
 
     private static final String DELETE_TEMPLATE = "DELETE FROM concept WHERE id=?::UUID";
 
+    /**
+     * Persists a new concept to the database.
+     *
+     * @param toCreate the concept to persist.
+     * @param connection a connection to the database.
+     * @throws SkosPersistenceException if the concept already exists, or an error occurs executing
+     *     the write.
+     */
     public void create(ConceptModel toCreate, Connection connection)
             throws SkosPersistenceException {
         logger.info("Preparing to create concept with ID=" + toCreate.getId());
@@ -84,8 +96,17 @@ class ConceptDao {
         return concepts;
     }
 
+    /**
+     * Retrieves a concept with a given ID from the database.
+     *
+     * @param id the ID of the concept to retrieve.
+     * @param connection a connection to the database.
+     * @return an {@link Optional} containing the retrieved concept if present in the database; an
+     *     empty Optional if not.
+     */
     public Optional<ConceptModel> read(String id, Connection connection) {
-        try (PreparedStatement readStatement = connection.prepareStatement(SELECT_BY_IRI_TEMPLATE)) {
+        try (PreparedStatement readStatement =
+                connection.prepareStatement(SELECT_BY_IRI_TEMPLATE)) {
 
             readStatement.setString(1, id);
             ResultSet resultSet = readStatement.executeQuery();
@@ -102,6 +123,15 @@ class ConceptDao {
         return Optional.empty();
     }
 
+    /**
+     * Updates a pre-existing concept in the database.
+     *
+     * @param toUpdate a model of the updated concept.
+     * @param connection a connection to the database
+     * @throws SkosPersistenceException if no ID is supplied against which to update the row, the
+     *     supplied ID does not correspond to any row in the database, or an error occurs executing
+     *     the write.
+     */
     public void update(ConceptModel toUpdate, Connection connection)
             throws SkosPersistenceException {
         logger.info("Preparing to update concept with ID=" + toUpdate.getId());
@@ -136,6 +166,14 @@ class ConceptDao {
         }
     }
 
+    /**
+     * Deletes a concept with a given ID from the database.
+     *
+     * @param id the ID of the concept to delete.
+     * @param connection a connection to the database.
+     * @throws SkosPersistenceException if no such concept exists to be deleted, or if an error
+     *     occurs while executing the update.
+     */
     public void delete(String id, Connection connection) throws SkosPersistenceException {
         logger.info("Preparing to delete concept with ID=" + id);
 
@@ -156,6 +194,7 @@ class ConceptDao {
 
         } catch (SQLException e) {
             logger.error(e);
+            throw SkosPersistenceException.unableToDeleteConcept(id, e);
         }
     }
 }

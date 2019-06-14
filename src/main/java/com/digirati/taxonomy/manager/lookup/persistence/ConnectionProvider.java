@@ -10,6 +10,11 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
+/**
+ * Provides a connection to a database. The details of the connection string are configured in a
+ * file named "db-config.properties" in the resources root, and the user credentials are configured
+ * in an untracked file named "db-credentials.properties" in the same location.
+ */
 class ConnectionProvider {
 
     private static final Logger logger = LogManager.getLogger(ConnectionProvider.class);

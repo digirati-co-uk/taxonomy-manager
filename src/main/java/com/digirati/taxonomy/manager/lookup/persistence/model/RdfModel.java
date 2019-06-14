@@ -2,6 +2,7 @@ package com.digirati.taxonomy.manager.lookup.persistence.model;
 
 import java.util.Collection;
 
+/** Models the contents of a SKOS file. */
 public class RdfModel {
 
     private final Collection<ConceptModel> concepts;

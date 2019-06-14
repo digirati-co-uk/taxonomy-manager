@@ -5,6 +5,7 @@ import org.apache.jena.rdf.model.Property;
 
 import java.util.Objects;
 
+/** Models a relationship between two SKOS entities. */
 public class ConceptSemanticRelationModel {
 
     private final String sourceId;

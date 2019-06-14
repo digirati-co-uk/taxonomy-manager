@@ -2,6 +2,7 @@ package com.digirati.taxonomy.manager.lookup.persistence.model;
 
 import java.util.Objects;
 
+/** Models a SKOS concept scheme. */
 public class ConceptSchemeModel {
 
     private final String id;

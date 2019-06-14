@@ -25,6 +25,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * Translates SKOS into an {@link RdfModel} modelling all of the entities defined in that SKOS, and
+ * vice-versa.
+ */
 class SkosTranslator {
 
     private static final Logger logger = LogManager.getLogger(SkosTranslator.class);
@@ -33,10 +37,14 @@ class SkosTranslator {
             ModelFactory.createDefaultModel()
                     .createProperty("http://purl.org/dc/terms/1.1/", "title");
 
-    SkosTranslator() {
-        // no-op
-    }
-
+    /**
+     * Translates a SKOS input into an {@link RdfModel}
+     *
+     * @param skos an {@link InputStream} of the SKOS to translate.
+     * @param baseUrl the base URL of the SKOS, against which to resolve any relative URLs.
+     * @param skosFileType the file type of the SKOS input.
+     * @return an {@link RdfModel} containing all entities defined in the input SKOS.
+     */
     public RdfModel translate(InputStream skos, String baseUrl, SkosFileType skosFileType) {
         Model model = read(skos, baseUrl, skosFileType);
         List<ConceptModel> concepts = new ArrayList<>();
@@ -119,6 +127,12 @@ class SkosTranslator {
         return conceptSemanticRelations;
     }
 
+    /**
+     * Translates an {@link RdfModel} into a {@link Model} representing the SKOS.
+     *
+     * @param rdfModel a model of the entities to describe as SKOS.
+     * @return a {@link Model} representing the translated SKOS.
+     */
     public Model translate(RdfModel rdfModel) {
         Model model = ModelFactory.createDefaultModel();
         for (ConceptModel concept : rdfModel.getConcepts()) {

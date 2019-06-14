@@ -25,6 +25,10 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * Service which encapsulates the business logic needed to read SKOS from and write SKOS to the
+ * database.
+ */
 public class SkosPersistenceService {
 
     private static final Logger logger = LogManager.getLogger(SkosPersistenceService.class);
@@ -60,6 +64,15 @@ public class SkosPersistenceService {
         this.skosTranslator = skosTranslator;
     }
 
+    /**
+     * Creates all entities defined in an input piece of SKOS.
+     *
+     * @param skos an {@link InputStream} of the SKOS to be created.
+     * @param baseUrl the base URL against which to resolve relative URLs in the SKOS input.
+     * @param fileType the file type of the SKOS input.
+     * @throws SkosPersistenceException if an error occurs while attempting to persist the SKOS
+     *     entities.
+     */
     public void create(InputStream skos, String baseUrl, SkosFileType fileType)
             throws SkosPersistenceException {
         Map<String, String> idToUuid = new HashMap<>();
@@ -147,6 +160,16 @@ public class SkosPersistenceService {
                 originalRelationship.isTransitive());
     }
 
+    /**
+     * Retrieves the SKOS containing a given concept as well as all entities directly related to
+     * that concept.
+     *
+     * @param id the ID of the concept to retrieve.
+     * @param outputFileType the file type in which to write the output SKOS.
+     * @return an {@link OutputStream} of the SKOS related to the concept.
+     * @throws SkosPersistenceException if an error occurs while attempting to read from the
+     *     database.
+     */
     public OutputStream getConcept(String id, SkosFileType outputFileType)
             throws SkosPersistenceException {
         try (Connection connection = connectionProvider.getConnection()) {
@@ -203,6 +226,16 @@ public class SkosPersistenceService {
                 .collect(Collectors.toSet());
     }
 
+    /**
+     * Retrieves the SKOS containing a given concept scheme as well as all entities directly related
+     * to that scheme.
+     *
+     * @param id the ID of the concept scheme to retrieve.
+     * @param outputFileType the file type in which to write the output SKOS.
+     * @return an {@link OutputStream} of the SKOS related to the concept scheme.
+     * @throws SkosPersistenceException if an error occurs while attempting to read from the
+     *     database.
+     */
     public OutputStream getConceptScheme(String id, SkosFileType outputFileType)
             throws SkosPersistenceException {
         try (Connection connection = connectionProvider.getConnection()) {
@@ -229,6 +262,15 @@ public class SkosPersistenceService {
         }
     }
 
+    /**
+     * Updates all entities defined in an input piece of SKOS.
+     *
+     * @param skos an {@link InputStream} of the SKOS to be updated.
+     * @param baseUrl the base URL against which to resolve relative URLs in the SKOS input.
+     * @param fileType the file type of the SKOS input.
+     * @throws SkosPersistenceException if an error occurs while attempting to persist the SKOS
+     *     entities.
+     */
     public void update(InputStream skos, String baseUrl, SkosFileType fileType)
             throws SkosPersistenceException {
         RdfModel rdfModel = skosTranslator.translate(skos, baseUrl, fileType);
@@ -258,12 +300,17 @@ public class SkosPersistenceService {
         }
     }
 
-    public void deleteConceptScheme(String conceptSchemePrimaryKey)
-            throws SkosPersistenceException {
+    /**
+     * Deletes a given concept scheme, as well as any relationships involving that scheme.
+     *
+     * @param conceptSchemeId the ID of the scheme to delete.
+     * @throws SkosPersistenceException if an error occurs while attempting to delete the scheme.
+     */
+    public void deleteConceptScheme(String conceptSchemeId) throws SkosPersistenceException {
         try (Connection connection = connectionProvider.getConnection()) {
             try {
-                relationshipDao.delete(conceptSchemePrimaryKey, connection);
-                conceptSchemeDao.delete(conceptSchemePrimaryKey, connection);
+                relationshipDao.delete(conceptSchemeId, connection);
+                conceptSchemeDao.delete(conceptSchemeId, connection);
 
             } catch (SkosPersistenceException e) {
                 connection.rollback();
@@ -272,15 +319,21 @@ public class SkosPersistenceService {
 
         } catch (SQLException e) {
             logger.error(e);
-            throw SkosPersistenceException.unableToRemoveRelationships(conceptSchemePrimaryKey, e);
+            throw SkosPersistenceException.unableToRemoveRelationships(conceptSchemeId, e);
         }
     }
 
-    public void deleteConcept(String conceptPrimaryKey) throws SkosPersistenceException {
+    /**
+     * Deletes a concept, as well as any relationships involving that concept.
+     *
+     * @param conceptId the ID of the concept to delete.
+     * @throws SkosPersistenceException if an error occurs while attempting to delete the concept.
+     */
+    public void deleteConcept(String conceptId) throws SkosPersistenceException {
         try (Connection connection = connectionProvider.getConnection()) {
             try {
-                relationshipDao.delete(conceptPrimaryKey, connection);
-                conceptDao.delete(conceptPrimaryKey, connection);
+                relationshipDao.delete(conceptId, connection);
+                conceptDao.delete(conceptId, connection);
 
             } catch (SkosPersistenceException e) {
                 connection.rollback();
@@ -289,7 +342,7 @@ public class SkosPersistenceService {
 
         } catch (SQLException e) {
             logger.error(e);
-            throw SkosPersistenceException.unableToRemoveRelationships(conceptPrimaryKey, e);
+            throw SkosPersistenceException.unableToRemoveRelationships(conceptId, e);
         }
     }
 }
