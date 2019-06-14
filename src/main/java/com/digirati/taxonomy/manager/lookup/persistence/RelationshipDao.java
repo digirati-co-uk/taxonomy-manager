@@ -63,7 +63,7 @@ class RelationshipDao {
             throw SkosPersistenceException.relationshipAlreadyExists(relationship);
         }
 
-        logger.info("Preparing to create relationship: " + relationship);
+        logger.info("Preparing to create relationship: {}", relationship);
 
         try (PreparedStatement createStatement = connection.prepareStatement(CREATE_TEMPLATE)) {
 
@@ -73,7 +73,7 @@ class RelationshipDao {
             createStatement.setString(4, relationship.getTargetId());
             createStatement.execute();
 
-            logger.info("Successfully created relationship: " + relationship);
+            logger.info("Successfully created relationship: {}", relationship);
 
         } catch (SQLException e) {
             logger.error(e);
@@ -143,23 +143,25 @@ class RelationshipDao {
     public Collection<ConceptSemanticRelationModel> getRelationships(
             String sourceId, Connection connection) throws SkosPersistenceException {
         List<ConceptSemanticRelationModel> relationships = new ArrayList<>();
+        relationships.addAll(
+                getRelationships(sourceId, connection, SELECT_RELATED_TO_SOURCE_TEMPLATE));
+        relationships.addAll(
+                getRelationships(sourceId, connection, SELECT_RELATED_TO_TARGET_TEMPLATE));
+        return relationships;
+    }
 
-        ResultSet relatedToSourceResults = null;
-        ResultSet relatedToTargetResults = null;
+    private Collection<ConceptSemanticRelationModel> getRelationships(
+            String sourceId, Connection connection, String sqlTemplate)
+            throws SkosPersistenceException {
+
+        ResultSet relatedResults = null;
         try (PreparedStatement relatedToSourceStatement =
-                        connection.prepareStatement(SELECT_RELATED_TO_SOURCE_TEMPLATE);
-                PreparedStatement relatedToTargetStatement =
-                        connection.prepareStatement(SELECT_RELATED_TO_TARGET_TEMPLATE)) {
+                connection.prepareStatement(sqlTemplate)) {
 
             relatedToSourceStatement.setString(1, sourceId);
-            relatedToTargetStatement.setString(1, sourceId);
-            relatedToSourceResults = relatedToSourceStatement.executeQuery();
-            relatedToTargetResults = relatedToTargetStatement.executeQuery();
+            relatedResults = relatedToSourceStatement.executeQuery();
 
-            relationships.addAll(fromResultSet(relatedToSourceResults));
-            relationships.addAll(fromResultSet(relatedToTargetResults));
-
-            return relationships;
+            return fromResultSet(relatedResults);
 
         } catch (SQLException e) {
             logger.error(e);
@@ -167,11 +169,8 @@ class RelationshipDao {
 
         } finally {
             try {
-                if (relatedToSourceResults != null) {
-                    relatedToSourceResults.close();
-                }
-                if (relatedToTargetResults != null) {
-                    relatedToTargetResults.close();
+                if (relatedResults != null) {
+                    relatedResults.close();
                 }
             } catch (SQLException e) {
                 logger.error("Unable to close result set", e);
@@ -193,7 +192,7 @@ class RelationshipDao {
             throw SkosPersistenceException.relationshipNotFound(relationship);
         }
 
-        logger.info("Preparing to update relationship: " + relationship);
+        logger.info("Preparing to update relationship: {}", relationship);
 
         try (PreparedStatement updateStatement = connection.prepareStatement(UPDATE_TEMPLATE)) {
 
@@ -203,7 +202,7 @@ class RelationshipDao {
             updateStatement.setString(4, relationship.getTargetId());
             updateStatement.executeUpdate();
 
-            logger.info("Successfully updated relationship: " + relationship);
+            logger.info("Successfully updated relationship: {}", relationship);
 
         } catch (SQLException e) {
             logger.error(e);
@@ -228,7 +227,7 @@ class RelationshipDao {
             throw SkosPersistenceException.relationshipNotFound(sourceId, targetId);
         }
 
-        logger.info("Preparing to delete relationship between " + sourceId + " and " + targetId);
+        logger.info("Preparing to delete relationship between {} and {}", sourceId, targetId);
 
         try (PreparedStatement deleteStatement =
                 connection.prepareStatement(DELETE_RELATIONSHIP_TEMPLATE)) {
@@ -238,12 +237,10 @@ class RelationshipDao {
             int rowsAffected = deleteStatement.executeUpdate();
 
             logger.info(
-                    "Successfully deleted relationship between "
-                            + sourceId
-                            + " and "
-                            + targetId
-                            + " - number of rows affected: "
-                            + rowsAffected);
+                    "Successfully deleted relationship between {} and {} - number of rows affected: {}",
+                    sourceId,
+                    targetId,
+                    rowsAffected);
 
         } catch (SQLException e) {
             logger.error(e);
@@ -259,7 +256,7 @@ class RelationshipDao {
      * @throws SkosPersistenceException if an error occurs while executing the update.
      */
     public void delete(String id, Connection connection) throws SkosPersistenceException {
-        logger.info("Preparing to delete all relationships involving " + id);
+        logger.info("Preparing to delete all relationships involving {}", id);
 
         try (PreparedStatement deleteBySourceIri =
                         connection.prepareStatement(DELETE_RELATED_TO_SOURCE_TEMPLATE);
@@ -277,12 +274,10 @@ class RelationshipDao {
             connection.commit();
 
             logger.info(
-                    "Successfully deleted all relationships involving "
-                            + id
-                            + " - number of source relationships deleted: "
-                            + sourceRowsAffected
-                            + ", number of target relationships deleted: "
-                            + targetRowsAffected);
+                    "Successfully deleted all relationships involving {} - number of source relationships deleted: {}, number of target relationships deleted: {}",
+                    id,
+                    sourceRowsAffected,
+                    targetRowsAffected);
 
         } catch (SQLException e) {
             logger.error(e);

@@ -47,7 +47,7 @@ class ConceptDao {
      */
     public void create(ConceptModel toCreate, Connection connection)
             throws SkosPersistenceException {
-        logger.info("Preparing to create concept with ID=" + toCreate.getId());
+        logger.info("Preparing to create concept with ID={}", toCreate.getId());
 
         if (toCreate.getId() != null && read(toCreate.getId(), connection).isPresent()) {
             throw SkosPersistenceException.conceptAlreadyExists(toCreate.getId());
@@ -67,7 +67,7 @@ class ConceptDao {
             createStatement.setString(10, toCreate.getScopeNote().toString());
             createStatement.execute();
 
-            logger.info("Successfully created concept with ID=" + toCreate.getId());
+            logger.info("Successfully created concept with ID={}", toCreate.getId());
 
         } catch (SQLException e) {
             logger.error(e);
@@ -134,7 +134,7 @@ class ConceptDao {
      */
     public void update(ConceptModel toUpdate, Connection connection)
             throws SkosPersistenceException {
-        logger.info("Preparing to update concept with ID=" + toUpdate.getId());
+        logger.info("Preparing to update concept with ID={}", toUpdate.getId());
 
         if (toUpdate.getId() == null || !read(toUpdate.getId(), connection).isPresent()) {
             throw SkosPersistenceException.conceptNotFound(toUpdate.getId());
@@ -155,10 +155,9 @@ class ConceptDao {
             int rowsAffected = updateStatement.executeUpdate();
 
             logger.info(
-                    "Successfully updated concept with ID="
-                            + toUpdate.getId()
-                            + " - number of rows affected: "
-                            + rowsAffected);
+                    "Successfully updated concept with ID={} - number of rows affected: {}",
+                    toUpdate.getId(),
+                    rowsAffected);
 
         } catch (SQLException e) {
             logger.error(e);
@@ -175,7 +174,7 @@ class ConceptDao {
      *     occurs while executing the update.
      */
     public void delete(String id, Connection connection) throws SkosPersistenceException {
-        logger.info("Preparing to delete concept with ID=" + id);
+        logger.info("Preparing to delete concept with ID={}", id);
 
         if (!read(id, connection).isPresent()) {
             throw SkosPersistenceException.conceptNotFound(id);
@@ -187,10 +186,9 @@ class ConceptDao {
             deleteStatement.close();
 
             logger.info(
-                    "Successfully deleted concept with ID="
-                            + id
-                            + " - number of rows affected: "
-                            + rowsAffected);
+                    "Successfully deleted concept with ID={} - number of rows affected: {}",
+                    id,
+                    rowsAffected);
 
         } catch (SQLException e) {
             logger.error(e);

@@ -41,7 +41,7 @@ class ConceptSchemeDao {
      */
     public void create(ConceptSchemeModel toCreate, Connection connection)
             throws SkosPersistenceException {
-        logger.info("Preparing to create concept scheme with ID=" + toCreate.getId());
+        logger.info("Preparing to create concept scheme with ID={}", toCreate.getId());
 
         if (toCreate.getId() != null && read(toCreate.getId(), connection).isPresent()) {
             throw SkosPersistenceException.conceptSchemeAlreadyExists(toCreate.getId());
@@ -53,7 +53,7 @@ class ConceptSchemeDao {
             createStatement.setString(2, toCreate.getTitle());
             createStatement.execute();
 
-            logger.info("Successfully created concept with ID=" + toCreate.getId());
+            logger.info("Successfully created concept with ID={}", toCreate.getId());
 
         } catch (SQLException e) {
             logger.error(e);
@@ -108,7 +108,7 @@ class ConceptSchemeDao {
      */
     public void update(ConceptSchemeModel toUpdate, Connection connection)
             throws SkosPersistenceException {
-        logger.info("Preparing to update concept scheme with ID=" + toUpdate.getId());
+        logger.info("Preparing to update concept scheme with ID={}", toUpdate.getId());
 
         if (toUpdate.getId() == null || !read(toUpdate.getId(), connection).isPresent()) {
             throw SkosPersistenceException.conceptSchemeNotFound(toUpdate.getId());
@@ -120,7 +120,7 @@ class ConceptSchemeDao {
             createStatement.setString(2, toUpdate.getId());
             createStatement.execute();
 
-            logger.info("Successfully updated concept with ID=" + toUpdate.getId());
+            logger.info("Successfully updated concept with ID={}", toUpdate.getId());
 
         } catch (SQLException e) {
             logger.error(e);
@@ -137,7 +137,7 @@ class ConceptSchemeDao {
      *     error occurs while executing the update.
      */
     public void delete(String id, Connection connection) throws SkosPersistenceException {
-        logger.info("Preparing to delete concept scheme with ID=" + id);
+        logger.info("Preparing to delete concept scheme with ID={}", id);
 
         if (!read(id, connection).isPresent()) {
             throw SkosPersistenceException.conceptSchemeNotFound(id);
@@ -148,10 +148,9 @@ class ConceptSchemeDao {
             int rowsAffected = deleteStatement.executeUpdate();
 
             logger.info(
-                    "Successfully deleted concept scheme with ID="
-                            + id
-                            + " - number of rows affected: "
-                            + rowsAffected);
+                    "Successfully deleted concept scheme with ID={} - number of rows affected: {}",
+                    id,
+                    rowsAffected);
 
         } catch (SQLException e) {
             logger.error(e);

@@ -62,7 +62,7 @@ class SkosTranslator {
             } else if (SKOS.ConceptScheme.getURI().equals(rdfTypeUri)) {
                 conceptSchemes.add(extractConceptScheme(resource));
             } else {
-                logger.debug("Found an unsupported RDF type when deserialising RDF: " + rdfType);
+                logger.debug("Found an unsupported RDF type when deserialising RDF: {}", rdfType);
             }
         }
         return new RdfModel(concepts, conceptSchemes, conceptSemanticRelations);
@@ -201,7 +201,7 @@ class SkosTranslator {
             Resource conceptSchemeResource) {
         Resource object = getResource(model, relationship.getTargetId());
         if (object == null) {
-            logger.debug("Unable to locate object for relation: " + relationship);
+            logger.debug("Unable to locate object for relation: {}", relationship);
         } else {
             conceptSchemeResource.addProperty(relationship.getRelationPredicate(), object);
             model.createStatement(

@@ -8,6 +8,8 @@ import com.digirati.taxonomy.manager.lookup.persistence.model.ConceptSemanticRel
  */
 public class SkosPersistenceException extends Exception {
 
+    private static final String AND = " and ";
+
     protected SkosPersistenceException(String message) {
         super(message);
     }
@@ -39,13 +41,13 @@ public class SkosPersistenceException extends Exception {
 
     public static SkosPersistenceException relationshipNotFound(String sourceId, String targetId) {
         return new SkosPersistenceException(
-                "Relationship between " + sourceId + " and " + targetId + " was not found");
+                "Relationship between " + sourceId + AND + targetId + " was not found");
     }
 
     public static SkosPersistenceException relationshipNotFound(
             String sourceId, String targetId, Throwable t) {
         return new SkosPersistenceException(
-                "Relationship between " + sourceId + " and " + targetId + " was not found", t);
+                "Relationship between " + sourceId + AND + targetId + " was not found", t);
     }
 
     public static SkosPersistenceException relationshipNotFound(
@@ -95,7 +97,7 @@ public class SkosPersistenceException extends Exception {
     public static SkosPersistenceException unableToRemoveRelationship(
             String sourceId, String targetId, Throwable t) {
         return new SkosPersistenceException(
-                "Unable to delete relationship between " + sourceId + " and " + targetId, t);
+                "Unable to delete relationship between " + sourceId + AND + targetId, t);
     }
 
     public static SkosPersistenceException unableToGetConcept(String id, Throwable t) {
