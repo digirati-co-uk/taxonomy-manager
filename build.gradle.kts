@@ -9,6 +9,9 @@ plugins {
 val ci: String by project
 val isCiRunning = ci.toBoolean()
 
+val checkstyleReportLocations = mutableListOf<String>()
+val spotbugsReportLocations = mutableListOf<String>()
+
 subprojects {
     apply(plugin = "com.github.spotbugs")
     apply(plugin = "checkstyle")
@@ -33,12 +36,22 @@ subprojects {
             xml.isEnabled = isCiRunning
             html.isEnabled = !isCiRunning
         }
+
+        outputs.files.forEach { file ->
+            checkstyleReportLocations += file.toString()
+        }
+
+        ignoreFailures = true
     }
 
     tasks.withType<SpotBugsTask> {
         reports {
             xml.isEnabled = isCiRunning
             html.isEnabled = !isCiRunning
+        }
+
+        outputs.files.forEach { file ->
+            spotbugsReportLocations += file.toString()
         }
     }
 
@@ -56,5 +69,7 @@ sonarqube {
         property("sonar.projectKey", "digirati-co-uk_digirati-taxonomy-manager")
         property("sonar.pullrequest.provider", "GitHub")
         property("sonar.pullrequest.github.repository", "digirati-co-uk/digirati-taxonomy-manager")
+        property("sonar.java.spotbugs.reportPaths", spotbugsReportLocations.joinToString(","))
+        property("sonar.java.checkstyle.reportPaths", checkstyleReportLocations.joinToString(","))
     }
 }
