@@ -9,7 +9,7 @@ dependencies {
     implementation("com.google.guava", "guava", "27.1-jre")
 
     implementation("edu.stanford.nlp", "stanford-corenlp", "3.9.2")
-    runtimeOnly("edu.stanford.nlp", "stanford-corenlp", "3.9.2", "models")
+    runtimeOnly("edu.stanford.nlp", "stanford-corenlp", "3.9.2", classifier = "models")
 
     testImplementation("org.junit.jupiter", "junit-jupiter", "5.4.2")
     testImplementation("org.hamcrest", "hamcrest", "2.1")
