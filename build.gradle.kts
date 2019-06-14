@@ -2,6 +2,7 @@ import com.github.spotbugs.SpotBugsExtension
 import com.github.spotbugs.SpotBugsTask
 
 plugins {
+    id("com.gradle.build-scan") version "2.0.2"
     id("org.sonarqube") version "2.7"
     id("com.github.spotbugs") version "1.7.1" apply (false)
 }
@@ -76,4 +77,9 @@ sonarqube {
         property("sonar.java.spotbugs.reportPaths", spotbugsReportLocations.joinToString(","))
         property("sonar.java.checkstyle.reportPaths", checkstyleReportLocations.joinToString(","))
     }
+}
+
+buildScan {
+    setTermsOfServiceUrl("https://gradle.com/terms-of-service")
+    setTermsOfServiceAgree("yes")
 }
