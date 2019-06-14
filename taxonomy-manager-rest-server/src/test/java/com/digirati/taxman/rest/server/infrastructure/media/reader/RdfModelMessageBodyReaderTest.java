@@ -25,12 +25,12 @@ import static org.jboss.resteasy.spi.HttpResponseCodes.SC_OK;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class RdfModelMessageBodyReaderTest {
-    private final Dispatcher dispatcher = MockDispatcherFactory.createDispatcher();
-    private final ResourceClass rootResourceClass =
+    private static final Dispatcher dispatcher = MockDispatcherFactory.createDispatcher();
+    private static final ResourceClass rootResourceClass =
             new ResourceBuilder().buildRootResource(RdfModelResource.class).buildClass();
 
     @BeforeAll
-    public void setup() {
+    public static void setup() {
         var providerFactory = dispatcher.getProviderFactory();
         providerFactory.registerProvider(RdfModelMessageBodyReader.class);
 
