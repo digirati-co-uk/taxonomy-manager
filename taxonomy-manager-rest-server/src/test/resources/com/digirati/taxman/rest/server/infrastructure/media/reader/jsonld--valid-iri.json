@@ -1,0 +1,8 @@
+{
+  "@context": {
+    "dcterms": "http://purl.org/dc/terms/1.1/"
+  },
+  "@id": "http://example.org/test",
+  "@type": "rdf:Dataset",
+  "dcterms:identifier": "test-id"
+}
