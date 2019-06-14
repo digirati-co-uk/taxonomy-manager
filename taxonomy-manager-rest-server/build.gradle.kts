@@ -26,5 +26,4 @@ dependencies {
     }
 
     testCompile("io.quarkus", "quarkus-junit5", "0.16.1")
-    testCompile("io.rest-assured", "rest-assured")
 }
