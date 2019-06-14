@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+        xmlns:dcterms="http://purl.org/dc/terms/1.1/"
+        xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+>
+    <rdf:Description rdf:about="http://example.org/test">
+        <rdf:type rdf:resource="rdf:Dataset"/>
+        <dcterms:identifier>test-id</dcterms:identifier>
+    </rdf:Description>
+</rdf:RDF>
