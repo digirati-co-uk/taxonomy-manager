@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class ConceptDao {
+class ConceptDao {
 
     private static final Logger logger = LogManager.getLogger(ConceptDao.class);
 
@@ -33,17 +33,11 @@ public class ConceptDao {
 
     private static final String DELETE_TEMPLATE = "DELETE FROM concept WHERE id=?::UUID";
 
-    private final ConnectionProvider connectionProvider;
-
-    ConceptDao(ConnectionProvider connectionProvider) {
-        this.connectionProvider = connectionProvider;
-    }
-
     public void create(ConceptModel toCreate, Connection connection)
             throws SkosPersistenceException {
         logger.info("Preparing to create concept with ID=" + toCreate.getId());
 
-        if (toCreate.getId() != null && read(toCreate.getId()).isPresent()) {
+        if (toCreate.getId() != null && read(toCreate.getId(), connection).isPresent()) {
             throw SkosPersistenceException.conceptAlreadyExists(toCreate.getId());
         }
 
@@ -90,10 +84,8 @@ public class ConceptDao {
         return concepts;
     }
 
-    public Optional<ConceptModel> read(String id) {
-        try (Connection connection = connectionProvider.getConnection();
-                PreparedStatement readStatement =
-                        connection.prepareStatement(SELECT_BY_IRI_TEMPLATE)) {
+    public Optional<ConceptModel> read(String id, Connection connection) {
+        try (PreparedStatement readStatement = connection.prepareStatement(SELECT_BY_IRI_TEMPLATE)) {
 
             readStatement.setString(1, id);
             ResultSet resultSet = readStatement.executeQuery();
@@ -114,7 +106,7 @@ public class ConceptDao {
             throws SkosPersistenceException {
         logger.info("Preparing to update concept with ID=" + toUpdate.getId());
 
-        if (toUpdate.getId() == null || !read(toUpdate.getId()).isPresent()) {
+        if (toUpdate.getId() == null || !read(toUpdate.getId(), connection).isPresent()) {
             throw SkosPersistenceException.conceptNotFound(toUpdate.getId());
         }
 
@@ -147,7 +139,7 @@ public class ConceptDao {
     public void delete(String id, Connection connection) throws SkosPersistenceException {
         logger.info("Preparing to delete concept with ID=" + id);
 
-        if (!read(id).isPresent()) {
+        if (!read(id, connection).isPresent()) {
             throw SkosPersistenceException.conceptNotFound(id);
         }
 

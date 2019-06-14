@@ -41,9 +41,9 @@ public class SkosPersistenceService {
 
     public SkosPersistenceService() {
         this.connectionProvider = new ConnectionProvider();
-        this.conceptDao = new ConceptDao(connectionProvider);
-        this.conceptSchemeDao = new ConceptSchemeDao(connectionProvider);
-        this.relationshipDao = new RelationshipDao(connectionProvider);
+        this.conceptDao = new ConceptDao();
+        this.conceptSchemeDao = new ConceptSchemeDao();
+        this.relationshipDao = new RelationshipDao();
         this.skosTranslator = new SkosTranslator();
     }
 
@@ -149,32 +149,43 @@ public class SkosPersistenceService {
 
     public OutputStream getConcept(String id, SkosFileType outputFileType)
             throws SkosPersistenceException {
-        ConceptModel concept =
-                conceptDao.read(id).orElseThrow(() -> SkosPersistenceException.conceptNotFound(id));
+        try (Connection connection = connectionProvider.getConnection()) {
 
-        Collection<ConceptSemanticRelationModel> relationships =
-                relationshipDao.getRelationships(concept.getId());
+            ConceptModel concept =
+                    conceptDao
+                            .read(id, connection)
+                            .orElseThrow(() -> SkosPersistenceException.conceptNotFound(id));
 
-        RdfModel rdfModel = getRelatedEntities(concept.getId(), relationships);
-        rdfModel.getConcepts().add(concept);
-        Model model = skosTranslator.translate(rdfModel);
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        model.write(outputStream, outputFileType.getFileTypeName());
-        return outputStream;
+            Collection<ConceptSemanticRelationModel> relationships =
+                    relationshipDao.getRelationships(concept.getId(), connection);
+
+            RdfModel rdfModel = getRelatedEntities(concept.getId(), relationships, connection);
+            rdfModel.getConcepts().add(concept);
+            Model model = skosTranslator.translate(rdfModel);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            model.write(outputStream, outputFileType.getFileTypeName());
+            return outputStream;
+
+        } catch (SQLException e) {
+            logger.error(e);
+            throw SkosPersistenceException.unableToGetConcept(id, e);
+        }
     }
 
     private RdfModel getRelatedEntities(
-            String originalEntityId, Collection<ConceptSemanticRelationModel> relationships)
+            String originalEntityId,
+            Collection<ConceptSemanticRelationModel> relationships,
+            Connection connection)
             throws SkosPersistenceException {
         Set<ConceptModel> concepts = new HashSet<>();
         Set<ConceptSchemeModel> conceptSchemes = new HashSet<>();
 
         for (String id : getRelatedIris(originalEntityId, relationships)) {
-            Optional<ConceptModel> concept = conceptDao.read(id);
+            Optional<ConceptModel> concept = conceptDao.read(id, connection);
             if (concept.isPresent()) {
                 concepts.add(concept.get());
             } else {
-                Optional<ConceptSchemeModel> scheme = conceptSchemeDao.read(id);
+                Optional<ConceptSchemeModel> scheme = conceptSchemeDao.read(id, connection);
                 conceptSchemes.add(
                         scheme.orElseThrow(
                                 () -> SkosPersistenceException.conceptSchemeNotFound(id)));
@@ -194,20 +205,28 @@ public class SkosPersistenceService {
 
     public OutputStream getConceptScheme(String id, SkosFileType outputFileType)
             throws SkosPersistenceException {
-        ConceptSchemeModel conceptScheme =
-                conceptSchemeDao
-                        .read(id)
-                        .orElseThrow(() -> SkosPersistenceException.conceptSchemeNotFound(id));
+        try (Connection connection = connectionProvider.getConnection()) {
 
-        Collection<ConceptSemanticRelationModel> relationships =
-                relationshipDao.getRelationships(conceptScheme.getId());
+            ConceptSchemeModel conceptScheme =
+                    conceptSchemeDao
+                            .read(id, connection)
+                            .orElseThrow(() -> SkosPersistenceException.conceptSchemeNotFound(id));
 
-        RdfModel rdfModel = getRelatedEntities(conceptScheme.getId(), relationships);
-        rdfModel.getConceptSchemes().add(conceptScheme);
-        Model model = skosTranslator.translate(rdfModel);
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        model.write(outputStream, outputFileType.getFileTypeName());
-        return outputStream;
+            Collection<ConceptSemanticRelationModel> relationships =
+                    relationshipDao.getRelationships(conceptScheme.getId(), connection);
+
+            RdfModel rdfModel =
+                    getRelatedEntities(conceptScheme.getId(), relationships, connection);
+            rdfModel.getConceptSchemes().add(conceptScheme);
+            Model model = skosTranslator.translate(rdfModel);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            model.write(outputStream, outputFileType.getFileTypeName());
+            return outputStream;
+
+        } catch (SQLException e) {
+            logger.error(e);
+            throw SkosPersistenceException.unableToGetConceptScheme(id, e);
+        }
     }
 
     public void update(InputStream skos, String baseUrl, SkosFileType fileType)

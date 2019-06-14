@@ -180,7 +180,7 @@ class SkosPersistenceServiceTest {
     @Test
     void getConceptShouldThrowExceptionIfConceptCannotBeFound() {
         // Given
-        given(conceptDao.read(conceptTwo.getId())).willReturn(Optional.empty());
+        given(conceptDao.read(conceptTwo.getId(), connection)).willReturn(Optional.empty());
 
         // Then
         assertThrows(
@@ -192,10 +192,11 @@ class SkosPersistenceServiceTest {
     void getConceptShouldThrowExceptionIfRelatedEntityCannotBeFound()
             throws SkosPersistenceException {
         // Given
-        given(conceptDao.read(conceptTwo.getId())).willReturn(Optional.of(conceptTwo));
-        given(conceptSchemeDao.read(conceptScheme.getId())).willReturn(Optional.empty());
-        given(conceptDao.read(conceptScheme.getId())).willReturn(Optional.empty());
-        given(relationshipDao.getRelationships(conceptTwo.getId()))
+        given(conceptDao.read(conceptTwo.getId(), connection)).willReturn(Optional.of(conceptTwo));
+        given(conceptSchemeDao.read(conceptScheme.getId(), connection))
+                .willReturn(Optional.empty());
+        given(conceptDao.read(conceptScheme.getId(), connection)).willReturn(Optional.empty());
+        given(relationshipDao.getRelationships(conceptTwo.getId(), connection))
                 .willReturn(Sets.newHashSet(schemeHasTopConceptTwo));
 
         // Then
@@ -228,7 +229,8 @@ class SkosPersistenceServiceTest {
     @Test
     void getConceptSchemeShouldThrowExceptionIfConceptCannotBeFound() {
         // Given
-        given(conceptSchemeDao.read(conceptScheme.getId())).willReturn(Optional.empty());
+        given(conceptSchemeDao.read(conceptScheme.getId(), connection))
+                .willReturn(Optional.empty());
 
         // Then
         assertThrows(
@@ -240,10 +242,11 @@ class SkosPersistenceServiceTest {
     void getConceptSchemeShouldThrowExceptionIfRelatedEntityCannotBeFound()
             throws SkosPersistenceException {
         // Given
-        given(conceptSchemeDao.read(conceptScheme.getId())).willReturn(Optional.of(conceptScheme));
-        given(conceptDao.read(conceptOne.getId())).willReturn(Optional.empty());
-        given(conceptSchemeDao.read(conceptOne.getId())).willReturn(Optional.empty());
-        given(relationshipDao.getRelationships(conceptScheme.getId()))
+        given(conceptSchemeDao.read(conceptScheme.getId(), connection))
+                .willReturn(Optional.of(conceptScheme));
+        given(conceptDao.read(conceptOne.getId(), connection)).willReturn(Optional.empty());
+        given(conceptSchemeDao.read(conceptOne.getId(), connection)).willReturn(Optional.empty());
+        given(relationshipDao.getRelationships(conceptScheme.getId(), connection))
                 .willReturn(Sets.newHashSet(schemeHasTopConceptOne));
 
         // Then
@@ -346,19 +349,22 @@ class SkosPersistenceServiceTest {
     }
 
     private void givenEntitiesRelatedToConceptTwoExist() throws SkosPersistenceException {
-        given(conceptSchemeDao.read(conceptScheme.getId())).willReturn(Optional.of(conceptScheme));
-        given(conceptDao.read(conceptScheme.getId())).willReturn(Optional.empty());
-        given(conceptDao.read(conceptTwo.getId())).willReturn(Optional.of(conceptTwo));
-        given(conceptDao.read(conceptThree.getId())).willReturn(Optional.of(conceptThree));
-        given(relationshipDao.getRelationships(conceptTwo.getId()))
+        given(conceptSchemeDao.read(conceptScheme.getId(), connection))
+                .willReturn(Optional.of(conceptScheme));
+        given(conceptDao.read(conceptScheme.getId(), connection)).willReturn(Optional.empty());
+        given(conceptDao.read(conceptTwo.getId(), connection)).willReturn(Optional.of(conceptTwo));
+        given(conceptDao.read(conceptThree.getId(), connection))
+                .willReturn(Optional.of(conceptThree));
+        given(relationshipDao.getRelationships(conceptTwo.getId(), connection))
                 .willReturn(Sets.newHashSet(schemeHasTopConceptTwo, threeIsRelatedToTwo));
     }
 
     private void givenEntitiesRelatedToConceptSchemeExist() throws SkosPersistenceException {
-        given(conceptSchemeDao.read(conceptScheme.getId())).willReturn(Optional.of(conceptScheme));
-        given(conceptDao.read(conceptOne.getId())).willReturn(Optional.of(conceptOne));
-        given(conceptDao.read(conceptTwo.getId())).willReturn(Optional.of(conceptTwo));
-        given(relationshipDao.getRelationships(conceptScheme.getId()))
+        given(conceptSchemeDao.read(conceptScheme.getId(), connection))
+                .willReturn(Optional.of(conceptScheme));
+        given(conceptDao.read(conceptOne.getId(), connection)).willReturn(Optional.of(conceptOne));
+        given(conceptDao.read(conceptTwo.getId(), connection)).willReturn(Optional.of(conceptTwo));
+        given(relationshipDao.getRelationships(conceptScheme.getId(), connection))
                 .willReturn(Sets.newHashSet(schemeHasTopConceptOne, schemeHasTopConceptTwo));
     }
 

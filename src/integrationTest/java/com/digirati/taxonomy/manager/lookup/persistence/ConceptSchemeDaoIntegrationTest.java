@@ -3,10 +3,10 @@ package com.digirati.taxonomy.manager.lookup.persistence;
 import com.digirati.taxonomy.manager.lookup.exception.SkosPersistenceException;
 import com.digirati.taxonomy.manager.lookup.persistence.model.ConceptSchemeModel;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Optional;
 import java.util.UUID;
@@ -15,13 +15,18 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class ConceptSchemeDaoIntegrationTest {
 
-    private ConnectionProvider connectionProvider;
+    private Connection connection;
 
     private ConceptSchemeDao underTest;
 
     ConceptSchemeDaoIntegrationTest() {
-        this.connectionProvider = new ConnectionProvider();
-        this.underTest = new ConceptSchemeDao(connectionProvider);
+        this.underTest = new ConceptSchemeDao();
+    }
+
+    @BeforeEach
+    void setup() throws SQLException {
+        connection = new ConnectionProvider().getConnection();
+        connection.setAutoCommit(false);
     }
 
     @Test
@@ -31,18 +36,16 @@ public class ConceptSchemeDaoIntegrationTest {
                 new ConceptSchemeModel(UUID.randomUUID().toString(), "Example Scheme");
 
         // When
-        underTest.create(conceptScheme, connectionProvider.getConnection());
+        underTest.create(conceptScheme, connection);
 
         // Then
-        assertEquals(conceptScheme, underTest.read(conceptScheme.getId()).get());
+        assertEquals(conceptScheme, underTest.read(conceptScheme.getId(), connection).get());
     }
 
     @Test
     void createShouldThrowExceptionIfNoIdIsProvided() {
         ConceptSchemeModel scheme = new ConceptSchemeModel(null, "Example");
-        assertThrows(
-                SkosPersistenceException.class,
-                () -> underTest.create(scheme, connectionProvider.getConnection()));
+        assertThrows(SkosPersistenceException.class, () -> underTest.create(scheme, connection));
     }
 
     @Test
@@ -50,12 +53,11 @@ public class ConceptSchemeDaoIntegrationTest {
         // Given
         ConceptSchemeModel conceptScheme =
                 new ConceptSchemeModel(UUID.randomUUID().toString(), "Example Scheme");
-        underTest.create(conceptScheme, connectionProvider.getConnection());
+        underTest.create(conceptScheme, connection);
 
         // Then
         assertThrows(
-                SkosPersistenceException.class,
-                () -> underTest.create(conceptScheme, connectionProvider.getConnection()));
+                SkosPersistenceException.class, () -> underTest.create(conceptScheme, connection));
     }
 
     @Test
@@ -63,12 +65,12 @@ public class ConceptSchemeDaoIntegrationTest {
         // Given
         ConceptSchemeModel conceptScheme =
                 new ConceptSchemeModel(UUID.randomUUID().toString(), "Example Scheme");
-        underTest.create(conceptScheme, connectionProvider.getConnection());
+        underTest.create(conceptScheme, connection);
 
         // When
         ConceptSchemeModel retrieved =
                 underTest
-                        .read(conceptScheme.getId())
+                        .read(conceptScheme.getId(), connection)
                         .orElseThrow(
                                 () -> new AssertionError("Concept scheme to retrieve not found."));
 
@@ -78,7 +80,7 @@ public class ConceptSchemeDaoIntegrationTest {
 
     @Test
     void readShouldReturnEmptyIfIdCannotBeFound() {
-        assertEquals(Optional.empty(), underTest.read(UUID.randomUUID().toString()));
+        assertEquals(Optional.empty(), underTest.read(UUID.randomUUID().toString(), connection));
     }
 
     @Test
@@ -86,15 +88,15 @@ public class ConceptSchemeDaoIntegrationTest {
         // Given
         String id = UUID.randomUUID().toString();
         ConceptSchemeModel toCreate = new ConceptSchemeModel(id, "Initial Title");
-        underTest.create(toCreate, connectionProvider.getConnection());
+        underTest.create(toCreate, connection);
 
         ConceptSchemeModel toUpdate = new ConceptSchemeModel(id, "Updated Title");
 
         // When
-        underTest.update(toUpdate, connectionProvider.getConnection());
+        underTest.update(toUpdate, connection);
 
         // Then
-        assertEquals(toUpdate, underTest.read(id).get());
+        assertEquals(toUpdate, underTest.read(id, connection).get());
     }
 
     @Test
@@ -102,14 +104,12 @@ public class ConceptSchemeDaoIntegrationTest {
         // Given
         String id = UUID.randomUUID().toString();
         ConceptSchemeModel toCreate = new ConceptSchemeModel(id, "Initial Title");
-        underTest.create(toCreate, connectionProvider.getConnection());
+        underTest.create(toCreate, connection);
 
         ConceptSchemeModel toUpdate = new ConceptSchemeModel(null, "Updated Title");
 
         // Then
-        assertThrows(
-                SkosPersistenceException.class,
-                () -> underTest.update(toUpdate, connectionProvider.getConnection()));
+        assertThrows(SkosPersistenceException.class, () -> underTest.update(toUpdate, connection));
     }
 
     @Test
@@ -119,9 +119,7 @@ public class ConceptSchemeDaoIntegrationTest {
                 new ConceptSchemeModel(UUID.randomUUID().toString(), "Updated Title");
 
         // Then
-        assertThrows(
-                SkosPersistenceException.class,
-                () -> underTest.update(toUpdate, connectionProvider.getConnection()));
+        assertThrows(SkosPersistenceException.class, () -> underTest.update(toUpdate, connection));
     }
 
     @Test
@@ -129,33 +127,24 @@ public class ConceptSchemeDaoIntegrationTest {
         // Given
         ConceptSchemeModel conceptScheme =
                 new ConceptSchemeModel(UUID.randomUUID().toString(), "Example Scheme");
-        underTest.create(conceptScheme, connectionProvider.getConnection());
+        underTest.create(conceptScheme, connection);
 
         // When
-        underTest.delete(conceptScheme.getId(), connectionProvider.getConnection());
+        underTest.delete(conceptScheme.getId(), connection);
 
         // Then
-        assertEquals(Optional.empty(), underTest.read(conceptScheme.getId()));
+        assertEquals(Optional.empty(), underTest.read(conceptScheme.getId(), connection));
     }
 
     @Test
     void deleteShouldThrowExceptionIfIdDoesNotExistInDb() {
         String newId = UUID.randomUUID().toString();
-        assertThrows(
-                SkosPersistenceException.class,
-                () -> underTest.delete(newId, connectionProvider.getConnection()));
+        assertThrows(SkosPersistenceException.class, () -> underTest.delete(newId, connection));
     }
 
     @AfterEach
-    void tearDown() {
-        try (Connection connection = connectionProvider.getConnection();
-                PreparedStatement deleteAllConceptSchemes =
-                        connection.prepareStatement("DELETE FROM concept_scheme")) {
-
-            deleteAllConceptSchemes.execute();
-
-        } catch (SQLException e) {
-            fail(e);
-        }
+    void tearDown() throws SQLException {
+        connection.rollback();
+        connection.close();
     }
 }

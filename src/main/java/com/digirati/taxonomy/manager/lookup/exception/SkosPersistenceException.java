@@ -87,4 +87,12 @@ public class SkosPersistenceException extends Exception {
         return new SkosPersistenceException(
                 "Unable to delete relationships involving entity with ID=" + id, t);
     }
+
+    public static SkosPersistenceException unableToGetConcept(String id, Throwable t) {
+        return new SkosPersistenceException("Unable to get concept with ID=" + id, t);
+    }
+
+    public static SkosPersistenceException unableToGetConceptScheme(String id, Throwable t) {
+        return new SkosPersistenceException("Unable to get concept scheme with ID=" + id, t);
+    }
 }

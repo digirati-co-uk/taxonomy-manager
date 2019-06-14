@@ -45,15 +45,9 @@ class RelationshipDao {
     private static final String DELETE_RELATED_TO_TARGET_TEMPLATE =
             "DELETE FROM concept_semantic_relation WHERE target_id=?::UUID";
 
-    private final ConnectionProvider connectionProvider;
-
-    RelationshipDao(ConnectionProvider connectionProvider) {
-        this.connectionProvider = connectionProvider;
-    }
-
     public void create(ConceptSemanticRelationModel relationship, Connection connection)
             throws SkosPersistenceException {
-        if (read(relationship.getSourceId(), relationship.getTargetId()).isPresent()) {
+        if (read(relationship.getSourceId(), relationship.getTargetId(), connection).isPresent()) {
             throw SkosPersistenceException.relationshipAlreadyExists(relationship);
         }
 
@@ -75,11 +69,11 @@ class RelationshipDao {
         }
     }
 
-    public Optional<ConceptSemanticRelationModel> read(String sourceId, String targetId)
+    public Optional<ConceptSemanticRelationModel> read(
+            String sourceId, String targetId, Connection connection)
             throws SkosPersistenceException {
-        try (Connection connection = connectionProvider.getConnection();
-                PreparedStatement readStatement =
-                        connection.prepareStatement(SELECT_RELATIONSHIP_TEMPLATE)) {
+        try (PreparedStatement readStatement =
+                connection.prepareStatement(SELECT_RELATIONSHIP_TEMPLATE)) {
 
             readStatement.setString(1, sourceId);
             readStatement.setString(2, targetId);
@@ -113,26 +107,21 @@ class RelationshipDao {
         return relationships;
     }
 
-    public Collection<ConceptSemanticRelationModel> getRelationships(String sourceId)
-            throws SkosPersistenceException {
+    public Collection<ConceptSemanticRelationModel> getRelationships(
+            String sourceId, Connection connection) throws SkosPersistenceException {
         List<ConceptSemanticRelationModel> relationships = new ArrayList<>();
 
         ResultSet relatedToSourceResults = null;
         ResultSet relatedToTargetResults = null;
-        try (Connection connection = connectionProvider.getConnection();
-                PreparedStatement relatedToSourceStatement =
+        try (PreparedStatement relatedToSourceStatement =
                         connection.prepareStatement(SELECT_RELATED_TO_SOURCE_TEMPLATE);
                 PreparedStatement relatedToTargetStatement =
                         connection.prepareStatement(SELECT_RELATED_TO_TARGET_TEMPLATE)) {
-
-            connection.setAutoCommit(false);
 
             relatedToSourceStatement.setString(1, sourceId);
             relatedToTargetStatement.setString(1, sourceId);
             relatedToSourceResults = relatedToSourceStatement.executeQuery();
             relatedToTargetResults = relatedToTargetStatement.executeQuery();
-
-            connection.commit();
 
             relationships.addAll(fromResultSet(relatedToSourceResults));
             relationships.addAll(fromResultSet(relatedToTargetResults));
@@ -159,7 +148,7 @@ class RelationshipDao {
 
     public void update(ConceptSemanticRelationModel relationship, Connection connection)
             throws SkosPersistenceException {
-        if (!read(relationship.getSourceId(), relationship.getTargetId()).isPresent()) {
+        if (!read(relationship.getSourceId(), relationship.getTargetId(), connection).isPresent()) {
             throw SkosPersistenceException.relationshipNotFound(relationship);
         }
 
@@ -183,7 +172,7 @@ class RelationshipDao {
 
     public void delete(String sourceId, String targetId, Connection connection)
             throws SkosPersistenceException {
-        if (!read(sourceId, targetId).isPresent()) {
+        if (!read(sourceId, targetId, connection).isPresent()) {
             throw SkosPersistenceException.relationshipNotFound(sourceId, targetId);
         }
 
