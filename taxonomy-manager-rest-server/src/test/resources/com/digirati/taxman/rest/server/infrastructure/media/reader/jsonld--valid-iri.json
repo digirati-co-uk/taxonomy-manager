@@ -1,8 +1,9 @@
 {
   "@context": {
-    "dcterms": "http://purl.org/dc/terms/1.1/"
+    "dcterms": "http://purl.org/dc/terms/",
+    "skos": "http://www.w3.org/2004/02/skos/core#"
   },
   "@id": "http://example.org/test",
-  "@type": "rdf:Dataset",
+  "@type": "skos:Concept",
   "dcterms:identifier": "test-id"
 }

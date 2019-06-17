@@ -1,4 +1,4 @@
-package com.digirati.taxman.rest.server.taxonomy.concept.autosuggest;
+package com.digirati.taxman.rest.server;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.GET;
@@ -7,7 +7,7 @@ import java.util.List;
 
 @ApplicationScoped
 @Path("/v0.1/concept-scheme/suggestions")
-public class ConceptSuggestionResource {
+public class ServerConceptSuggestionResource {
 
     @GET
     public List<String> getSuggestions() {

@@ -12,9 +12,10 @@ repositories {
 
 val quarkusExtensions = setOf(
         "agroal",
+        "flyway",
+        "jdbc-postgresql",
         "resteasy",
-        "resteasy-jsonb",
-        "jdbc-postgresql"
+        "resteasy-jsonb"
 )
 
 dependencies {
@@ -24,7 +25,9 @@ dependencies {
         compile("io.quarkus:quarkus-$ext:0.16.1")
     }
 
+    compile(project(":taxonomy-manager-common"))
     compile(project(":taxonomy-manager-engine"))
+    compile(project(":taxonomy-manager-rest"))
     compile("com.google.guava", "guava", "27.1-jre")
 
     testCompile("io.quarkus", "quarkus-junit5", "0.16.1")
