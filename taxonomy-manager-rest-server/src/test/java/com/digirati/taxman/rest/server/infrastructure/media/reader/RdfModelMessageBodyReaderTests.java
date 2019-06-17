@@ -1,8 +1,10 @@
 package com.digirati.taxman.rest.server.infrastructure.media.reader;
 
-import com.google.common.collect.Streams;
-import org.apache.jena.rdf.model.Model;
+import com.digirati.taxman.common.rdf.RdfModel;
+import com.digirati.taxman.common.rdf.annotation.RdfConstructor;
+import com.digirati.taxman.common.rdf.annotation.RdfType;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.vocabulary.DCTerms;
 import org.jboss.resteasy.mock.MockDispatcherFactory;
 import org.jboss.resteasy.mock.MockHttpRequest;
 import org.jboss.resteasy.mock.MockHttpResponse;
@@ -18,13 +20,12 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
-import java.util.stream.Collectors;
 
 import static org.jboss.resteasy.spi.HttpResponseCodes.SC_BAD_REQUEST;
 import static org.jboss.resteasy.spi.HttpResponseCodes.SC_OK;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class RdfModelMessageBodyReaderTest {
+class RdfModelMessageBodyReaderTests {
     private static final Dispatcher dispatcher = MockDispatcherFactory.createDispatcher();
     private static final ResourceClass rootResourceClass =
             new ResourceBuilder().buildRootResource(RdfModelResource.class).buildClass();
@@ -36,31 +37,6 @@ class RdfModelMessageBodyReaderTest {
 
         var registry = dispatcher.getRegistry();
         registry.addResourceFactory(new POJOResourceFactory(rootResourceClass));
-    }
-
-    @Path("/")
-    public static class RdfModelResource {
-        @GET
-        @Consumes("application/rdf+xml")
-        public Response rdfXml(Model model) {
-            return respondWithSubjectUris(model);
-        }
-
-        @GET
-        @Consumes("application/ld+json")
-        public Response jsonLd(Model model) {
-            return respondWithSubjectUris(model);
-        }
-
-        private static Response respondWithSubjectUris(Model model) {
-            var uris =
-                    Streams.stream(model.listSubjects())
-                            .map(Resource::getURI)
-                            .sorted()
-                            .collect(Collectors.joining(","));
-
-            return Response.ok(uris).build();
-        }
     }
 
     /**
@@ -88,7 +64,7 @@ class RdfModelMessageBodyReaderTest {
         var response =
                 dispatch(
                         "application/rdf+xml",
-                        RdfModelMessageBodyReaderTest.class.getResourceAsStream(
+                        RdfModelMessageBodyReaderTests.class.getResourceAsStream(
                                 "rdfxml--no-triples.xml"));
 
         assertEquals(SC_BAD_REQUEST, response.getStatus());
@@ -99,11 +75,11 @@ class RdfModelMessageBodyReaderTest {
         var response =
                 dispatch(
                         "application/rdf+xml",
-                        RdfModelMessageBodyReaderTest.class.getResourceAsStream(
+                        RdfModelMessageBodyReaderTests.class.getResourceAsStream(
                                 "rdfxml--valid-iri.xml"));
 
+        assertEquals("test-id", response.getContentAsString());
         assertEquals(SC_OK, response.getStatus());
-        assertEquals("http://example.org/test", response.getContentAsString());
     }
 
     @Test
@@ -118,21 +94,59 @@ class RdfModelMessageBodyReaderTest {
         var response =
                 dispatch(
                         "application/ld+json",
-                        RdfModelMessageBodyReaderTest.class.getResourceAsStream(
+                        RdfModelMessageBodyReaderTests.class.getResourceAsStream(
                                 "jsonld--no-triples.json"));
 
         assertEquals(SC_BAD_REQUEST, response.getStatus());
     }
 
     @Test
-    public void readFrom_ReturnsIri_JsonLd() throws Exception {
+    public void readFrom_DeserializesJsonLd() throws Exception {
         var response =
                 dispatch(
                         "application/ld+json",
-                        RdfModelMessageBodyReaderTest.class.getResourceAsStream(
+                        RdfModelMessageBodyReaderTests.class.getResourceAsStream(
                                 "jsonld--valid-iri.json"));
 
+        assertEquals("test-id", response.getContentAsString());
         assertEquals(SC_OK, response.getStatus());
-        assertEquals("http://example.org/test", response.getContentAsString());
+    }
+
+    @Path("/")
+    public static class RdfModelResource {
+        @RdfType("http://www.w3.org/2004/02/skos/core#Concept")
+        public static class RdfModelTest implements RdfModel {
+            private final Resource resource;
+
+            @RdfConstructor
+            public RdfModelTest(Resource resource) {
+                this.resource = resource;
+            }
+
+            @Override
+            public Resource getResource() {
+                return resource;
+            }
+
+            String id() {
+                return resource.getProperty(DCTerms.identifier).getLiteral().getString();
+            }
+        }
+
+        @GET
+        @Consumes("application/rdf+xml")
+        public Response rdfXml(RdfModelTest model) {
+            return respondWithSubjectUris(model);
+        }
+
+        @GET
+        @Consumes("application/ld+json")
+        public Response jsonLd(RdfModelTest model) {
+            return respondWithSubjectUris(model);
+        }
+
+        private static Response respondWithSubjectUris(RdfModelTest model) {
+            return Response.ok(model.id()).build();
+        }
     }
 }
