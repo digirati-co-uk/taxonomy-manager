@@ -1,5 +1,6 @@
 rootProject.name = "digirati-taxonomy-manager"
 
+include("taxonomy-manager-common")
 include("taxonomy-manager-engine")
 include("taxonomy-manager-rest-server")
 
