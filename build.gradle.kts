@@ -38,8 +38,10 @@ subprojects {
             html.isEnabled = !isCiRunning
         }
 
-        outputs.files.forEach { file ->
-            checkstyleReportLocations += file.toString()
+        if (inputs.hasSourceFiles) {
+            outputs.files.forEach { file ->
+                checkstyleReportLocations += file.toString()
+            }
         }
 
         ignoreFailures = true
@@ -51,8 +53,10 @@ subprojects {
             html.isEnabled = !isCiRunning
         }
 
-        outputs.files.forEach { file ->
-            spotbugsReportLocations += file.toString()
+        if (inputs.hasSourceFiles) {
+            outputs.files.forEach { file ->
+                spotbugsReportLocations += file.toString()
+            }
         }
     }
 
