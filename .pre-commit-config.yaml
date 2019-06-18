@@ -1,10 +1,18 @@
--   repo: git://github.com/pre-commit/pre-commit-hooks
-    sha: v2.0.0
-    hooks:
-    -   id: check-added-large-files
-    -   id: check-case-conflict
-    -   id: check-merge-conflict
-    -   id: check-yaml
-    -   id: detect-private-key
-    -   id: end-of-file-fixer
-    -   id: trailing-whitespace
+- repo: git://github.com/pre-commit/pre-commit-hooks
+  sha: v2.0.0
+  hooks:
+    - id: check-added-large-files
+    - id: check-case-conflict
+    - id: check-merge-conflict
+    - id: check-yaml
+    - id: detect-private-key
+    - id: end-of-file-fixer
+    - id: trailing-whitespace
+- repo: local
+  hooks:
+    - id: gradle-check
+      name: gradle check
+      entry: ./gradlew check
+      language: system
+      always_run: true
+      pass_filenames: false
