@@ -8,8 +8,8 @@ END;
 $$ LANGUAGE plpgsql;
 COMMENT ON FUNCTION is_plain_literal(val jsonb) IS 'Check if a JSONB value contains only an object with string values';
 
-CREATE DOMAIN skos_plain_literal AS jsonb CHECK (is_plain_literal(VALUE));
-COMMENT ON DOMAIN skos_plain_literal IS 'A JSONB object type containing a map of ISO 9601 language keys to localized string literals';
+CREATE DOMAIN rdf_plain_literal AS jsonb CHECK (is_plain_literal(VALUE));
+COMMENT ON DOMAIN rdf_plain_literal IS 'A JSONB object type containing a map of ISO 9601 language keys to localized string literals';
 
 CREATE TYPE skos_semantic_relation_type AS ENUM (
     'broader',
@@ -20,22 +20,22 @@ CREATE TABLE skos_concept_scheme
 (
     id    bigserial primary key,
     uuid  uuid unique not null,
-    title skos_plain_literal
+    title rdf_plain_literal
 );
 
 CREATE TABLE skos_concept
 (
     id              bigserial primary key,
     uuid            uuid unique not null,
-    preferred_label skos_plain_literal,
-    alt_label       skos_plain_literal,
-    hidden_label    skos_plain_literal,
-    note            skos_plain_literal,
-    change_note     skos_plain_literal,
-    editorial_note  skos_plain_literal,
-    example         skos_plain_literal,
-    history_note    skos_plain_literal,
-    scope_note      skos_plain_literal
+    preferred_label rdf_plain_literal,
+    alt_label       rdf_plain_literal,
+    hidden_label    rdf_plain_literal,
+    note            rdf_plain_literal,
+    change_note     rdf_plain_literal,
+    editorial_note  rdf_plain_literal,
+    example         rdf_plain_literal,
+    history_note    rdf_plain_literal,
+    scope_note      rdf_plain_literal
 );
 
 
