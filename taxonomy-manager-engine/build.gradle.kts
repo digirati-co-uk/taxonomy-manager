@@ -5,9 +5,10 @@ plugins {
 dependencies {
     spotbugsPlugins("com.h3xstream.findsecbugs:findsecbugs-plugin:1.7.1")
 
+    implementation("org.json", "json", "20180813")
     implementation("org.ahocorasick", "ahocorasick", "0.4.0")
     implementation("com.google.guava", "guava", "27.1-jre")
-
+    implementation("org.springframework", "spring-jdbc", "5.1.3.RELEASE")
     implementation("edu.stanford.nlp", "stanford-corenlp", "3.9.2")
     runtimeOnly("edu.stanford.nlp", "stanford-corenlp", "3.9.2", classifier = "models")
 
@@ -17,4 +18,5 @@ dependencies {
 
     api("org.apache.jena:jena-core:3.12.0")
     api("org.apache.jena:apache-jena-libs:3.12.0")
+    api(project(":taxonomy-manager-common"))
 }
