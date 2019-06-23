@@ -6,6 +6,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * A model of the <code>skos_concept_semantic_relation</code> table in the taxman DDL.
+ *
+ * This record additionally models the output of the <code>get_concept_relationships(uuid)</code> procedure,
+ * where a preferred label is also present.
+ */
 public class ConceptRelationshipRecord {
     private final UUID source;
     private final UUID target;
