@@ -1,23 +1,21 @@
 package com.digirati.taxman.rest.taxonomy;
 
 import javax.ws.rs.PathParam;
+import java.util.UUID;
 
 /** An addressable path to an element of a {@link ConceptResource}. */
 public final class ConceptPath {
 
-    private final String scheme;
-    private final String concept;
+    @PathParam("concept")
+    private String concept;
 
-    public ConceptPath(@PathParam("scheme") String scheme, @PathParam("concept") String concept) {
-        this.scheme = scheme;
+    public ConceptPath() {}
+
+    public ConceptPath(@PathParam("concept") String concept) {
         this.concept = concept;
     }
 
-    public String getScheme() {
-        return scheme;
-    }
-
-    public String getConcept() {
-        return concept;
+    public UUID getUuid() {
+        return UUID.fromString(concept);
     }
 }
