@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * A model of the `skos_concept` database in the taxman DDL.
+ */
 public class ConceptRecord {
     private final UUID uuid;
 
