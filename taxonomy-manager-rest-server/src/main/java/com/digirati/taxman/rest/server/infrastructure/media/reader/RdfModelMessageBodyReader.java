@@ -2,10 +2,12 @@ package com.digirati.taxman.rest.server.infrastructure.media.reader;
 
 import com.digirati.taxman.common.rdf.RdfModel;
 import com.digirati.taxman.common.rdf.RdfModelException;
+import com.digirati.taxman.common.rdf.RdfModelFactory;
 import com.digirati.taxman.common.rdf.RdfModelFormat;
 import com.digirati.taxman.common.rdf.io.RdfModelReader;
 import com.digirati.taxman.rest.MediaTypes;
 
+import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
@@ -25,6 +27,8 @@ import java.lang.reflect.Type;
  */
 @Provider
 public class RdfModelMessageBodyReader implements MessageBodyReader<RdfModel> {
+
+    @Inject RdfModelFactory modelFactory;
 
     @Override
     public boolean isReadable(
@@ -59,7 +63,7 @@ public class RdfModelMessageBodyReader implements MessageBodyReader<RdfModel> {
             throw new WebApplicationException("Unsupported media type");
         }
 
-        RdfModelReader reader = new RdfModelReader();
+        RdfModelReader reader = new RdfModelReader(modelFactory);
         try {
             return reader.read(type, format, pushbackStream);
         } catch (RdfModelException e) {
