@@ -1,46 +1,41 @@
 package com.digirati.taxman.rest.server;
 
-import com.digirati.taxman.common.taxonomy.ConceptRdfModel;
+import com.digirati.taxman.common.taxonomy.ConceptModel;
+import com.digirati.taxman.rest.server.taxonomy.ConceptModelRepository;
 import com.digirati.taxman.rest.taxonomy.ConceptPath;
+import com.digirati.taxman.rest.taxonomy.ConceptResource;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.BeanParam;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 @ApplicationScoped
-public class ServerConceptResource {
+public class ServerConceptResource implements ConceptResource {
 
-    @POST
-    @Path("/v0.1/concept-scheme/{scheme}/concept")
-    public Response createConcept(@PathParam("scheme") String scheme, @Valid ConceptRdfModel model)
-            throws URISyntaxException {
-        return Response.created(new URI("http://localhost/test")).build();
+    @Inject
+    ConceptModelRepository concepts;
+
+    @Override
+    public Response createConcept(@Valid ConceptModel model) {
+        var updatedModel = concepts.create(model);
+        var uri = updatedModel.getUri();
+
+        return Response.created(uri).entity(updatedModel).build();
     }
 
-    @DELETE
-    @Path("/v0.1/concept-scheme/{scheme}/concept/{concept}")
-    public Response deleteConcept(@BeanParam ConceptPath params) {
-        return Response.noContent().build();
-    }
-
-    @GET
-    @Path("/v0.1/concept-scheme/{scheme}/concept/{concept}")
+    @Override
     public Response getConcept(@BeanParam ConceptPath params) {
-        return Response.status(200).build();
+        var model = concepts.find(params.getUuid());
+
+        return Response.ok(model).build();
     }
 
-    @PUT
-    @Path("/v0.1/concept-scheme/{scheme}/concept/{concept}")
-    public Response updateConcept(@BeanParam ConceptPath params) {
-        return Response.status(204).build();
+    @Override
+    public Response updateConcept(@BeanParam ConceptPath params, @Valid ConceptModel model) {
+        concepts.update(model);
+
+        return Response.noContent().build();
     }
 }
