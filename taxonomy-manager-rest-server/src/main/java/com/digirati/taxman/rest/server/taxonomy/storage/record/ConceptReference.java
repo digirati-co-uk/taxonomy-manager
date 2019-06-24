@@ -1,11 +1,11 @@
-package com.digirati.taxonomy.manager.storage.record;
+package com.digirati.taxman.rest.server.taxonomy.storage.record;
 
 import java.util.Map;
 import java.util.UUID;
 
 
 /**
- * A reference to a {@link com.digirati.taxonomy.manager.storage.ConceptDataSet},
+ * A reference to a {@link com.digirati.taxman.rest.server.taxonomy.storage.ConceptDataSet},
  * with only an identifier and a display label.
  */
 public class ConceptReference {

@@ -1,7 +1,7 @@
-package com.digirati.taxonomy.manager.storage.record.mapper;
+package com.digirati.taxman.rest.server.taxonomy.storage.record.mapper;
 
 import com.digirati.taxman.common.taxonomy.ConceptRelationshipType;
-import com.digirati.taxonomy.manager.storage.record.ConceptRelationshipRecord;
+import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRelationshipRecord;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;

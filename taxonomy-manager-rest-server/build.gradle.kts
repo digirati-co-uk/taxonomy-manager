@@ -39,7 +39,25 @@ dependencies {
     implementation(project(":taxonomy-manager-rest"))
     implementation("com.google.guava", "guava", "27.1-jre")
 
+    testImplementation("org.testcontainers:testcontainers:1.11.3")
+    testImplementation("org.testcontainers:postgresql:1.11.3")
+    testRuntimeOnly("org.postgresql:postgresql:42.2.5")
+
     testImplementation("io.quarkus", "quarkus-junit5", "0.16.1")
+}
+
+tasks {
+    test {                                  // (5)
+        useJUnitPlatform() {
+            excludeTags("integration")
+        }
+    }
+
+    create<Test>("integrationTest") {
+        useJUnitPlatform {
+            includeTags("integration")
+        }
+    }
 }
 
 fun getOutputs(project: Project) = project.sourceSets.getByName("main").output

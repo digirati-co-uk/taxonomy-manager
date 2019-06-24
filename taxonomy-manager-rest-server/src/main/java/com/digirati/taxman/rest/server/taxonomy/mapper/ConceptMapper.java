@@ -5,9 +5,9 @@ import com.digirati.taxman.common.rdf.RdfModelFactory;
 import com.digirati.taxman.common.taxonomy.ConceptModel;
 import com.digirati.taxman.common.taxonomy.ConceptRelationshipType;
 import com.digirati.taxman.rest.server.taxonomy.identity.ConceptIdResolver;
-import com.digirati.taxonomy.manager.storage.ConceptDataSet;
-import com.digirati.taxonomy.manager.storage.record.ConceptRecord;
-import com.digirati.taxonomy.manager.storage.record.ConceptRelationshipRecord;
+import com.digirati.taxman.rest.server.taxonomy.storage.ConceptDataSet;
+import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRecord;
+import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRelationshipRecord;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.SKOS;
 

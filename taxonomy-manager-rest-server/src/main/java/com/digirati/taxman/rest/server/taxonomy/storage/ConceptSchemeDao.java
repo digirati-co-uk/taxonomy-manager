@@ -1,4 +1,4 @@
-package com.digirati.taxonomy.manager.storage;
+package com.digirati.taxman.rest.server.taxonomy.storage;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 

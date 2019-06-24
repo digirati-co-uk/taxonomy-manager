@@ -1,5 +1,8 @@
 import com.github.spotbugs.SpotBugsExtension
 import com.github.spotbugs.SpotBugsTask
+import org.sonarqube.gradle.SonarQubeTask
+import java.nio.file.Files
+import java.nio.file.Paths
 
 plugins {
     id("com.gradle.build-scan") version "2.0.2"
@@ -67,19 +70,33 @@ subprojects {
     }
 }
 
+buildScan {
+    setTermsOfServiceUrl("https://gradle.com/terms-of-service")
+    setTermsOfServiceAgree("yes")
+}
+
 sonarqube {
     properties {
         property("sonar.organization", "digirati")
         property("sonar.projectName", "digirati-taxonomy-manager")
         property("sonar.projectKey", "digirati-co-uk_digirati-taxonomy-manager")
         property("sonar.pullrequest.provider", "GitHub")
-        property("sonar.pullrequest.github.repository", "digirati-co-uk/digirati-taxonomy-manager")
-        property("sonar.java.spotbugs.reportPaths", spotbugsReportLocations.joinToString(","))
-        property("sonar.java.checkstyle.reportPaths", checkstyleReportLocations.joinToString(","))
+        property("sonar.pullrequest.github.repository", "digirati-co-uk/taxonomy-manager")
     }
 }
 
-buildScan {
-    setTermsOfServiceUrl("https://gradle.com/terms-of-service")
-    setTermsOfServiceAgree("yes")
+allprojects {
+    tasks.withType<SonarQubeTask> {
+        doFirst {
+            val filter: (String) -> Boolean = { Files.exists(Paths.get(it)) }
+            val filteredSpotBugsLocations = spotbugsReportLocations.filter(filter)
+            val filteredCheckStyleLocations = checkstyleReportLocations.filter(filter)
+            val props = mapOf(
+                    "sonar.java.spotbugs.reportPaths" to filteredSpotBugsLocations.joinToString(","),
+                    "sonar.java.checkstyle.reportPaths" to filteredCheckStyleLocations.joinToString(",")
+            )
+
+            properties.putAll(props)
+        }
+    }
 }

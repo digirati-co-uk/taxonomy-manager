@@ -1,6 +1,6 @@
-package com.digirati.taxonomy.manager.storage.record.mapper;
+package com.digirati.taxman.rest.server.taxonomy.storage.record.mapper;
 
-import com.digirati.taxonomy.manager.storage.record.ConceptRecord;
+import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRecord;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;

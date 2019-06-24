@@ -3,8 +3,8 @@ package com.digirati.taxman.rest.server.taxonomy;
 import com.digirati.taxman.common.rdf.RdfModelException;
 import com.digirati.taxman.common.taxonomy.ConceptModel;
 import com.digirati.taxman.rest.server.taxonomy.mapper.ConceptMapper;
-import com.digirati.taxonomy.manager.storage.ConceptDao;
-import com.digirati.taxonomy.manager.storage.ConceptDataSet;
+import com.digirati.taxman.rest.server.taxonomy.storage.ConceptDao;
+import com.digirati.taxman.rest.server.taxonomy.storage.ConceptDataSet;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;

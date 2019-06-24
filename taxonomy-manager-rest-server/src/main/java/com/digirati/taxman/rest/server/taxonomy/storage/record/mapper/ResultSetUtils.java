@@ -1,4 +1,4 @@
-package com.digirati.taxonomy.manager.storage.record.mapper;
+package com.digirati.taxman.rest.server.taxonomy.storage.record.mapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

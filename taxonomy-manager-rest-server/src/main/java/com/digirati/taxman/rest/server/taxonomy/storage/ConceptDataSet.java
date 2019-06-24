@@ -1,7 +1,7 @@
-package com.digirati.taxonomy.manager.storage;
+package com.digirati.taxman.rest.server.taxonomy.storage;
 
-import com.digirati.taxonomy.manager.storage.record.ConceptRecord;
-import com.digirati.taxonomy.manager.storage.record.ConceptRelationshipRecord;
+import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRecord;
+import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRelationshipRecord;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -39,7 +39,7 @@ public class ConceptDataSet {
     }
 
     /**
-     * Get the underlying record for the concept row this {@link com.digirati.taxonomy.manager.storage.ConceptDataSet} models.
+     * Get the underlying record for the concept row this {@link com.digirati.taxman.rest.server.taxonomy.storage.ConceptDataSet} models.
      *
      * @return the database record for this concept.
      */

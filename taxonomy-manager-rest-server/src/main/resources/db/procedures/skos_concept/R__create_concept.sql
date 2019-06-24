@@ -33,4 +33,3 @@ VALUES (_uuid,
         _history_note,
         _scope_note);
 $$;
-
