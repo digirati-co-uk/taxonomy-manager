@@ -28,7 +28,16 @@ import java.lang.reflect.Type;
 @Provider
 public class RdfModelMessageBodyReader implements MessageBodyReader<RdfModel> {
 
-    @Inject RdfModelFactory modelFactory;
+    private final RdfModelFactory modelFactory;
+
+    public RdfModelMessageBodyReader() {
+        this(new RdfModelFactory());
+    }
+
+    @Inject
+    public RdfModelMessageBodyReader(RdfModelFactory modelFactory) {
+        this.modelFactory = modelFactory;
+    }
 
     @Override
     public boolean isReadable(
