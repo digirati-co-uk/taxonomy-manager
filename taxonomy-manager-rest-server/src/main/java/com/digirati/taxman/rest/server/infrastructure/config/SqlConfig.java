@@ -1,7 +1,7 @@
 package com.digirati.taxman.rest.server.infrastructure.config;
 
-import com.digirati.taxonomy.manager.storage.ConceptDao;
-import com.digirati.taxonomy.manager.storage.ConceptSchemeDao;
+import com.digirati.taxman.rest.server.taxonomy.storage.ConceptDao;
+import com.digirati.taxman.rest.server.taxonomy.storage.ConceptSchemeDao;
 import io.agroal.api.AgroalDataSource;
 
 import javax.enterprise.context.ApplicationScoped;

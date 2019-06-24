@@ -1,4 +1,7 @@
-package com.digirati.taxonomy.manager.storage.record;
+package com.digirati.taxman.rest.server.taxonomy.storage.record;
+
+import com.google.common.base.MoreObjects;
+import com.google.common.base.Objects;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -98,5 +101,34 @@ public class ConceptRecord {
 
     public void setScopeNote(Map<String, String> scopeNote) {
         this.scopeNote = scopeNote;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ConceptRecord that = (ConceptRecord) o;
+        return Objects.equal(uuid, that.uuid);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(uuid);
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("uuid", uuid)
+                .add("preferredLabel", preferredLabel)
+                .add("altLabel", altLabel)
+                .add("hiddenLabel", hiddenLabel)
+                .add("note", note)
+                .add("changeNote", changeNote)
+                .add("editorialNote", editorialNote)
+                .add("example", example)
+                .add("historyNote", historyNote)
+                .add("scopeNote", scopeNote)
+                .toString();
     }
 }

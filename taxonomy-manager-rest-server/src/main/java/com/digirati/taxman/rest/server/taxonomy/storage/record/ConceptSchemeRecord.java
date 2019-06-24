@@ -1,4 +1,4 @@
-package com.digirati.taxonomy.manager.storage.record;
+package com.digirati.taxman.rest.server.taxonomy.storage.record;
 
 import java.util.HashMap;
 import java.util.Map;

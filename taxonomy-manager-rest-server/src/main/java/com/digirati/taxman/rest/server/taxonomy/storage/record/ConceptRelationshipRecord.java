@@ -1,6 +1,7 @@
-package com.digirati.taxonomy.manager.storage.record;
+package com.digirati.taxman.rest.server.taxonomy.storage.record;
 
 import com.digirati.taxman.common.taxonomy.ConceptRelationshipType;
+import com.google.common.base.Objects;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -49,5 +50,22 @@ public class ConceptRelationshipRecord {
 
     public void setPreferredLabel(Map<String, String> preferredLabel) {
         this.preferredLabel = preferredLabel;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ConceptRelationshipRecord that = (ConceptRelationshipRecord) o;
+        return transitive == that.transitive &&
+                Objects.equal(source, that.source) &&
+                Objects.equal(target, that.target) &&
+                type == that.type &&
+                Objects.equal(preferredLabel, that.preferredLabel);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(source, target, type, transitive, preferredLabel);
     }
 }
