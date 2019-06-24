@@ -3,7 +3,7 @@ package com.digirati.taxman.rest;
 import java.util.Map;
 import javax.ws.rs.core.MediaType;
 
-public class MediaTypes {
+public final class MediaTypes {
     public static final String APPLICATION_JSONLD_SKOS_VALUE =
             "application/ld+json;profile=\"http://www.w3.org/2004/02/skos/core.jsonld\"";
     public static final String APPLICATION_RDF_XML_VALUE = "application/rdf+xml";
@@ -13,4 +13,6 @@ public class MediaTypes {
             Map.of("profile", "http://www.w3.org/2004/02/skos/core.jsonld");
     public static final MediaType APPLICATION_JSONLD_SKOS =
             new MediaType("application", "ld+json", SKOS_PROFILE);
+
+    private MediaTypes() {}
 }

@@ -6,7 +6,6 @@ import org.flywaydb.core.Flyway;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
-import java.util.Properties;
 
 @ApplicationScoped
 public class DatabaseInitListener {

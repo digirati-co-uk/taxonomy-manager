@@ -14,7 +14,7 @@ import org.apache.jena.rdf.model.Resource;
  * Metadata encompassing a type {@link T} and it's RDF related metadata ({@link Resource}
  * constructor and RDF type).
  */
-public class RdfModelMetadata<T> {
+public class RdfModelMetadata<T extends RdfModel> {
 
     /** The fully qualified RDF resource URI that the type represents. */
     public final Resource type;
@@ -22,18 +22,34 @@ public class RdfModelMetadata<T> {
     /**
      * The single argument constructor that creates instances of {@link T} from a {@link Resource}.
      */
-    public final Constructor<T> constructor;
+    final Constructor<T> constructor;
 
-    public final Map<String, String> namespacePrefixes;
+    /**
+     * A map of RDF namespace prefixes to URIs.
+     *
+     * <p>Example:
+     * <code>
+     *     Map.of("skos", "http://www.w3.org/2004/02/skos/core#")
+     * </code>
+     */
+    final Map<String, String> namespacePrefixes;
 
-    public RdfModelMetadata(
+    private RdfModelMetadata(
             Resource type, Constructor<T> constructor, Map<String, String> namespacePrefixes) {
         this.type = type;
         this.constructor = constructor;
         this.namespacePrefixes = namespacePrefixes;
     }
 
-    public static <T> RdfModelMetadata<T> from(Class<T> type) throws RdfModelException {
+    /**
+     * Resolve the {@link RdfModelMetadata} for a given {@link RdfModel} {@code type}.
+     *
+     * @param type The class of the type to resolve metadata for.
+     * @param <T> The type to resolve metadata for.
+     * @return the runtime metadata required to construct RDF models of the given {@code type}.
+     * @throws RdfModelException if the class was missing the required metadata.
+     */
+    public static <T extends RdfModel> RdfModelMetadata<T> from(Class<T> type) throws RdfModelException {
         Constructor<T> constructor;
 
         try {

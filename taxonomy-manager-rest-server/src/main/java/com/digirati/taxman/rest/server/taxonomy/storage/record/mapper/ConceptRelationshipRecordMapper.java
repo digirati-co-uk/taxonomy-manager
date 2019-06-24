@@ -15,10 +15,8 @@ public class ConceptRelationshipRecordMapper implements RowMapper<ConceptRelatio
         var target = rs.getObject("target_uuid", UUID.class);
         var type = ConceptRelationshipType.valueOf(rs.getString("relation").toUpperCase());
         var transitive = rs.getBoolean("transitive");
-        var record = new ConceptRelationshipRecord(source, target, type, transitive);
+        var preferredLabel = ResultSetUtils.getPlainLiteralMap(rs, "target_preferred_label");
 
-        record.setPreferredLabel(ResultSetUtils.getPlainLiteralMap(rs, "target_preferred_label"));
-
-        return record;
+        return new ConceptRelationshipRecord(source, target, type, transitive, preferredLabel);
     }
 }

@@ -6,9 +6,18 @@ import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONObject;
 
-public final class ResultSetUtils {
+final class ResultSetUtils {
     private ResultSetUtils() {}
 
+    /**
+     * Read a key-value map of strings from a JSON column in a {@link ResultSet}.
+     *
+     * @param rs The {@code ResultSet} to read from.
+     * @param column The name of the column to read.
+     * @return a map of <code>language</code> to <code>value</code>.
+     *
+     * @throws SQLException if the column had the wrong type or was not present in the {@code ResultSet}.
+     */
     public static Map<String, String> getPlainLiteralMap(ResultSet rs, String column) throws SQLException {
         JSONObject json = new JSONObject(rs.getString(column));
 

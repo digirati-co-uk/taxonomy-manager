@@ -56,12 +56,12 @@ public class ConceptDataSet {
     JSONArray getRelationshipRecordsJson() {
         var array = new JSONArray();
 
-        for (var record : relationships) {
+        for (var relationship : relationships) {
             var recordJson = new JSONObject();
-            recordJson.put("source_id", record.getSource().toString());
-            recordJson.put("target_id", record.getTarget().toString());
-            recordJson.put("relation", record.getType().toString().toLowerCase());
-            recordJson.put("transitive", record.isTransitive());
+            recordJson.put("source_id", relationship.getSource().toString());
+            recordJson.put("target_id", relationship.getTarget().toString());
+            recordJson.put("relation", relationship.getType().toString().toLowerCase());
+            recordJson.put("transitive", relationship.isTransitive());
 
             array.put(recordJson);
         }

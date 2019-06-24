@@ -12,6 +12,7 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.SKOS;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
@@ -28,6 +29,13 @@ public class ConceptMapper {
         this.factory = modelFactory;
     }
 
+    /**
+     * Convert a database data representation to a typed RDF model.
+     *
+     * @param dataset The database dataset to convert.
+     * @return a typed RDF model.
+     * @throws RdfModelException if the RDF produced from the dataset was invalid.
+     */
     public ConceptModel map(ConceptDataSet dataset) throws RdfModelException {
         var builder = factory.createBuilder(ConceptModel.class);
         var record = dataset.getRecord();
@@ -50,13 +58,19 @@ public class ConceptMapper {
             builder.addEmbeddedModel(
                     property,
                     factory.createBuilder(ConceptModel.class)
-                            .addPlainLiteral(SKOS.prefLabel, relationship.getPreferredLabel())
+                            .addPlainLiteral(SKOS.prefLabel, relationship.getTargetPreferredLabel())
                             .setUri(idResolver.resolve(relationship.getTarget())));
         }
 
         return builder.build();
     }
 
+    /**
+     * Convert a typed RDF model to a database data representation.
+     *
+     * @param model The typed RDF model to convert.
+     * @return a database data representation of the {@link ConceptModel}.
+     */
     public ConceptDataSet map(ConceptModel model) {
         var uuid = model.getUuid()
                 .orElseThrow(() -> new IllegalArgumentException("No UUID present on provided model"));
@@ -72,7 +86,7 @@ public class ConceptMapper {
         record.setHistoryNote(model.getHistoryNote());
         record.setScopeNote(model.getScopeNote());
 
-        var dataset = new ConceptDataSet(record);
+        var relationshipRecords = new ArrayList<ConceptRelationshipRecord>();
 
         for (var type : ConceptRelationshipType.VALUES) {
             boolean transitiveSupported = type.hasTransitiveProperty();
@@ -80,18 +94,18 @@ public class ConceptMapper {
             Stream<Resource> relationships = model.getRelationships(type, false);
             Stream<Resource> transitiveRelationships = transitiveSupported ? model.getRelationships(type, true) : Stream.of();
 
-            var relationshipMapper = (BiConsumer<Resource, Boolean>) (resource, transitive) -> {
+            BiConsumer<Resource, Boolean> relationshipMapper = (resource, transitive) -> {
                 var targetUri = resource.getURI();
                 var targetUuid = idResolver.resolve(URI.create(targetUri));
                 var relationshipRecord = new ConceptRelationshipRecord(uuid, targetUuid, type, transitive);
 
-                dataset.addRelationshipRecord(relationshipRecord);
+                relationshipRecords.add(relationshipRecord);
             };
 
             relationships.forEach(r -> relationshipMapper.accept(r, false));
             transitiveRelationships.forEach(tr -> relationshipMapper.accept(tr, true));
         }
 
-        return dataset;
+        return new ConceptDataSet(record, relationshipRecords);
     }
 }

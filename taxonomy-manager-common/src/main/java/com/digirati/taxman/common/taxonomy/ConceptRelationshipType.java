@@ -3,16 +3,21 @@ package com.digirati.taxman.common.taxonomy;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.vocabulary.SKOS;
 
+import java.util.Set;
+
 public enum ConceptRelationshipType {
     BROADER(SKOS.broader, SKOS.broaderTransitive),
     NARROWER(SKOS.narrower, SKOS.narrowerTransitive),
     RELATED(SKOS.related);
 
-    public static final ConceptRelationshipType[] VALUES = values();
+    /** A cached set of valid {@link ConceptRelationshipType}s. */
+    public static final Set<ConceptRelationshipType> VALUES = Set.of(values());
+
     private final Property relationshipProperty;
     private final Property transitiveRelationshipProperty;
 
-    ConceptRelationshipType(Property relationshipProperty, Property transitiveRelationshipProperty) {
+    ConceptRelationshipType(
+            Property relationshipProperty, Property transitiveRelationshipProperty) {
         this.relationshipProperty = relationshipProperty;
         this.transitiveRelationshipProperty = transitiveRelationshipProperty;
     }
@@ -38,7 +43,8 @@ public enum ConceptRelationshipType {
      */
     public Property getSkosProperty(boolean transitive) {
         if (transitive && transitiveRelationshipProperty == null) {
-            throw new IllegalArgumentException("Relationship type does not support transitive properties");
+            throw new IllegalArgumentException(
+                    "Relationship type does not support transitive properties");
         }
 
         return transitive ? transitiveRelationshipProperty : relationshipProperty;

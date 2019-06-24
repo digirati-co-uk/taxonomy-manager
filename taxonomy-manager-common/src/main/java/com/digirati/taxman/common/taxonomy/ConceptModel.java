@@ -34,16 +34,13 @@ public final class ConceptModel implements RdfModel, PersistentModel {
         this.resource = resource;
     }
 
+    @Override
     public Optional<UUID> getUuid() {
         return Optional.ofNullable(uuid);
     }
 
     public void setUuid(UUID uuid) {
         this.uuid = uuid;
-    }
-
-    public boolean isNew() {
-        return uuid == null;
     }
 
     @Override

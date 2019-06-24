@@ -9,7 +9,6 @@ import com.digirati.taxman.rest.MediaTypes;
 import com.github.jsonldjava.core.JsonLdOptions;
 import com.google.common.io.Resources;
 import org.apache.jena.riot.JsonLDWriteContext;
-import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.sparql.util.Context;
 import org.jboss.resteasy.spi.util.FindAnnotation;
 import org.json.JSONObject;
@@ -46,9 +45,8 @@ public class RdfModelMessageBodyWriter implements MessageBodyWriter<RdfModel> {
             MediaType mediaType,
             MultivaluedMap<String, Object> httpHeaders,
             OutputStream entityStream)
-            throws IOException, WebApplicationException {
+            throws IOException {
 
-        // @TODO: Handle creation and passing of `context` in a better way.
         RdfModelFormat format;
         Context context = new Context();
 

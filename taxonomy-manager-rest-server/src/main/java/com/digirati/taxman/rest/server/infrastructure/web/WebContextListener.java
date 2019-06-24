@@ -7,8 +7,10 @@ import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.container.PreMatching;
 import javax.ws.rs.ext.Provider;
-import java.io.IOException;
 
+/**
+ * A JAX-RS request listener that binds the URI of the current request to the {@link Thread} that is handlign it.
+ */
 @Provider
 @PreMatching
 public class WebContextListener implements ContainerRequestFilter, ContainerResponseFilter {
@@ -17,12 +19,12 @@ public class WebContextListener implements ContainerRequestFilter, ContainerResp
     WebContextHolder contextHolder;
 
     @Override
-    public void filter(ContainerRequestContext requestContext) throws IOException {
+    public void filter(ContainerRequestContext requestContext) {
         contextHolder.setUriInfo(requestContext.getUriInfo());
     }
 
     @Override
-    public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
+    public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
         contextHolder.clear();
     }
 }

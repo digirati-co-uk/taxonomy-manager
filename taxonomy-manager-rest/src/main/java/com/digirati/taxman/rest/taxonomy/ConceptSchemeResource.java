@@ -1,7 +1,6 @@
 package com.digirati.taxman.rest.taxonomy;
 
 import com.digirati.taxman.common.rdf.annotation.jsonld.JsonLdFrame;
-import com.digirati.taxman.common.taxonomy.ConceptModel;
 import com.digirati.taxman.common.taxonomy.ConceptSchemeModel;
 import com.digirati.taxman.rest.MediaTypes;
 
@@ -28,10 +27,10 @@ public interface ConceptSchemeResource {
     @Consumes({MediaTypes.APPLICATION_JSONLD_SKOS_VALUE, MediaTypes.APPLICATION_RDF_XML_VALUE})
     @Produces({MediaTypes.APPLICATION_JSONLD_SKOS_VALUE, MediaTypes.APPLICATION_RDF_XML_VALUE})
     @JsonLdFrame(input = "/jsonld/framing/concept-scheme.json")
-    Response getConcept(@BeanParam ConceptSchemePath params);
+    Response getConceptScheme(@BeanParam ConceptSchemePath params);
 
     @PUT
     @Path("/{scheme}")
     @Consumes({MediaTypes.APPLICATION_RDF_XML_VALUE, MediaTypes.APPLICATION_JSONLD_SKOS_VALUE})
-    Response updateConcept(@BeanParam ConceptSchemePath params, @Valid ConceptSchemeModel model);
+    Response updateConceptScheme(@BeanParam ConceptSchemePath params, @Valid ConceptSchemeModel model);
 }

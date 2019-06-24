@@ -1,5 +1,5 @@
 - repo: git://github.com/pre-commit/pre-commit-hooks
-  sha: v2.0.0
+  sha: v2.2.3
   hooks:
     - id: check-added-large-files
     - id: check-case-conflict

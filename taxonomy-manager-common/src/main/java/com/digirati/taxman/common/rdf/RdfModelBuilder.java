@@ -10,12 +10,15 @@ import org.apache.jena.rdf.model.Resource;
 import java.net.URI;
 import java.util.Map;
 
-import static com.digirati.taxman.common.rdf.RdfModelBuilder.PendingPropertyValue.Type.LITERAL;
 import static com.digirati.taxman.common.rdf.RdfModelBuilder.PendingPropertyValue.Type.RESOURCE;
 
+/**
+ * A builder for typed {@link RdfModel}s.
+ *
+ * @param <T> The type of {@link RdfModel} being built.
+ */
 public class RdfModelBuilder<T extends RdfModel> {
 
-    private final RdfModelFactory factory;
     private final Model model;
     private final RdfModelMetadata<T> metadata;
     private final Multimap<Property, PendingPropertyValue> properties = MultimapBuilder
@@ -25,12 +28,18 @@ public class RdfModelBuilder<T extends RdfModel> {
 
     private URI uri;
 
-    RdfModelBuilder(RdfModelFactory factory, Model model, RdfModelMetadata<T> metadata) {
-        this.factory = factory;
+    RdfModelBuilder(Model model, RdfModelMetadata<T> metadata) {
         this.model = model;
         this.metadata = metadata;
     }
 
+    /**
+     * Add a new plain literal property to the underlying resource.
+     *
+     * @param property The property to add.
+     * @param values   A map representing the plain literal, where keys are languages and
+     *                 the values are the literal strings.
+     */
     public RdfModelBuilder addPlainLiteral(Property property, Map<String, String> values) {
         for (var entry : values.entrySet()) {
             String language = entry.getKey();
@@ -43,9 +52,36 @@ public class RdfModelBuilder<T extends RdfModel> {
         return this;
     }
 
+    /**
+     * Build and embed a new resource within this model and associate it with a {@code property}.
+     *
+     * @param property      The property to associate the resource with.
+     * @param embeddedModel The builder used to produce the new embedded model.
+     * @throws RdfModelException if the embedded resource was invalid.
+     */
     public RdfModelBuilder addEmbeddedModel(Property property, RdfModelBuilder embeddedModel) throws RdfModelException {
         properties.put(property, new PendingPropertyValue(embeddedModel.build(model).getResource()));
         return this;
+    }
+
+    /**
+     * Set the URI of the resource being built.
+     *
+     * @param uri The URI of the resource.
+     */
+    public RdfModelBuilder<T> setUri(URI uri) {
+        this.uri = uri;
+        return this;
+    }
+
+    /**
+     * Build and return the typed model.
+     *
+     * @return A new typed {@link RdfModel} with properties configured based on this builder.
+     * @throws RdfModelException if the configured properties produced an invalid RDF graph.
+     */
+    public T build() throws RdfModelException {
+        return build(model);
     }
 
     private T build(Model model) throws RdfModelException {
@@ -73,15 +109,13 @@ public class RdfModelBuilder<T extends RdfModel> {
         }
     }
 
-    public T build() throws RdfModelException {
-      return build(model);
-    }
-
-    public RdfModelBuilder<T> setUri(URI uri) {
-        this.uri = uri;
-        return this;
-    }
-
+    /**
+     * A pending value that has no {@link Resource} to be attached to yet.
+     *
+     * <p>This is required because the URI of an existing {@code Resource} cannot be changed,
+     * so we need to delegate creation of the object until all properties are configured and a
+     * {@code URI} has been set (or not).
+     */
     static class PendingPropertyValue {
         final Type type;
         final Object value;

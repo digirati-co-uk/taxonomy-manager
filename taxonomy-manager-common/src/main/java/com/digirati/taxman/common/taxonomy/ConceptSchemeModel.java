@@ -21,12 +21,11 @@ import java.util.stream.Stream;
 public class ConceptSchemeModel implements RdfModel, PersistentModel {
 
     private final Resource resource;
-    private final UUID uuid;
+    private UUID uuid;
 
     @RdfConstructor
     public ConceptSchemeModel(Resource resource) {
-        this.resource = resource;
-        this.uuid = null;
+        this(null, resource);
     }
 
     public ConceptSchemeModel(UUID uuid, Resource resource) {
@@ -37,6 +36,10 @@ public class ConceptSchemeModel implements RdfModel, PersistentModel {
     @Override
     public Optional<UUID> getUuid() {
         return Optional.ofNullable(uuid);
+    }
+
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
     }
 
     @Override

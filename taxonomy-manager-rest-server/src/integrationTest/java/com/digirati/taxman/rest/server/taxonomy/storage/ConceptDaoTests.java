@@ -5,6 +5,7 @@ import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRecord;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRelationshipRecord;
 import com.digirati.taxman.rest.server.testing.DatabaseTestExtension;
 import com.digirati.taxman.rest.server.testing.annotation.TestDataSource;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,7 +19,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(DatabaseTestExtension.class)
 @Tag("integration")
@@ -60,7 +60,7 @@ public class ConceptDaoTests {
         var storedRecord = dao.loadDataSet(uuid).getRecord();
         var storedLabels = getter.getLabels(storedRecord);
 
-        assertEquals(expectedLabels, storedLabels);
+        Assertions.assertEquals(expectedLabels, storedLabels);
     }
 
     @MethodSource("labelPropertiesProvider")
@@ -81,7 +81,7 @@ public class ConceptDaoTests {
         var storedRecord = dao.loadDataSet(uuid).getRecord();
         var storedLabels = getter.getLabels(storedRecord);
 
-        assertEquals(expectedLabels, storedLabels);
+        Assertions.assertEquals(expectedLabels, storedLabels);
     }
 
     @Test
@@ -95,7 +95,7 @@ public class ConceptDaoTests {
         dao.storeDataSet(new ConceptDataSet(new ConceptRecord(uuidB)));
         dao.storeDataSet(new ConceptDataSet(new ConceptRecord(uuidA), relationships));
 
-        assertEquals(relationships, dao.loadDataSet(uuidA).getRelationshipRecords());
+        Assertions.assertEquals(relationships, dao.loadDataSet(uuidA).getRelationshipRecords());
     }
 
     @FunctionalInterface

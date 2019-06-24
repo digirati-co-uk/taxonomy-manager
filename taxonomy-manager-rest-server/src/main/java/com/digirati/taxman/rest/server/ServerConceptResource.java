@@ -34,6 +34,7 @@ public class ServerConceptResource implements ConceptResource {
 
     @Override
     public Response updateConcept(@BeanParam ConceptPath params, @Valid ConceptModel model) {
+        model.setUuid(params.getUuid());
         concepts.update(model);
 
         return Response.noContent().build();

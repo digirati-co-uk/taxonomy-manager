@@ -1,18 +1,41 @@
 package com.digirati.taxman.rest.server;
 
-import com.digirati.taxman.rest.MediaTypes;
-import org.apache.jena.rdf.model.Model;
+import com.digirati.taxman.common.taxonomy.ConceptSchemeModel;
+import com.digirati.taxman.rest.server.taxonomy.ConceptSchemeModelRepository;
+import com.digirati.taxman.rest.taxonomy.ConceptSchemePath;
+import com.digirati.taxman.rest.taxonomy.ConceptSchemeResource;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
+import javax.inject.Inject;
+import javax.validation.Valid;
+import javax.ws.rs.core.Response;
 
 @ApplicationScoped
-@Path("/v0.1/concept-scheme")
-public class ServerConceptSchemeResource {
+public class ServerConceptSchemeResource implements ConceptSchemeResource {
 
-    @POST
-    @Consumes({MediaTypes.APPLICATION_JSONLD_SKOS_VALUE, MediaTypes.APPLICATION_RDF_XML_VALUE})
-    public void createConceptSchemeFromJsonLd(Model model) {}
+    @Inject
+    ConceptSchemeModelRepository conceptSchemes;
+
+    @Override
+    public Response createConceptScheme(@Valid ConceptSchemeModel model) {
+        var updatedModel = conceptSchemes.create(model);
+        var uri = updatedModel.getUri();
+
+        return Response.created(uri).entity(updatedModel).build();
+    }
+
+    @Override
+    public Response getConceptScheme(ConceptSchemePath params) {
+        var model = conceptSchemes.find(params.getUuid());
+
+        return Response.ok(model).build();
+    }
+
+    @Override
+    public Response updateConceptScheme(ConceptSchemePath params, @Valid ConceptSchemeModel model) {
+        model.setUuid(params.getUuid());
+        conceptSchemes.update(model);
+
+        return Response.noContent().build();
+    }
 }

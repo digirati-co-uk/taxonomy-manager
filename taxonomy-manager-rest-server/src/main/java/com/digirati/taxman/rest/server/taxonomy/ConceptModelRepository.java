@@ -41,6 +41,10 @@ public class ConceptModelRepository {
         }
     }
 
+    /**
+     * Perform an idempotent update of an existing {@link ConceptModel}, updating all stored properties
+     * as well relationships.
+     */
     @Transactional(Transactional.TxType.REQUIRED)
     public void update(ConceptModel model) {
         conceptDao.storeDataSet(dataMapper.map(model));

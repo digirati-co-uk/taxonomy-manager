@@ -29,6 +29,6 @@ public class TaxonomyConfig {
 
     @Produces
     ConceptSchemeMapper conceptSchemeMapper() {
-        return new ConceptSchemeMapper(conceptSchemeIdResolver, modelFactory);
+        return new ConceptSchemeMapper(conceptSchemeIdResolver, conceptIdResolver, modelFactory);
     }
 }
