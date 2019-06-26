@@ -19,12 +19,17 @@ final class ResultSetUtils {
      * @throws SQLException if the column had the wrong type or was not present in the {@code ResultSet}.
      */
     public static Map<String, String> getPlainLiteralMap(ResultSet rs, String column) throws SQLException {
-        JSONObject json = new JSONObject(rs.getString(column));
-
         Map<String, String> map = new HashMap<>();
+        String value = rs.getString(column);
 
-        for (String key : json.keySet()) {
-            map.put(key, json.getString(key));
+        if (value == null) {
+            return map;
+        }
+
+        JSONObject jsonValue = new JSONObject(value);
+
+        for (String key : jsonValue.keySet()) {
+            map.put(key, jsonValue.getString(key));
         }
 
         return map;

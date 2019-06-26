@@ -1,5 +1,7 @@
 package com.digirati.taxman.rest.server.taxonomy.storage.record;
 
+import com.google.common.base.Objects;
+
 import java.util.Map;
 import java.util.UUID;
 
@@ -28,5 +30,22 @@ public class ConceptReference {
 
     public Map<String, String> getPreferredLabel() {
         return preferredLabel;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ConceptReference that = (ConceptReference) o;
+        return Objects.equal(target, that.target);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(target);
     }
 }

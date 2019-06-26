@@ -6,7 +6,6 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -41,10 +40,6 @@ public interface RdfModel {
      * @return the URI of this model.
      */
     default URI getUri() {
-        try {
-            return new URI(getResource().getURI());
-        } catch (URISyntaxException ex) {
-            throw new RuntimeException("RdfModel has an invalid URI", ex);
-        }
+        return URI.create(getResource().getURI());
     }
 }
