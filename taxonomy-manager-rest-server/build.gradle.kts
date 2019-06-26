@@ -77,6 +77,12 @@ val integrationTest = task<Test>("integrationTest") {
     shouldRunAfter("test")
 
     useJUnitPlatform()
+
+    reports {
+        junitXml.isEnabled = true
+    }
+
+    testLogging.showStandardStreams = true
 }
 
 val mergeBuildOutput = task<Copy>("mergeBuildOutput") {
