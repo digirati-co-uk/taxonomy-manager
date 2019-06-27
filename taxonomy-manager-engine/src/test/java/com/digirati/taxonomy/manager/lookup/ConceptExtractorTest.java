@@ -1,33 +1,36 @@
 package com.digirati.taxonomy.manager.lookup;
 
-import com.digirati.taxonomy.manager.lookup.model.Concept;
 import com.digirati.taxonomy.manager.lookup.model.ConceptMatch;
 import com.digirati.taxonomy.manager.lookup.model.TermMatch;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class ConceptExtractorTest {
 
     @Test
     void extractShouldReturnCollectionWithAllMatchingConcepts() {
         // Given
-        Concept fight = new Concept("fight", Lists.newArrayList("row"));
-        Concept line = new Concept("line", Lists.newArrayList("row"));
-        Concept purpose = new Concept("purpose", Lists.newArrayList("sake"));
-        Concept riceWine = new Concept("rice wine", Lists.newArrayList("sake"));
+        UUID fightId = UUID.randomUUID();
+        UUID lineId = UUID.randomUUID();
+        UUID purposeId = UUID.randomUUID();
+        UUID riceWineId = UUID.randomUUID();
 
         ConceptExtractor underTest =
                 new ConceptExtractor(
-                        new AhoCorasickTextSearcher(Lists.newArrayList("row", "sake")));
-        Multimap<String, Concept> conceptLookupTable = underTest.getConceptLookupTable();
-        conceptLookupTable.putAll("row", Arrays.asList(fight, line));
-        conceptLookupTable.putAll("sake", Arrays.asList(purpose, riceWine));
+                        new AhoCorasickTextSearcher(Lists.newArrayList("row", "sake")),
+                        ArrayListMultimap.create());
+        Multimap<String, UUID> conceptLookupTable = underTest.getConceptLookupTable();
+        conceptLookupTable.putAll("row", Arrays.asList(fightId, lineId));
+        conceptLookupTable.putAll("sake", Arrays.asList(purposeId, riceWineId));
 
         // When
         Collection<ConceptMatch> actual =
@@ -37,10 +40,10 @@ class ConceptExtractorTest {
         // Then
         Collection<ConceptMatch> expected =
                 Lists.newArrayList(
-                        match("row", 2, 4, fight, line),
-                        match("sake", 24, 27, purpose, riceWine),
-                        match("row", 62, 64, fight, line),
-                        match("sake", 69, 72, purpose, riceWine));
+                        match("row", 2, 4, fightId, lineId),
+                        match("sake", 24, 27, purposeId, riceWineId),
+                        match("row", 62, 64, fightId, lineId),
+                        match("sake", 69, 72, purposeId, riceWineId));
         assertEquals(expected, actual);
     }
 
@@ -49,7 +52,8 @@ class ConceptExtractorTest {
         // Given
         ConceptExtractor underTest =
                 new ConceptExtractor(
-                        new AhoCorasickTextSearcher(Lists.newArrayList("row", "sake")));
+                        new AhoCorasickTextSearcher(Lists.newArrayList("row", "sake")),
+                        ArrayListMultimap.create());
 
         // When
         Collection<ConceptMatch> actual =
@@ -66,7 +70,37 @@ class ConceptExtractorTest {
         assertEquals(expected, actual);
     }
 
-    private ConceptMatch match(String term, int startIndex, int endIndex, Concept... concepts) {
+    @Test
+    void addConceptShouldRebuildLookupTableAndSearcherWhenLabelsAreNew() {
+        fail();
+    }
+
+    @Test
+    void addConceptShouldNotRebuildSearcherWhenLabelsAreAlreadyLoaded() {
+        fail();
+    }
+
+    @Test
+    void updateConceptShouldRebuildLookupTableAndSearcherWhenLabelsHaveChanged() {
+        fail();
+    }
+
+    @Test
+    void updateConceptShouldNotRebuildWhenLabelsHaveNotChanged() {
+        fail();
+    }
+
+    @Test
+    void removeConceptShouldRebuildSearcherWhenLabelsNoLongerExist() {
+        fail();
+    }
+
+    @Test
+    void removeConceptShouldNotRebuildSearcherWhenLabelsExistForOtherConcepts() {
+        fail();
+    }
+
+    private ConceptMatch match(String term, int startIndex, int endIndex, UUID... concepts) {
         return new ConceptMatch(
                 new TermMatch(term, startIndex, endIndex), Lists.newArrayList(concepts));
     }

@@ -122,4 +122,14 @@ public class TextNormaliser {
     public String normalise(List<Word> contentWords) {
         return contentWords.stream().map(Word::getLemma).collect(Collectors.joining(" "));
     }
+
+    /**
+     * Applies the NLP pipeline to a piece of input text to produce a single normalised String.
+     *
+     * @param text the text to normalise
+     * @return the normalised form of the input text
+     */
+    public String normalise(String text) {
+        return normalise(extractContentWords(text));
+    }
 }

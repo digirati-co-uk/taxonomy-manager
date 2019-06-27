@@ -39,6 +39,16 @@ public final class ConceptModel implements RdfModel, PersistentModel {
         return Optional.ofNullable(uuid);
     }
 
+    /**
+     * Gets the UUID of this concept.
+     *
+     * @return the UUID of this concept.
+     * @throws IllegalStateException if the UUID is not present.
+     */
+    public UUID getNullSafeUuid() {
+        return getUuid().orElseThrow(() -> new IllegalStateException("Null UUIDs are not allowed."));
+    }
+
     public void setUuid(UUID uuid) {
         this.uuid = uuid;
     }

@@ -5,6 +5,7 @@ import com.digirati.taxonomy.manager.lookup.model.Word;
 import com.digirati.taxonomy.manager.lookup.model.LookupResultContext;
 import com.digirati.taxonomy.manager.lookup.model.TermMatch;
 import com.digirati.taxonomy.manager.lookup.normalisation.TextNormaliser;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Sets;
 import org.junit.jupiter.api.Test;
 
@@ -16,6 +17,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class TextLookupServiceTest {
 
@@ -28,9 +30,9 @@ class TextLookupServiceTest {
         Set<String> stopwords = Sets.newHashSet("I");
 
         TextSearcher textSearcher = new AhoCorasickTextSearcher(terms);
-        ConceptExtractor conceptExtractor = new ConceptExtractor(textSearcher);
+        ConceptExtractor conceptExtractor = new ConceptExtractor(textSearcher, ArrayListMultimap.create());
         TextNormaliser textNormaliser = TextNormaliser.initialiseEnglishNormaliser(stopwords).get();
-        TextLookupService underTest = new TextLookupService(textNormaliser, conceptExtractor);
+        TextLookupService underTest = new TextLookupService(textNormaliser, conceptExtractor, "en");
 
         // When
         LookupResultContext actual = underTest.search(inputText);
@@ -48,6 +50,21 @@ class TextLookupServiceTest {
                 new LookupResultContext(inputText, normalisedText, contentWords, conceptMatches);
 
         assertEquals(expected, actual);
+    }
+
+    @Test
+    void addConceptShouldAddNormalisedConceptLabelsToExtractor() {
+        fail();
+    }
+
+    @Test
+    void updateConceptShouldApplyNormalisedConceptLabelsToExtractor() {
+        fail();
+    }
+
+    @Test
+    void removeConceptShouldRemoveNormalisedLabelsFromExtractor() {
+        fail();
     }
 
     private ConceptMatch conceptMatch(String originalTerm, int startIndex, int endIndex) {
