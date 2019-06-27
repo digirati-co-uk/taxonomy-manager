@@ -1,59 +1,78 @@
-repositories {
-    mavenCentral()
-}
+import com.github.spotbugs.SpotBugsExtension
+import com.github.spotbugs.SpotBugsTask
+import org.sonarqube.gradle.SonarQubeTask
+import java.nio.file.Files
+import java.nio.file.Paths
 
 plugins {
-    java
-    jacoco
-    checkstyle
+    id("com.gradle.build-scan") version "2.0.2"
     id("org.sonarqube") version "2.7"
-    id("com.github.spotbugs") version "1.7.1"
+    id("com.github.spotbugs") version "1.7.1" apply (false)
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
-}
+val ci: String by project
+val isCiRunning = ci.toBoolean()
 
-val ahoCorasickVersion: String by project
-val guavaVersion: String by project
-val stanfordNlpVersion: String by project
-val junitVersion: String by project
-val hamcrestVersion: String by project
-val mockitoVersion: String by project
+val checkstyleReportLocations = mutableListOf<String>()
+val spotbugsReportLocations = mutableListOf<String>()
 
-dependencies {
-    spotbugsPlugins("com.h3xstream.findsecbugs:findsecbugs-plugin:1.7.1")
+subprojects {
+    apply(plugin = "com.github.spotbugs")
+    apply(plugin = "checkstyle")
+    apply(plugin = "jacoco")
 
-    compile("org.ahocorasick", "ahocorasick", ahoCorasickVersion)
-    compile("com.google.guava", "guava", guavaVersion)
-    compile("edu.stanford.nlp", "stanford-corenlp", stanfordNlpVersion)
-    compile("edu.stanford.nlp:stanford-corenlp:$stanfordNlpVersion:models")
-
-    testCompile("org.junit.jupiter", "junit-jupiter", junitVersion)
-    testCompile("org.hamcrest", "hamcrest", hamcrestVersion)
-    testCompile("org.mockito", "mockito-junit-jupiter", mockitoVersion)
-}
-
-tasks.named<Test>("test") {
-    useJUnitPlatform()
-}
-
-tasks.withType<JavaCompile> {
-    options.encoding = "UTF-8"
-}
-
-spotbugs {
-    toolVersion = "3.1.+"
-    effort = "max"
-    isIgnoreFailures = true
-}
-
-tasks.withType<Checkstyle>().configureEach {
-    reports {
-        xml.isEnabled = false
-        html.isEnabled = true
+    repositories {
+        mavenCentral()
     }
+
+    tasks.withType<JavaCompile> {
+        sourceCompatibility = "11"
+        targetCompatibility = "11"
+        options.encoding = "UTF-8"
+    }
+
+    tasks.withType<Test> {
+        useJUnitPlatform()
+    }
+
+    tasks.withType<Checkstyle> {
+        reports {
+            xml.isEnabled = isCiRunning
+            html.isEnabled = !isCiRunning
+        }
+
+        if (inputs.hasSourceFiles) {
+            outputs.files.forEach { file ->
+                checkstyleReportLocations += file.toString()
+            }
+        }
+
+        ignoreFailures = true
+    }
+
+    tasks.withType<SpotBugsTask> {
+        reports {
+            xml.isEnabled = isCiRunning
+            html.isEnabled = !isCiRunning
+        }
+
+        if (inputs.hasSourceFiles) {
+            outputs.files.forEach { file ->
+                spotbugsReportLocations += file.toString()
+            }
+        }
+    }
+
+    configure<SpotBugsExtension> {
+        toolVersion = "3.1.+"
+        effort = "max"
+        isIgnoreFailures = true
+    }
+}
+
+buildScan {
+    setTermsOfServiceUrl("https://gradle.com/terms-of-service")
+    setTermsOfServiceAgree("yes")
 }
 
 sonarqube {
@@ -62,6 +81,22 @@ sonarqube {
         property("sonar.projectName", "digirati-taxonomy-manager")
         property("sonar.projectKey", "digirati-co-uk_digirati-taxonomy-manager")
         property("sonar.pullrequest.provider", "GitHub")
-        property("sonar.pullrequest.github.repository", "digirati-co-uk/digirati-taxonomy-manager")
+        property("sonar.pullrequest.github.repository", "digirati-co-uk/taxonomy-manager")
+    }
+}
+
+allprojects {
+    tasks.withType<SonarQubeTask> {
+        doFirst {
+            val filter: (String) -> Boolean = { Files.exists(Paths.get(it)) }
+            val filteredSpotBugsLocations = spotbugsReportLocations.filter(filter)
+            val filteredCheckStyleLocations = checkstyleReportLocations.filter(filter)
+            val props = mapOf(
+                    "sonar.java.spotbugs.reportPaths" to filteredSpotBugsLocations.joinToString(","),
+                    "sonar.java.checkstyle.reportPaths" to filteredCheckStyleLocations.joinToString(",")
+            )
+
+            properties.putAll(props)
+        }
     }
 }

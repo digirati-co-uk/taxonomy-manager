@@ -35,7 +35,7 @@ pipeline {
             steps {
                 script {
                     def workspace = env.WORKSPACE
-                    sh "$workspace/gradlew clean build"
+                    sh "$workspace/gradlew -Pci=true clean assemble check"
                 }
             }
         }
@@ -66,7 +66,7 @@ pipeline {
                         def changeId = env.CHANGE_ID
                         def workspace = env.WORKSPACE
 
-                        sh "$workspace/gradlew sonarqube -Dsonar.pullrequest.branch=$branchName -Dsonar.pullrequest.key=$changeId"
+                        sh "$workspace/gradlew -Pci=true sonarqube -Dsonar.pullrequest.branch=$branchName -Dsonar.pullrequest.key=$changeId"
                     }
                 }
             }
@@ -81,10 +81,16 @@ pipeline {
                 withSonarQubeEnv('default') {
                     script {
                         def workspace = env.WORKSPACE
-                        sh "$workspace/gradlew sonarqube"
+                        sh "$workspace/gradlew -Pci=true sonarqube"
                     }
                 }
             }
+        }
+    }
+
+    post {
+        always {
+            junit '**/build/test-results/test/*.xml'
         }
     }
 }
