@@ -17,7 +17,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 class TextLookupServiceTest {
 
@@ -50,21 +49,6 @@ class TextLookupServiceTest {
                 new LookupResultContext(inputText, normalisedText, contentWords, conceptMatches);
 
         assertEquals(expected, actual);
-    }
-
-    @Test
-    void addConceptShouldAddNormalisedConceptLabelsToExtractor() {
-        fail();
-    }
-
-    @Test
-    void updateConceptShouldApplyNormalisedConceptLabelsToExtractor() {
-        fail();
-    }
-
-    @Test
-    void removeConceptShouldRemoveNormalisedLabelsFromExtractor() {
-        fail();
     }
 
     private ConceptMatch conceptMatch(String originalTerm, int startIndex, int endIndex) {

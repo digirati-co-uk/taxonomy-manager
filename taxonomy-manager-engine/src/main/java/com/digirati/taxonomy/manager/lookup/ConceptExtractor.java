@@ -49,6 +49,10 @@ class ConceptExtractor {
         return new ConceptMatch(termMatch, conceptLookupTable.get(termMatch.getTerm()));
     }
 
+    private Set<String> getTerms() {
+        return Sets.newHashSet(conceptLookupTable.keySet());
+    }
+
     /**
      * Adds the details of a concept to the lookup table, and reconstructs the text searcher with
      * the new terms to search for if the concept labels are not already loaded into it.
@@ -57,11 +61,11 @@ class ConceptExtractor {
      * @param labels the labels of the concept
      */
     public void addConcept(UUID conceptUuid, Set<String> labels) {
-        Set<String> originalTerms = conceptLookupTable.keySet();
+        Set<String> originalTerms = getTerms();
         labels.forEach(label -> conceptLookupTable.put(label, conceptUuid));
 
         if (!originalTerms.containsAll(labels)) {
-            textSearcher = textSearcher.rebuild(conceptLookupTable.keySet());
+            textSearcher = textSearcher.rebuild(getTerms());
         }
     }
 
@@ -95,7 +99,7 @@ class ConceptExtractor {
                 });
         updatedLabels.forEach(label -> conceptLookupTable.put(label, conceptUuid));
 
-        textSearcher = textSearcher.rebuild(conceptLookupTable.keySet());
+        textSearcher = textSearcher.rebuild(getTerms());
     }
 
     /**
@@ -108,7 +112,7 @@ class ConceptExtractor {
     public void removeConcept(UUID conceptUuid, Set<String> labels) {
         boolean hasRemovedLastLabelInstance = false;
         for (String label : labels) {
-            Collection<UUID> conceptsWithLabel = conceptLookupTable.get(label);
+            Collection<UUID> conceptsWithLabel = Sets.newHashSet(conceptLookupTable.get(label));
             conceptsWithLabel.remove(conceptUuid);
             conceptLookupTable.replaceValues(label, conceptsWithLabel);
             if (conceptsWithLabel.isEmpty()) {
@@ -117,7 +121,7 @@ class ConceptExtractor {
         }
 
         if (hasRemovedLastLabelInstance) {
-            textSearcher = textSearcher.rebuild(conceptLookupTable.keySet());
+            textSearcher = textSearcher.rebuild(getTerms());
         }
     }
 }
