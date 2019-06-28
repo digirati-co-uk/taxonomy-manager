@@ -1,14 +1,21 @@
 package com.digirati.taxman.rest.server.taxonomy.storage;
 
+import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRecord;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.mapper.ConceptRecordMapper;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.mapper.ConceptRelationshipRecordMapper;
+import com.digirati.taxman.rest.server.taxonomy.storage.sql.RowMappingSpliterator;
 import org.json.JSONObject;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ResultSetExtractor;
 
 import javax.sql.DataSource;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Arrays;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 /**
  * A data access object that can retrieve and store {@link ConceptDataSet}s in an underlying
@@ -21,6 +28,16 @@ public class ConceptDao {
 
     public ConceptDao(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+    }
+
+    /**
+     * Load every concept scheme in the database and stream them from the database server in batches.
+     */
+    public Stream<ConceptRecord> loadAllRecords() {
+        // @TODO - jdbcTemplate.setFetchSize(...)
+        ResultSetExtractor<Stream<ConceptRecord>> extractor = rs -> RowMappingSpliterator.stream(recordMapper, rs);
+
+        return jdbcTemplate.query("SELECT * FROM get_all_concepts()", extractor);
     }
 
     /**
@@ -54,16 +71,16 @@ public class ConceptDao {
         var record = dataset.getRecord();
 
         Object[] recordArgs = {
-            record.getUuid(),
-            new JSONObject(record.getPreferredLabel()),
-            new JSONObject(record.getAltLabel()),
-            new JSONObject(record.getHiddenLabel()),
-            new JSONObject(record.getNote()),
-            new JSONObject(record.getChangeNote()),
-            new JSONObject(record.getEditorialNote()),
-            new JSONObject(record.getExample()),
-            new JSONObject(record.getHistoryNote()),
-            new JSONObject(record.getScopeNote())
+                record.getUuid(),
+                new JSONObject(record.getPreferredLabel()),
+                new JSONObject(record.getAltLabel()),
+                new JSONObject(record.getHiddenLabel()),
+                new JSONObject(record.getNote()),
+                new JSONObject(record.getChangeNote()),
+                new JSONObject(record.getEditorialNote()),
+                new JSONObject(record.getExample()),
+                new JSONObject(record.getHistoryNote()),
+                new JSONObject(record.getScopeNote())
         };
 
         int[] recordTypes = new int[recordArgs.length];
