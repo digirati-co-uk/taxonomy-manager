@@ -65,7 +65,8 @@ public class TextLookupService {
     }
 
     @VisibleForTesting
-    TextLookupService(TextNormaliser textNormaliser, ConceptExtractor conceptExtractor, String languageKey) {
+    TextLookupService(
+            TextNormaliser textNormaliser, ConceptExtractor conceptExtractor, String languageKey) {
         this.textNormaliser = textNormaliser;
         this.conceptExtractor = conceptExtractor;
         this.languageKey = languageKey;
@@ -121,7 +122,8 @@ public class TextLookupService {
 
     public void addConcept(ConceptModel concept) {
         UUID conceptUuid = concept.getUuid();
-        String preferredLabel = textNormaliser.normalise(concept.getPreferredLabel().get(languageKey));
+        String preferredLabel =
+                textNormaliser.normalise(concept.getPreferredLabel().get(languageKey));
         String altLabel = textNormaliser.normalise(concept.getAltLabel().get(languageKey));
 
         conceptExtractor.addConcept(conceptUuid, Sets.newHashSet(preferredLabel, altLabel));
@@ -129,7 +131,8 @@ public class TextLookupService {
 
     public void updateConcept(ConceptModel concept) {
         UUID conceptUuid = concept.getUuid();
-        String preferredLabel = textNormaliser.normalise(concept.getPreferredLabel().get(languageKey));
+        String preferredLabel =
+                textNormaliser.normalise(concept.getPreferredLabel().get(languageKey));
         String altLabel = textNormaliser.normalise(concept.getAltLabel().get(languageKey));
 
         conceptExtractor.updateConcept(conceptUuid, Sets.newHashSet(preferredLabel, altLabel));
@@ -137,7 +140,8 @@ public class TextLookupService {
 
     public void removeConcept(ConceptModel concept) {
         UUID conceptUuid = concept.getUuid();
-        String preferredLabel = textNormaliser.normalise(concept.getPreferredLabel().get(languageKey));
+        String preferredLabel =
+                textNormaliser.normalise(concept.getPreferredLabel().get(languageKey));
         String altLabel = textNormaliser.normalise(concept.getAltLabel().get(languageKey));
 
         conceptExtractor.removeConcept(conceptUuid, Sets.newHashSet(preferredLabel, altLabel));

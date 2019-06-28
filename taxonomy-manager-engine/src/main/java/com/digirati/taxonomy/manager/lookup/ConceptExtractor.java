@@ -76,8 +76,7 @@ class ConceptExtractor {
      * @param conceptUuid the UUID of the concept
      * @param updatedLabels the labels of the updated concept
      */
-    public void updateConcept(
-            UUID conceptUuid, Set<String> updatedLabels) {
+    public void updateConcept(UUID conceptUuid, Set<String> updatedLabels) {
         Set<String> originalLabels =
                 conceptLookupTable.entries().stream()
                         .filter(entry -> conceptUuid.equals(entry.getValue()))
@@ -91,12 +90,11 @@ class ConceptExtractor {
             return;
         }
 
-        originalLabels.forEach(
-                label -> {
-                    Set<UUID> uuids = Sets.newHashSet(conceptLookupTable.get(label));
-                    uuids.remove(conceptUuid);
-                    conceptLookupTable.replaceValues(label, uuids);
-                });
+        originalLabels.forEach(label -> {
+            Set<UUID> uuids = Sets.newHashSet(conceptLookupTable.get(label));
+            uuids.remove(conceptUuid);
+            conceptLookupTable.replaceValues(label, uuids);
+        });
         updatedLabels.forEach(label -> conceptLookupTable.put(label, conceptUuid));
 
         textSearcher = textSearcher.rebuild(getTerms());

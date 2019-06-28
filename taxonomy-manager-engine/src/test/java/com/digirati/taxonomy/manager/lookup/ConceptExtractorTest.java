@@ -23,19 +23,18 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class ConceptExtractorTest {
 
-	@Mock
-	private TextSearcher mockTextSearcher;
+    @Mock private TextSearcher mockTextSearcher;
 
-	private Multimap<String, UUID> termToId;
+    private Multimap<String, UUID> termToId;
 
-	private ConceptExtractor underTest;
+    private ConceptExtractor underTest;
 
-	@BeforeEach
-	void setup() {
-		lenient().when(mockTextSearcher.rebuild(anySet())).thenReturn(mockTextSearcher);
-		termToId = ArrayListMultimap.create();
-		underTest = new ConceptExtractor(mockTextSearcher, termToId);
-	}
+    @BeforeEach
+    void setup() {
+        lenient().when(mockTextSearcher.rebuild(anySet())).thenReturn(mockTextSearcher);
+        termToId = ArrayListMultimap.create();
+        underTest = new ConceptExtractor(mockTextSearcher, termToId);
+    }
 
     @Test
     void extractShouldReturnCollectionWithAllMatchingConcepts() {
@@ -94,101 +93,101 @@ class ConceptExtractorTest {
     @Test
     void addConceptShouldRebuildLookupTableAndSearcherWhenLabelsAreNew() {
         // Given
-		UUID conceptUuid = UUID.randomUUID();
+        UUID conceptUuid = UUID.randomUUID();
 
         // When
         underTest.addConcept(conceptUuid, Sets.newHashSet("a"));
 
         // Then
-		assertEquals(Lists.newArrayList(conceptUuid), termToId.get("a"));
-		verify(mockTextSearcher).rebuild(Sets.newHashSet("a"));
+        assertEquals(Lists.newArrayList(conceptUuid), termToId.get("a"));
+        verify(mockTextSearcher).rebuild(Sets.newHashSet("a"));
     }
 
     @Test
     void addConceptShouldNotRebuildSearcherWhenLabelsAreAlreadyLoaded() {
-		// Given
-		UUID originalConceptUuid = UUID.randomUUID();
-		termToId.put("a", originalConceptUuid);
+        // Given
+        UUID originalConceptUuid = UUID.randomUUID();
+        termToId.put("a", originalConceptUuid);
 
-		UUID newConceptUuid = UUID.randomUUID();
+        UUID newConceptUuid = UUID.randomUUID();
 
-		// When
-		underTest.addConcept(newConceptUuid, Sets.newHashSet("a"));
+        // When
+        underTest.addConcept(newConceptUuid, Sets.newHashSet("a"));
 
-		// Then
-		assertEquals(Lists.newArrayList(originalConceptUuid, newConceptUuid), termToId.get("a"));
-		verify(mockTextSearcher, never()).rebuild(Sets.newHashSet("a"));
+        // Then
+        assertEquals(Lists.newArrayList(originalConceptUuid, newConceptUuid), termToId.get("a"));
+        verify(mockTextSearcher, never()).rebuild(Sets.newHashSet("a"));
     }
 
     @Test
     void updateConceptShouldRebuildLookupTableAndSearcherWhenLabelsHaveChanged() {
         // Given
-		UUID conceptUuid = UUID.randomUUID();
-		termToId.put("a", conceptUuid);
-		termToId.put("b", conceptUuid);
+        UUID conceptUuid = UUID.randomUUID();
+        termToId.put("a", conceptUuid);
+        termToId.put("b", conceptUuid);
 
-		// When
-		underTest.updateConcept(conceptUuid, Sets.newHashSet("c", "d"));
+        // When
+        underTest.updateConcept(conceptUuid, Sets.newHashSet("c", "d"));
 
-		// Then
-		assertEquals(Lists.newArrayList(), termToId.get("a"));
-		assertEquals(Lists.newArrayList(), termToId.get("b"));
-		assertEquals(Lists.newArrayList(conceptUuid), termToId.get("c"));
-		assertEquals(Lists.newArrayList(conceptUuid), termToId.get("d"));
-		verify(mockTextSearcher).rebuild(Sets.newHashSet("c", "d"));
+        // Then
+        assertEquals(Lists.newArrayList(), termToId.get("a"));
+        assertEquals(Lists.newArrayList(), termToId.get("b"));
+        assertEquals(Lists.newArrayList(conceptUuid), termToId.get("c"));
+        assertEquals(Lists.newArrayList(conceptUuid), termToId.get("d"));
+        verify(mockTextSearcher).rebuild(Sets.newHashSet("c", "d"));
     }
 
     @Test
     void updateConceptShouldNotRebuildWhenLabelsHaveNotChanged() {
-		// Given
-		UUID conceptUuid = UUID.randomUUID();
-		termToId.put("a", conceptUuid);
-		termToId.put("b", conceptUuid);
+        // Given
+        UUID conceptUuid = UUID.randomUUID();
+        termToId.put("a", conceptUuid);
+        termToId.put("b", conceptUuid);
 
-		// When
-		underTest.updateConcept(conceptUuid, Sets.newHashSet("a", "b"));
+        // When
+        underTest.updateConcept(conceptUuid, Sets.newHashSet("a", "b"));
 
-		// Then
-		assertEquals(Lists.newArrayList(conceptUuid), termToId.get("a"));
-		assertEquals(Lists.newArrayList(conceptUuid), termToId.get("b"));
-		verify(mockTextSearcher, never()).rebuild(anySet());
+        // Then
+        assertEquals(Lists.newArrayList(conceptUuid), termToId.get("a"));
+        assertEquals(Lists.newArrayList(conceptUuid), termToId.get("b"));
+        verify(mockTextSearcher, never()).rebuild(anySet());
     }
 
     @Test
     void removeConceptShouldRebuildSearcherWhenLabelsNoLongerExist() {
-		// Given
-		UUID deletedConceptUuid = UUID.randomUUID();
-		UUID otherConceptUuid = UUID.randomUUID();
-		termToId.put("a", deletedConceptUuid);
-		termToId.put("a", otherConceptUuid);
-		termToId.put("b", deletedConceptUuid);
+        // Given
+        UUID deletedConceptUuid = UUID.randomUUID();
+        UUID otherConceptUuid = UUID.randomUUID();
+        termToId.put("a", deletedConceptUuid);
+        termToId.put("a", otherConceptUuid);
+        termToId.put("b", deletedConceptUuid);
 
-		// When
-		underTest.removeConcept(deletedConceptUuid, Sets.newHashSet("a", "b"));
+        // When
+        underTest.removeConcept(deletedConceptUuid, Sets.newHashSet("a", "b"));
 
-		// Then
-		assertEquals(Lists.newArrayList(otherConceptUuid), termToId.get("a"));
-		assertEquals(Lists.newArrayList(), termToId.get("b"));
-		verify(mockTextSearcher).rebuild(Sets.newHashSet("a"));
+        // Then
+        assertEquals(Lists.newArrayList(otherConceptUuid), termToId.get("a"));
+        assertEquals(Lists.newArrayList(), termToId.get("b"));
+        verify(mockTextSearcher).rebuild(Sets.newHashSet("a"));
     }
 
     @Test
     void removeConceptShouldNotRebuildSearcherWhenLabelsExistForOtherConcepts() {
-		// Given
-		UUID deletedConceptUuid = UUID.randomUUID();
-		UUID otherConceptUuid = UUID.randomUUID();
-		termToId.put("a", deletedConceptUuid);
-		termToId.put("a", otherConceptUuid);
-		termToId.put("b", deletedConceptUuid);
-		termToId.put("b", otherConceptUuid);
+        // Given
+        UUID deletedConceptUuid = UUID.randomUUID();
+        UUID otherConceptUuid = UUID.randomUUID();
+        termToId.put("a", deletedConceptUuid);
+        termToId.put("a", otherConceptUuid);
+        termToId.put("b", deletedConceptUuid);
+        termToId.put("b", otherConceptUuid);
 
-		// When
-		underTest.removeConcept(deletedConceptUuid, Sets.newHashSet("a", "b"));
+        // When
+        underTest.removeConcept(deletedConceptUuid, Sets.newHashSet("a", "b"));
 
-		// Then
-		assertEquals(Lists.newArrayList(otherConceptUuid), termToId.get("a"));
-		assertEquals(Lists.newArrayList(otherConceptUuid), termToId.get("b"));
-		verify(mockTextSearcher, never()).rebuild(anySet());
+        // Then
+        assertEquals(Lists.newArrayList(otherConceptUuid), termToId.get("a"));
+        assertEquals(Lists.newArrayList(otherConceptUuid), termToId.get("b"));
+        verify(mockTextSearcher, never()).rebuild(anySet());
     }
 
     private ConceptMatch match(String term, int startIndex, int endIndex, UUID... concepts) {
