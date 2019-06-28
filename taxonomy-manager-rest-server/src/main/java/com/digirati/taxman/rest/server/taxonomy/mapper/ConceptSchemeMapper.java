@@ -63,8 +63,7 @@ public class ConceptSchemeMapper {
      * @return A {@link ConceptSchemeDataSet} representing records to be passed to the database.
      */
     public ConceptSchemeDataSet map(ConceptSchemeModel model) {
-        var uuid = model.getUuid()
-                .orElseThrow(() -> new IllegalArgumentException("No UUID present on provided model"));
+        var uuid = model.getUuid();
 
         var record = new ConceptSchemeRecord(uuid);
         record.setTitle(model.getTitle());

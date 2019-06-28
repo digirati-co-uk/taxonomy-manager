@@ -12,7 +12,6 @@ import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.vocabulary.SKOS;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -35,18 +34,8 @@ public final class ConceptModel implements RdfModel, PersistentModel {
     }
 
     @Override
-    public Optional<UUID> getUuid() {
-        return Optional.ofNullable(uuid);
-    }
-
-    /**
-     * Gets the UUID of this concept.
-     *
-     * @return the UUID of this concept.
-     * @throws IllegalStateException if the UUID is not present.
-     */
-    public UUID getNullSafeUuid() {
-        return getUuid().orElseThrow(() -> new IllegalStateException("Null UUIDs are not allowed."));
+    public UUID getUuid() {
+        return uuid;
     }
 
     public void setUuid(UUID uuid) {

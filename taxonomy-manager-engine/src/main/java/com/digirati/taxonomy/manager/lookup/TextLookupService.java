@@ -50,7 +50,7 @@ public class TextLookupService {
 
         ArrayListMultimap<String, UUID> termToUuid = ArrayListMultimap.create();
         concepts.forEach(concept -> {
-            UUID conceptUuid = concept.getNullSafeUuid();
+            UUID conceptUuid = concept.getUuid();
             String preferredLabel = textNormaliser.normalise(concept.getPreferredLabel().get(languageKey));
             String altLabel = textNormaliser.normalise(concept.getAltLabel().get(languageKey));
             termToUuid.put(preferredLabel, conceptUuid);
@@ -120,7 +120,7 @@ public class TextLookupService {
     }
 
     public void addConcept(ConceptModel concept) {
-        UUID conceptUuid = concept.getNullSafeUuid();
+        UUID conceptUuid = concept.getUuid();
         String preferredLabel = textNormaliser.normalise(concept.getPreferredLabel().get(languageKey));
         String altLabel = textNormaliser.normalise(concept.getAltLabel().get(languageKey));
 
@@ -128,7 +128,7 @@ public class TextLookupService {
     }
 
     public void updateConcept(ConceptModel concept) {
-        UUID conceptUuid = concept.getNullSafeUuid();
+        UUID conceptUuid = concept.getUuid();
         String preferredLabel = textNormaliser.normalise(concept.getPreferredLabel().get(languageKey));
         String altLabel = textNormaliser.normalise(concept.getAltLabel().get(languageKey));
 
@@ -136,7 +136,7 @@ public class TextLookupService {
     }
 
     public void removeConcept(ConceptModel concept) {
-        UUID conceptUuid = concept.getNullSafeUuid();
+        UUID conceptUuid = concept.getUuid();
         String preferredLabel = textNormaliser.normalise(concept.getPreferredLabel().get(languageKey));
         String altLabel = textNormaliser.normalise(concept.getAltLabel().get(languageKey));
 
