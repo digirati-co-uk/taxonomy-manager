@@ -1,14 +1,18 @@
 package com.digirati.taxman.rest.server.taxonomy.storage;
 
+import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRecord;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.mapper.ConceptRecordMapper;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.mapper.ConceptRelationshipRecordMapper;
+import com.digirati.taxman.rest.server.taxonomy.storage.record.sql.RowMappingSpliterator;
 import org.json.JSONObject;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ResultSetExtractor;
 
 import javax.sql.DataSource;
 import java.sql.Types;
 import java.util.Arrays;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 /**
  * A data access object that can retrieve and store {@link ConceptDataSet}s in an underlying
@@ -21,6 +25,11 @@ public class ConceptDao {
 
     public ConceptDao(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+    }
+
+    public Stream<ConceptRecord> loadAllRecords() {
+        ResultSetExtractor<Stream<ConceptRecord>> extractor = rs -> RowMappingSpliterator.stream(recordMapper, rs);
+        return jdbcTemplate.query("SELECT * FROM get_all_concepts(?)", extractor);
     }
 
     /**
