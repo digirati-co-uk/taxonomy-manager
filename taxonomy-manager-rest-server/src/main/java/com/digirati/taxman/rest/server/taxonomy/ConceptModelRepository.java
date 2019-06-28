@@ -24,6 +24,9 @@ public class ConceptModelRepository {
     @Inject
     ConceptDao conceptDao;
 
+    @Inject
+    ConceptExtractionService conceptExtractionService;
+
     /**
      * Find an RDF model representation of a concept given an identifier.
      *
@@ -48,6 +51,7 @@ public class ConceptModelRepository {
     @Transactional(Transactional.TxType.REQUIRED)
     public void update(ConceptModel model) {
         conceptDao.storeDataSet(dataMapper.map(model));
+        conceptExtractionService.getTextLookupService().updateConcept(model);
     }
 
     /**
@@ -64,6 +68,7 @@ public class ConceptModelRepository {
 
         var dataset = dataMapper.map(model);
         conceptDao.storeDataSet(dataset);
+        conceptExtractionService.getTextLookupService().addConcept(model);
 
         return find(uuid);
     }

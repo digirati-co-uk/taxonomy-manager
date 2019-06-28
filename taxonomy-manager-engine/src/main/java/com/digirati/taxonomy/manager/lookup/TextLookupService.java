@@ -9,6 +9,7 @@ import com.digirati.taxonomy.manager.lookup.normalisation.TextNormaliser;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Sets;
+import org.apache.lucene.analysis.core.StopAnalyzer;
 
 import java.util.Collection;
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /** Service to orchestrate all the steps in looking up concepts from a piece of input text. */
 public class TextLookupService {
@@ -29,21 +31,22 @@ public class TextLookupService {
     private final String languageKey;
 
     public static Future<TextLookupService> initialiseLookupService(
-            Set<String> stopwords,
-            Collection<ConceptModel> concepts,
+            Stream<ConceptModel> concepts,
             String languageKey,
             String languageName) {
 
-        return Executors.newSingleThreadExecutor()
-                .submit(() -> init(stopwords, concepts, languageKey, languageName));
+        return Executors.newSingleThreadExecutor().submit(() -> init(concepts, languageKey, languageName));
     }
 
     private static TextLookupService init(
-            Set<String> stopwords,
-            Collection<ConceptModel> concepts,
+            Stream<ConceptModel> concepts,
             String languageKey,
             String languageName)
             throws ExecutionException, InterruptedException {
+
+        Set<String> stopwords = StopAnalyzer.ENGLISH_STOP_WORDS_SET.stream()
+                .map(Object::toString)
+                .collect(Collectors.toSet());
 
         TextNormaliser textNormaliser =
                 TextNormaliser.initialiseNormaliser(stopwords, languageKey, languageName).get();
