@@ -4,7 +4,7 @@ plugins {
     java
     jacoco
     checkstyle
-    id("io.quarkus") version "0.17.0"
+    id("io.quarkus") version "0.18.0"
 }
 
 
@@ -38,10 +38,10 @@ val integrationTestImplementation by configurations.getting { extendsFrom(config
 configurations["integrationTestRuntimeOnly"].extendsFrom(configurations.runtimeOnly.get())
 
 dependencies {
-    implementation(enforcedPlatform("io.quarkus:quarkus-bom:0.17.0"))
+    implementation(enforcedPlatform("io.quarkus:quarkus-bom:0.18.0"))
 
     quarkusExtensions.forEach { ext ->
-        implementation("io.quarkus:quarkus-$ext:0.17.0")
+        implementation("io.quarkus:quarkus-$ext:0.18.0")
     }
     implementation("org.springframework", "spring-jdbc", "5.1.3.RELEASE")
     implementation("org.json", "json", "20180813")
@@ -51,7 +51,7 @@ dependencies {
     implementation(project(":taxonomy-manager-rest"))
     implementation("com.google.guava", "guava", "27.1-jre")
 
-    testImplementation("io.quarkus", "quarkus-junit5", "0.17.0")
+    testImplementation("io.quarkus", "quarkus-junit5", "0.18.0")
 
     integrationTestImplementation("org.junit.jupiter:junit-jupiter-api:5.4.2")
     integrationTestImplementation("org.junit.jupiter:junit-jupiter-params:5.4.2")
