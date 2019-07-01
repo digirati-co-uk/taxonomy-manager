@@ -39,7 +39,9 @@ public interface Concept {
      */
     default Stream<String> getLabels(String languageKey) {
         Set<String> labels = new HashSet<>();
-        labels.add(getPreferredLabel().get(languageKey));
+        if (getPreferredLabel().containsKey(languageKey)) {
+            labels.add(getPreferredLabel().get(languageKey));
+        }
         if (getAltLabel().containsKey(languageKey)) {
             labels.add(getAltLabel().get(languageKey));
         }

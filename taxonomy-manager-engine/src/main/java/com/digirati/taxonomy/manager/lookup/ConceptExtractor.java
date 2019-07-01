@@ -62,7 +62,9 @@ class ConceptExtractor {
      */
     public void addConcept(UUID conceptUuid, Set<String> labels) {
         Set<String> originalTerms = getTerms();
-        labels.forEach(label -> conceptLookupTable.put(label, conceptUuid));
+        for (String label : labels) {
+            conceptLookupTable.put(label, conceptUuid);
+        }
 
         if (!originalTerms.containsAll(labels)) {
             textSearcher = textSearcher.rebuild(getTerms());
@@ -90,12 +92,15 @@ class ConceptExtractor {
             return;
         }
 
-        originalLabels.forEach(label -> {
+        for (String label : originalLabels) {
             Set<UUID> uuids = Sets.newHashSet(conceptLookupTable.get(label));
             uuids.remove(conceptUuid);
             conceptLookupTable.replaceValues(label, uuids);
-        });
-        updatedLabels.forEach(label -> conceptLookupTable.put(label, conceptUuid));
+        }
+
+        for (String label : updatedLabels) {
+            conceptLookupTable.put(label, conceptUuid);
+        }
 
         textSearcher = textSearcher.rebuild(getTerms());
     }
