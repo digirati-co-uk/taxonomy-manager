@@ -18,8 +18,7 @@ val quarkusExtensions = setOf(
         "hibernate-validator",
         "jdbc-postgresql",
         "resteasy",
-        "resteasy-jsonb",
-        "smallrye-reactive-messaging"
+        "resteasy-jsonb"
 )
 
 java {
@@ -67,6 +66,10 @@ tasks {
     test {
         useJUnitPlatform()
     }
+}
+
+tasks.withType<QuarkusDev> {
+    debug = "client"
 }
 
 val integrationTest = task<Test>("integrationTest") {
