@@ -18,7 +18,8 @@ val quarkusExtensions = setOf(
         "hibernate-validator",
         "jdbc-postgresql",
         "resteasy",
-        "resteasy-jsonb"
+        "resteasy-jsonb",
+        "smallrye-reactive-messaging"
 )
 
 java {

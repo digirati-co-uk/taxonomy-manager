@@ -5,12 +5,15 @@ import com.digirati.taxman.common.taxonomy.ConceptModel;
 import com.digirati.taxman.rest.server.taxonomy.mapper.ConceptMapper;
 import com.digirati.taxman.rest.server.taxonomy.storage.ConceptDao;
 import com.digirati.taxman.rest.server.taxonomy.storage.ConceptDataSet;
+import io.smallrye.reactive.messaging.annotations.Emitter;
+import io.smallrye.reactive.messaging.annotations.Stream;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.ws.rs.WebApplicationException;
 import java.util.UUID;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * A repository that manages storage of {@link ConceptModel}s.
@@ -25,7 +28,12 @@ public class ConceptModelRepository {
     ConceptDao conceptDao;
 
     @Inject
-    ConceptExtractionService conceptExtractionService;
+    @Stream("created-concepts")
+    Emitter<ConceptModel> createdConcepts;
+
+    @Inject
+    @Stream("updated-concepts")
+    Emitter<ConceptModel> updatedConcepts;
 
     /**
      * Find an RDF model representation of a concept given an identifier.
@@ -51,7 +59,7 @@ public class ConceptModelRepository {
     @Transactional(Transactional.TxType.REQUIRED)
     public void update(ConceptModel model) {
         conceptDao.storeDataSet(dataMapper.map(model));
-        conceptExtractionService.getTextLookupService().updateConcept(model);
+        updatedConcepts.send(model);
     }
 
     /**
@@ -68,7 +76,7 @@ public class ConceptModelRepository {
 
         var dataset = dataMapper.map(model);
         conceptDao.storeDataSet(dataset);
-        conceptExtractionService.getTextLookupService().addConcept(model);
+        createdConcepts.send(model);
 
         return find(uuid);
     }
