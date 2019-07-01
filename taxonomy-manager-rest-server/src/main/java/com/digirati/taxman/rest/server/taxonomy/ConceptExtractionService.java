@@ -1,13 +1,13 @@
 package com.digirati.taxman.rest.server.taxonomy;
 
-import com.digirati.taxman.common.taxonomy.Concept;
-import com.digirati.taxman.rest.server.taxonomy.mapper.ConceptMapper;
+import com.digirati.taxman.common.taxonomy.Term;
 import com.digirati.taxman.rest.server.taxonomy.storage.ConceptDao;
 import com.digirati.taxonomy.manager.lookup.TextLookupService;
+import io.quarkus.runtime.StartupEvent;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 import java.util.concurrent.ExecutionException;
@@ -25,14 +25,11 @@ public class ConceptExtractionService {
     @Inject
     ConceptDao conceptDao;
 
-    @Inject
-    ConceptMapper conceptMapper;
-
     private TextLookupService textLookupService;
 
-    @PostConstruct
-    public void initialiseExtractionService() {
-        Stream<? extends Concept> concepts = conceptDao.loadAllRecords();
+    void onStartup(@Observes StartupEvent event) {
+        Stream<Term> concepts = conceptDao.loadAllRecords()
+                .map(concept -> new Term(concept, defaultLanguageKey));
 
         try {
             textLookupService = TextLookupService.initialiseLookupService(concepts,

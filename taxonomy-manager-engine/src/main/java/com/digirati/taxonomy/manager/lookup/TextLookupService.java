@@ -1,7 +1,7 @@
 package com.digirati.taxonomy.manager.lookup;
 
-import com.digirati.taxman.common.taxonomy.Concept;
 import com.digirati.taxman.common.taxonomy.ConceptModel;
+import com.digirati.taxman.common.taxonomy.Term;
 import com.digirati.taxonomy.manager.lookup.model.Word;
 import com.digirati.taxonomy.manager.lookup.model.LookupResultContext;
 import com.digirati.taxonomy.manager.lookup.model.ConceptMatch;
@@ -39,7 +39,7 @@ public class TextLookupService {
     private final String languageKey;
 
     public static Future<TextLookupService> initialiseLookupService(
-            Stream<? extends Concept> concepts,
+            Stream<Term> concepts,
             String languageKey,
             String languageName) {
 
@@ -47,7 +47,7 @@ public class TextLookupService {
     }
 
     private static TextLookupService init(
-            Stream<? extends Concept> concepts,
+            Stream<Term> concepts,
             String languageKey,
             String languageName)
             throws ExecutionException, InterruptedException {
@@ -58,7 +58,7 @@ public class TextLookupService {
         ArrayListMultimap<String, UUID> termToUuid = ArrayListMultimap.create();
         concepts.forEach(concept -> {
             UUID conceptUuid = concept.getUuid();
-            concept.getLabels(languageKey)
+            concept.getLabels()
                     .forEach(label ->  termToUuid.put(textNormaliser.normalise(label), conceptUuid));
         });
 
