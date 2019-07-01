@@ -1,12 +1,12 @@
 package com.digirati.taxman.rest.server.taxonomy;
 
-import com.digirati.taxman.common.rdf.RdfModelException;
-import com.digirati.taxman.common.taxonomy.ConceptModel;
+import com.digirati.taxman.common.taxonomy.Concept;
 import com.digirati.taxman.rest.server.taxonomy.mapper.ConceptMapper;
 import com.digirati.taxman.rest.server.taxonomy.storage.ConceptDao;
-import com.digirati.taxman.rest.server.taxonomy.storage.ConceptDataSet;
 import com.digirati.taxonomy.manager.lookup.TextLookupService;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
@@ -16,9 +16,11 @@ import java.util.stream.Stream;
 @ApplicationScoped
 public class ConceptExtractionService {
 
-    // TODO make these configurable
-    private static final String DEFAULT_LANGUAGE_KEY = "en";
-    private static final String DEFAULT_LANGUAGE_NAME = "english";
+    @ConfigProperty(name = "taxman.analysis.default-lang.key")
+    String defaultLanguageKey;
+
+    @ConfigProperty(name = "taxman.analysis.default-lang.name")
+    String defaultLanguageName = "english";
 
     @Inject
     ConceptDao conceptDao;
@@ -28,22 +30,13 @@ public class ConceptExtractionService {
 
     private TextLookupService textLookupService;
 
-    public ConceptExtractionService() {
-        initialiseExtractionService(DEFAULT_LANGUAGE_KEY, DEFAULT_LANGUAGE_NAME);
-    }
-
-    public void initialiseExtractionService(String languageKey, String languageName) {
-        Stream<ConceptModel> concepts = conceptDao.loadAllRecords().map(record -> {
-            try {
-                return conceptMapper.map(new ConceptDataSet(record));
-            } catch (RdfModelException e) {
-                throw new WebApplicationException(e);
-            }
-        });
+    @PostConstruct
+    public void initialiseExtractionService() {
+        Stream<? extends Concept> concepts = conceptDao.loadAllRecords();
 
         try {
-            textLookupService =
-                    TextLookupService.initialiseLookupService(concepts, languageKey, languageName).get();
+            textLookupService = TextLookupService.initialiseLookupService(concepts,
+                    defaultLanguageKey, defaultLanguageName).get();
 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

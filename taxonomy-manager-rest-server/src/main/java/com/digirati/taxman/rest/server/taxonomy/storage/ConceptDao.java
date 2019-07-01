@@ -3,10 +3,8 @@ package com.digirati.taxman.rest.server.taxonomy.storage;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRecord;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.mapper.ConceptRecordMapper;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.mapper.ConceptRelationshipRecordMapper;
-import com.digirati.taxman.rest.server.taxonomy.storage.record.sql.RowMappingSpliterator;
 import org.json.JSONObject;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.ResultSetExtractor;
 
 import javax.sql.DataSource;
 import java.sql.Types;
@@ -28,8 +26,7 @@ public class ConceptDao {
     }
 
     public Stream<ConceptRecord> loadAllRecords() {
-        ResultSetExtractor<Stream<ConceptRecord>> extractor = rs -> RowMappingSpliterator.stream(recordMapper, rs);
-        return jdbcTemplate.query("SELECT * FROM get_all_concepts(?)", extractor);
+        return jdbcTemplate.query("SELECT * FROM get_all_concepts()", recordMapper).stream();
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.digirati.taxonomy.manager.lookup;
 
+import com.digirati.taxman.common.taxonomy.Concept;
 import com.digirati.taxman.common.taxonomy.ConceptModel;
 import com.digirati.taxonomy.manager.lookup.model.Word;
 import com.digirati.taxonomy.manager.lookup.model.LookupResultContext;
@@ -9,7 +10,6 @@ import com.digirati.taxonomy.manager.lookup.normalisation.TextNormaliser;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Sets;
-import org.apache.lucene.analysis.core.StopAnalyzer;
 
 import java.util.Collection;
 import java.util.List;
@@ -24,6 +24,14 @@ import java.util.stream.Stream;
 /** Service to orchestrate all the steps in looking up concepts from a piece of input text. */
 public class TextLookupService {
 
+    private static final Set<String> stopWords = Sets.newHashSet(
+            "a", "an", "and", "are", "as", "at", "be", "but", "by",
+            "for", "if", "in", "into", "is", "it",
+            "no", "not", "of", "on", "or", "such",
+            "that", "the", "their", "then", "there", "these",
+            "they", "this", "to", "was", "will", "with"
+    );
+
     private final TextNormaliser textNormaliser;
 
     private final ConceptExtractor conceptExtractor;
@@ -31,7 +39,7 @@ public class TextLookupService {
     private final String languageKey;
 
     public static Future<TextLookupService> initialiseLookupService(
-            Stream<ConceptModel> concepts,
+            Stream<? extends Concept> concepts,
             String languageKey,
             String languageName) {
 
@@ -39,25 +47,19 @@ public class TextLookupService {
     }
 
     private static TextLookupService init(
-            Stream<ConceptModel> concepts,
+            Stream<? extends Concept> concepts,
             String languageKey,
             String languageName)
             throws ExecutionException, InterruptedException {
 
-        Set<String> stopwords = StopAnalyzer.ENGLISH_STOP_WORDS_SET.stream()
-                .map(Object::toString)
-                .collect(Collectors.toSet());
-
         TextNormaliser textNormaliser =
-                TextNormaliser.initialiseNormaliser(stopwords, languageKey, languageName).get();
+                TextNormaliser.initialiseNormaliser(stopWords, languageKey, languageName).get();
 
         ArrayListMultimap<String, UUID> termToUuid = ArrayListMultimap.create();
         concepts.forEach(concept -> {
             UUID conceptUuid = concept.getUuid();
-            String preferredLabel = textNormaliser.normalise(concept.getPreferredLabel().get(languageKey));
-            String altLabel = textNormaliser.normalise(concept.getAltLabel().get(languageKey));
-            termToUuid.put(preferredLabel, conceptUuid);
-            termToUuid.put(altLabel, conceptUuid);
+            concept.getLabels(languageKey)
+                    .forEach(label ->  termToUuid.put(textNormaliser.normalise(label), conceptUuid));
         });
 
         Set<String> terms = termToUuid.keySet();
@@ -125,28 +127,28 @@ public class TextLookupService {
 
     public void addConcept(ConceptModel concept) {
         UUID conceptUuid = concept.getUuid();
-        String preferredLabel =
-                textNormaliser.normalise(concept.getPreferredLabel().get(languageKey));
-        String altLabel = textNormaliser.normalise(concept.getAltLabel().get(languageKey));
+        Set<String> labels = concept.getLabels(languageKey)
+                .map(textNormaliser::normalise)
+                .collect(Collectors.toSet());
 
-        conceptExtractor.addConcept(conceptUuid, Sets.newHashSet(preferredLabel, altLabel));
+        conceptExtractor.addConcept(conceptUuid, labels);
     }
 
     public void updateConcept(ConceptModel concept) {
         UUID conceptUuid = concept.getUuid();
-        String preferredLabel =
-                textNormaliser.normalise(concept.getPreferredLabel().get(languageKey));
-        String altLabel = textNormaliser.normalise(concept.getAltLabel().get(languageKey));
+        Set<String> labels = concept.getLabels(languageKey)
+                .map(textNormaliser::normalise)
+                .collect(Collectors.toSet());
 
-        conceptExtractor.updateConcept(conceptUuid, Sets.newHashSet(preferredLabel, altLabel));
+        conceptExtractor.updateConcept(conceptUuid, labels);
     }
 
     public void removeConcept(ConceptModel concept) {
         UUID conceptUuid = concept.getUuid();
-        String preferredLabel =
-                textNormaliser.normalise(concept.getPreferredLabel().get(languageKey));
-        String altLabel = textNormaliser.normalise(concept.getAltLabel().get(languageKey));
+        Set<String> labels = concept.getLabels(languageKey)
+                .map(textNormaliser::normalise)
+                .collect(Collectors.toSet());
 
-        conceptExtractor.removeConcept(conceptUuid, Sets.newHashSet(preferredLabel, altLabel));
+        conceptExtractor.removeConcept(conceptUuid, labels);
     }
 }

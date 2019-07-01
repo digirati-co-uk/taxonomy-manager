@@ -62,7 +62,9 @@ public class ConceptMapper {
                             .setUri(idResolver.resolve(relationship.getTarget())));
         }
 
-        return builder.build();
+        ConceptModel concept = builder.build();
+        concept.setUuid(dataset.getRecord().getUuid());
+        return concept;
     }
 
     /**
