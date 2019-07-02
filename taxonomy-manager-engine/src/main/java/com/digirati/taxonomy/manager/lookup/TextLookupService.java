@@ -115,7 +115,7 @@ public class TextLookupService {
             ConceptMatch normalisedMatch, String normalisedText, List<Word> contentWords) {
         int normalisedTermStartIndex = normalisedMatch.getTermMatch().getStartIndex();
         String[] previousWords = normalisedText.substring(0, normalisedTermStartIndex).split(" ");
-        int contentWordIndex = previousWords.length;
+        int contentWordIndex = getContentWordIndex(previousWords);
         Word contentWord = contentWords.get(contentWordIndex);
         TermMatch originalTerm =
                 new TermMatch(
@@ -123,6 +123,13 @@ public class TextLookupService {
                         contentWord.getOriginalStartPosition(),
                         contentWord.getOriginalEndPosition());
         return new ConceptMatch(originalTerm, normalisedMatch.getConceptIds());
+    }
+
+    private int getContentWordIndex(String[] previousWords) {
+        if (previousWords.length == 1 && "".equals(previousWords[0])) {
+            return 0;
+        }
+        return previousWords.length;
     }
 
     public void addConcept(ConceptModel concept) {

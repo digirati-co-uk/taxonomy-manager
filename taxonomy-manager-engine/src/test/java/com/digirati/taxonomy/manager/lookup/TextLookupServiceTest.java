@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -47,6 +48,31 @@ class TextLookupServiceTest {
                 Arrays.asList(conceptMatch("there", 11, 16), conceptMatch("yesterday", 17, 26));
         LookupResultContext expected =
                 new LookupResultContext(inputText, normalisedText, contentWords, conceptMatches);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void shouldMatchOnFirstWordWithoutIndexOutOfBoundsException() throws ExecutionException, InterruptedException {
+        // Given
+        String inputText = "hello";
+
+        Collection<String> terms = Collections.singletonList("hello");
+        Set<String> stopwords = Sets.newHashSet();
+
+        TextSearcher textSearcher = new AhoCorasickTextSearcher(terms);
+        ConceptExtractor conceptExtractor = new ConceptExtractor(textSearcher, ArrayListMultimap.create());
+        TextNormaliser textNormaliser = TextNormaliser.initialiseEnglishNormaliser(stopwords).get();
+        TextLookupService underTest = new TextLookupService(textNormaliser, conceptExtractor, "en");
+
+        // When
+        LookupResultContext actual = underTest.search(inputText);
+
+        // Then
+        String normalisedText = "hello";
+        List<Word> contentWords = Collections.singletonList(new Word("hello", 0, 5, "hello"));
+        Collection<ConceptMatch> conceptMatches = Collections.singletonList(conceptMatch("hello", 0, 5));
+        LookupResultContext expected = new LookupResultContext(inputText, normalisedText, contentWords, conceptMatches);
 
         assertEquals(expected, actual);
     }
