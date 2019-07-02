@@ -62,7 +62,9 @@ public class ConceptMapper {
                             .setUri(idResolver.resolve(relationship.getTarget())));
         }
 
-        return builder.build();
+        ConceptModel concept = builder.build();
+        concept.setUuid(dataset.getRecord().getUuid());
+        return concept;
     }
 
     /**
@@ -72,8 +74,7 @@ public class ConceptMapper {
      * @return a database data representation of the {@link ConceptModel}.
      */
     public ConceptDataSet map(ConceptModel model) {
-        var uuid = model.getUuid()
-                .orElseThrow(() -> new IllegalArgumentException("No UUID present on provided model"));
+        var uuid = model.getUuid();
 
         var record = new ConceptRecord(uuid);
         record.setPreferredLabel(model.getPreferredLabel());

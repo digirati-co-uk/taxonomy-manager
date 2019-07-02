@@ -4,6 +4,7 @@ import com.digirati.taxonomy.manager.lookup.model.TermMatch;
 import org.ahocorasick.trie.Trie;
 
 import java.util.Collection;
+import java.util.Set;
 import java.util.stream.Stream;
 
 /**
@@ -26,5 +27,10 @@ class AhoCorasickTextSearcher implements TextSearcher {
     public Stream<TermMatch> search(String inputText) {
         return trie.parseText(inputText).stream()
                 .map(emit -> new TermMatch(emit.getKeyword(), emit.getStart(), emit.getEnd()));
+    }
+
+    @Override
+    public TextSearcher rebuild(Set<String> terms) {
+        return new AhoCorasickTextSearcher(terms);
     }
 }

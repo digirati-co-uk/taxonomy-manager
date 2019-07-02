@@ -1,5 +1,6 @@
 package com.digirati.taxman.rest.server.taxonomy.storage;
 
+import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRecord;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.mapper.ConceptRecordMapper;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.mapper.ConceptRelationshipRecordMapper;
 import org.json.JSONObject;
@@ -9,6 +10,7 @@ import javax.sql.DataSource;
 import java.sql.Types;
 import java.util.Arrays;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 /**
  * A data access object that can retrieve and store {@link ConceptDataSet}s in an underlying
@@ -21,6 +23,10 @@ public class ConceptDao {
 
     public ConceptDao(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+    }
+
+    public Stream<ConceptRecord> loadAllRecords() {
+        return jdbcTemplate.query("SELECT * FROM get_all_concepts()", recordMapper).stream();
     }
 
     /**

@@ -2,6 +2,7 @@ package com.digirati.taxonomy.manager.lookup;
 
 import com.digirati.taxonomy.manager.lookup.model.TermMatch;
 
+import java.util.Set;
 import java.util.stream.Stream;
 
 public interface TextSearcher {
@@ -14,4 +15,14 @@ public interface TextSearcher {
      * @return a stream of {@link TermMatch}es each representing an occurrence of a term in the text
      */
     Stream<TermMatch> search(String inputText);
+
+    /**
+     * Rebuilds the text searcher with an updated set of terms to search for. This could be
+     * accomplished by updating the internal state of this instance, or by constructing a new
+     * instance.
+     *
+     * @param terms the updated set of terms to search for
+     * @return a {@link TextSearcher} with the updated term set loaded into it
+     */
+    TextSearcher rebuild(Set<String> terms);
 }

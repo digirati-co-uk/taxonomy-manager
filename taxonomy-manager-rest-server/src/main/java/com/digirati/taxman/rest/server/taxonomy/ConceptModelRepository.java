@@ -2,6 +2,8 @@ package com.digirati.taxman.rest.server.taxonomy;
 
 import com.digirati.taxman.common.rdf.RdfModelException;
 import com.digirati.taxman.common.taxonomy.ConceptModel;
+import com.digirati.taxman.rest.server.infrastructure.event.ConceptEvent;
+import com.digirati.taxman.rest.server.infrastructure.event.EventService;
 import com.digirati.taxman.rest.server.taxonomy.mapper.ConceptMapper;
 import com.digirati.taxman.rest.server.taxonomy.storage.ConceptDao;
 import com.digirati.taxman.rest.server.taxonomy.storage.ConceptDataSet;
@@ -23,6 +25,9 @@ public class ConceptModelRepository {
 
     @Inject
     ConceptDao conceptDao;
+
+    @Inject
+    EventService eventService;
 
     /**
      * Find an RDF model representation of a concept given an identifier.
@@ -48,6 +53,7 @@ public class ConceptModelRepository {
     @Transactional(Transactional.TxType.REQUIRED)
     public void update(ConceptModel model) {
         conceptDao.storeDataSet(dataMapper.map(model));
+        eventService.send(ConceptEvent.updated(model));
     }
 
     /**
@@ -64,6 +70,7 @@ public class ConceptModelRepository {
 
         var dataset = dataMapper.map(model);
         conceptDao.storeDataSet(dataset);
+        eventService.send(ConceptEvent.created(model));
 
         return find(uuid);
     }

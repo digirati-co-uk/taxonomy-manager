@@ -1,5 +1,6 @@
 package com.digirati.taxman.rest.server.taxonomy.storage.record;
 
+import com.digirati.taxman.common.taxonomy.Concept;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
@@ -10,7 +11,7 @@ import java.util.UUID;
 /**
  * A model of the `skos_concept` database in the taxman DDL.
  */
-public class ConceptRecord {
+public class ConceptRecord implements Concept {
     private final UUID uuid;
 
     private Map<String, String> preferredLabel = new HashMap<>();
@@ -27,10 +28,12 @@ public class ConceptRecord {
         this.uuid = uuid;
     }
 
+    @Override
     public UUID getUuid() {
         return uuid;
     }
 
+    @Override
     public Map<String, String> getPreferredLabel() {
         return preferredLabel;
     }
@@ -39,6 +42,7 @@ public class ConceptRecord {
         this.preferredLabel = preferredLabel;
     }
 
+    @Override
     public Map<String, String> getAltLabel() {
         return altLabel;
     }
@@ -47,6 +51,7 @@ public class ConceptRecord {
         this.altLabel = altLabel;
     }
 
+    @Override
     public Map<String, String> getHiddenLabel() {
         return hiddenLabel;
     }
@@ -55,6 +60,7 @@ public class ConceptRecord {
         this.hiddenLabel = hiddenLabel;
     }
 
+    @Override
     public Map<String, String> getNote() {
         return note;
     }
@@ -63,6 +69,7 @@ public class ConceptRecord {
         this.note = note;
     }
 
+    @Override
     public Map<String, String> getChangeNote() {
         return changeNote;
     }
@@ -71,6 +78,7 @@ public class ConceptRecord {
         this.changeNote = changeNote;
     }
 
+    @Override
     public Map<String, String> getEditorialNote() {
         return editorialNote;
     }
@@ -79,6 +87,7 @@ public class ConceptRecord {
         this.editorialNote = editorialNote;
     }
 
+    @Override
     public Map<String, String> getExample() {
         return example;
     }
@@ -87,6 +96,7 @@ public class ConceptRecord {
         this.example = example;
     }
 
+    @Override
     public Map<String, String> getHistoryNote() {
         return historyNote;
     }
@@ -95,6 +105,7 @@ public class ConceptRecord {
         this.historyNote = historyNote;
     }
 
+    @Override
     public Map<String, String> getScopeNote() {
         return scopeNote;
     }

@@ -2,6 +2,7 @@ package com.digirati.taxonomy.manager.lookup.model;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Represents a pairing between the details of where a term was found in a piece of input text, and
@@ -11,19 +12,19 @@ public class ConceptMatch {
 
     private final TermMatch termMatch;
 
-    private final Collection<Concept> concepts;
+    private final Collection<UUID> conceptIds;
 
-    public ConceptMatch(TermMatch termMatch, Collection<Concept> concepts) {
+    public ConceptMatch(TermMatch termMatch, Collection<UUID> conceptIds) {
         this.termMatch = termMatch;
-        this.concepts = concepts;
+        this.conceptIds = conceptIds;
     }
 
     public TermMatch getTermMatch() {
         return termMatch;
     }
 
-    public Collection<Concept> getConcepts() {
-        return concepts;
+    public Collection<UUID> getConceptIds() {
+        return conceptIds;
     }
 
     @Override
@@ -36,11 +37,11 @@ public class ConceptMatch {
         }
         ConceptMatch conceptMatch = (ConceptMatch) o;
         return Objects.equals(termMatch, conceptMatch.termMatch)
-                && Objects.equals(concepts, conceptMatch.concepts);
+                && Objects.equals(conceptIds, conceptMatch.conceptIds);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(termMatch, concepts);
+        return Objects.hash(termMatch, conceptIds);
     }
 }
