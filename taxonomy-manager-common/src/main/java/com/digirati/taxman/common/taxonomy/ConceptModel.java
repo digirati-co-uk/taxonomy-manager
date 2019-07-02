@@ -35,6 +35,9 @@ public final class ConceptModel implements RdfModel, PersistentModel, Concept {
 
     @Override
     public UUID getUuid() {
+        if (uuid == null) {
+            throw new IllegalStateException("Concept schemes must have a UUID.");
+        }
         return uuid;
     }
 
