@@ -2,6 +2,7 @@ package com.digirati.taxman.rest.server;
 
 import com.digirati.taxman.common.taxonomy.ConceptModel;
 import com.digirati.taxman.rest.server.taxonomy.ConceptModelRepository;
+import com.digirati.taxman.rest.server.taxonomy.autocomplete.AutocompletionResultBuilder;
 import com.digirati.taxman.rest.taxonomy.ConceptPath;
 import com.digirati.taxman.rest.taxonomy.ConceptResource;
 
@@ -30,6 +31,17 @@ public class ServerConceptResource implements ConceptResource {
         var model = concepts.find(params.getUuid());
 
         return Response.ok(model).build();
+    }
+
+    @Override
+    public Response getConceptsByPartialLabel(String partialLabel) {
+        var matches = concepts.findByPartialLabel(partialLabel);
+        var autocompletionResult = new AutocompletionResultBuilder()
+                .withSearchTerm(partialLabel)
+                .withMatchedConcepts(matches)
+                .build();
+
+        return Response.ok(autocompletionResult).build();
     }
 
     @Override

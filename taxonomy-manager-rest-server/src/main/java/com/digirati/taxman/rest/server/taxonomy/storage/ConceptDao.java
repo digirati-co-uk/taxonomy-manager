@@ -29,6 +29,11 @@ public class ConceptDao {
         return jdbcTemplate.query("SELECT * FROM get_all_concepts()", recordMapper).stream();
     }
 
+    public Stream<ConceptRecord> getConceptsByPartialLabel(String label) {
+        Object[] args = {label};
+        return jdbcTemplate.query("SELECT * FROM get_concepts_by_partial_label(?)", args, recordMapper).stream();
+    }
+
     /**
      * Given a {@code uuid} of a concept, lookup and find the concept record and all of its
      * associated relationships.

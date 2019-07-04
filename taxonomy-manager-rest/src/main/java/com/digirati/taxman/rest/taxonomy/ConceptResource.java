@@ -11,7 +11,9 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 @Path("/v0.1/concept")
@@ -28,6 +30,12 @@ public interface ConceptResource {
     @Produces({MediaTypes.APPLICATION_JSONLD_SKOS_VALUE, MediaTypes.APPLICATION_RDF_XML_VALUE})
     @JsonLdFrame(input = "/jsonld/framing/concept.json")
     Response getConcept(@BeanParam ConceptPath params);
+
+    @GET
+    @Path("/by-label/{label}")
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
+    Response getConceptsByPartialLabel(@PathParam("label") String partialLabel);
 
     @PUT
     @Path("/{concept}")

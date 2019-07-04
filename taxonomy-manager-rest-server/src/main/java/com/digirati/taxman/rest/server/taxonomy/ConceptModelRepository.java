@@ -12,7 +12,9 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.ws.rs.WebApplicationException;
+import java.util.Collection;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * A repository that manages storage of {@link ConceptModel}s.
@@ -38,12 +40,28 @@ public class ConceptModelRepository {
     @Transactional(Transactional.TxType.REQUIRED)
     public ConceptModel find(UUID uuid) {
         ConceptDataSet dataset = conceptDao.loadDataSet(uuid);
+        return toConceptModel(dataset);
+    }
 
+    private ConceptModel toConceptModel(ConceptDataSet dataset) {
         try {
             return dataMapper.map(dataset);
         } catch (RdfModelException e) {
             throw new WebApplicationException("Internal error occurred creating RDF model from dataset", e);
         }
+    }
+
+    /**
+     * Find all concepts with a preferred label in any language beginning with a given String.
+     *
+     * @param partialLabel the label substring to search for
+     * @return all concepts with preferred labels beginning with the given substring
+     */
+    @Transactional(Transactional.TxType.REQUIRED)
+    public Collection<ConceptModel> findByPartialLabel(String partialLabel) {
+        return conceptDao.getConceptsByPartialLabel(partialLabel)
+                .map(record -> toConceptModel(new ConceptDataSet(record)))
+                .collect(Collectors.toList());
     }
 
     /**
