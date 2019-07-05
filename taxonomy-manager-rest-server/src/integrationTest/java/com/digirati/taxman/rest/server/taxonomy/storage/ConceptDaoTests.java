@@ -5,7 +5,6 @@ import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRecord;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRelationshipRecord;
 import com.digirati.taxman.rest.server.testing.DatabaseTestExtension;
 import com.digirati.taxman.rest.server.testing.annotation.TestDataSource;
-import com.google.common.collect.Sets;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -17,6 +16,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import javax.sql.DataSource;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -111,14 +111,19 @@ public class ConceptDaoTests {
 
         var eleven = new ConceptRecord(UUID.randomUUID());
         eleven.getPreferredLabel().put("en", "eleven");
-        eleven.getPreferredLabel().put("fr", "onze");
+        eleven.getAltLabel().put("fr", "onze");
+
+        var hundred = new ConceptRecord(UUID.randomUUID());
+        hundred.getPreferredLabel().put("en", "a hundred");
+        hundred.getHiddenLabel().put("en", "one hundred");
 
         var dao = new ConceptDao(dataSource);
         dao.storeDataSet(new ConceptDataSet(one));
         dao.storeDataSet(new ConceptDataSet(two));
         dao.storeDataSet(new ConceptDataSet(eleven));
+        dao.storeDataSet(new ConceptDataSet(hundred));
 
-        var expected = Sets.newHashSet(one, eleven);
+        var expected = Set.of(one, eleven, hundred);
         var actual = dao.getConceptsByPartialLabel("on").collect(Collectors.toSet());
 
         Assertions.assertEquals(expected, actual);

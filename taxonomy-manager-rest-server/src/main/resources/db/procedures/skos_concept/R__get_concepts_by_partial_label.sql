@@ -5,8 +5,18 @@ BEGIN
     RETURN QUERY
         SELECT concept.*
         FROM skos_concept concept
-        WHERE EXISTS(SELECT 1
-                     FROM jsonb_each_text(concept.preferred_label) AS preferred_label
-                     WHERE preferred_label.value::text ~ ('^' || _label));
+        WHERE contains_label_prefix(concept.preferred_label, _label)
+        OR contains_label_prefix(concept.alt_label, _label)
+        OR contains_label_prefix(concept.hidden_label, _label);
 END
+$$ LANGUAGE plpgsql;
+
+DROP FUNCTION IF EXISTS contains_label_prefix;
+CREATE OR REPLACE FUNCTION contains_label_prefix(_json jsonb, _label text) RETURNS boolean AS
+$$
+BEGIN
+    RETURN EXISTS(SELECT 1
+                  FROM jsonb_each_text(_json) AS preferred_label
+                  WHERE preferred_label.value::text ~ ('^' || _label));
+END;
 $$ LANGUAGE plpgsql;
