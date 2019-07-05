@@ -123,8 +123,8 @@ public class ConceptDaoTests {
         dao.storeDataSet(new ConceptDataSet(eleven));
         dao.storeDataSet(new ConceptDataSet(hundred));
 
-        var expected = Set.of(one, eleven, hundred);
-        var actual = dao.getConceptsByPartialLabel("on").collect(Collectors.toSet());
+        var expected = List.of(one, eleven, hundred);
+        var actual = dao.getConceptsByPartialLabel("on");
 
         Assertions.assertEquals(expected, actual);
     }
