@@ -30,9 +30,10 @@ public class CollectionMapper {
     }
 
     public CollectionModel map(Collection<ConceptRecord> concepts, String searchTerm) throws RdfModelException {
+        var uri = collectionUriResolver.resolve();
         var title = Map.of("en", "Search results for \"" + searchTerm + "\"");
         var builder = factory.createBuilder(CollectionModel.class)
-                .setUri(collectionUriResolver.resolve())
+                .setUri(uri)
                 .addPlainLiteral(DCTerms.title, title);
 
         for (ConceptRecord concept : concepts) {
@@ -43,6 +44,8 @@ public class CollectionMapper {
                             .setUri(idResolver.resolve(concept.getUuid())));
         }
 
-        return builder.build();
+        var collection = builder.build();
+        collection.setUri(uri);
+        return collection;
     }
 }

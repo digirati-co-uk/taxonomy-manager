@@ -16,6 +16,8 @@ public class CollectionModel implements RdfModel {
 
     private final Resource resource;
 
+    private URI uri;
+
     @RdfConstructor
     public CollectionModel(Resource resource) {
         this.resource = resource;
@@ -26,8 +28,12 @@ public class CollectionModel implements RdfModel {
         return resource;
     }
 
+    public void setUri(URI uri) {
+        this.uri = uri;
+    }
+
     @Override
     public URI getUri() {
-        throw new UnsupportedOperationException("Collections do not have URIs");
+        return uri;
     }
 }
