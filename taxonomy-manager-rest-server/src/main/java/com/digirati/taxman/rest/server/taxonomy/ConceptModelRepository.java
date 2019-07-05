@@ -1,12 +1,15 @@
 package com.digirati.taxman.rest.server.taxonomy;
 
 import com.digirati.taxman.common.rdf.RdfModelException;
+import com.digirati.taxman.common.taxonomy.CollectionModel;
 import com.digirati.taxman.common.taxonomy.ConceptModel;
 import com.digirati.taxman.rest.server.infrastructure.event.ConceptEvent;
 import com.digirati.taxman.rest.server.infrastructure.event.EventService;
+import com.digirati.taxman.rest.server.taxonomy.mapper.CollectionMapper;
 import com.digirati.taxman.rest.server.taxonomy.mapper.ConceptMapper;
 import com.digirati.taxman.rest.server.taxonomy.storage.ConceptDao;
 import com.digirati.taxman.rest.server.taxonomy.storage.ConceptDataSet;
+import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRecord;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -14,7 +17,6 @@ import javax.transaction.Transactional;
 import javax.ws.rs.WebApplicationException;
 import java.util.Collection;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * A repository that manages storage of {@link ConceptModel}s.
@@ -23,7 +25,10 @@ import java.util.stream.Collectors;
 public class ConceptModelRepository {
 
     @Inject
-    ConceptMapper dataMapper;
+    ConceptMapper conceptMapper;
+
+    @Inject
+    CollectionMapper collectionMapper;
 
     @Inject
     ConceptDao conceptDao;
@@ -40,12 +45,8 @@ public class ConceptModelRepository {
     @Transactional(Transactional.TxType.REQUIRED)
     public ConceptModel find(UUID uuid) {
         ConceptDataSet dataset = conceptDao.loadDataSet(uuid);
-        return toConceptModel(dataset);
-    }
-
-    private ConceptModel toConceptModel(ConceptDataSet dataset) {
         try {
-            return dataMapper.map(dataset);
+            return conceptMapper.map(dataset);
         } catch (RdfModelException e) {
             throw new WebApplicationException("Internal error occurred creating RDF model from dataset", e);
         }
@@ -58,10 +59,13 @@ public class ConceptModelRepository {
      * @return all concepts with preferred labels beginning with the given substring
      */
     @Transactional(Transactional.TxType.REQUIRED)
-    public Collection<ConceptModel> findByPartialLabel(String partialLabel) {
-        return conceptDao.getConceptsByPartialLabel(partialLabel)
-                .map(record -> toConceptModel(new ConceptDataSet(record)))
-                .collect(Collectors.toList());
+    public CollectionModel findByPartialLabel(String partialLabel) {
+        Collection<ConceptRecord> concepts = conceptDao.getConceptsByPartialLabel(partialLabel);
+        try {
+            return collectionMapper.map(concepts, partialLabel);
+        } catch (RdfModelException e) {
+            throw new WebApplicationException("Internal error occurred creating RDF model from dataset", e);
+        }
     }
 
     /**
@@ -70,7 +74,7 @@ public class ConceptModelRepository {
      */
     @Transactional(Transactional.TxType.REQUIRED)
     public void update(ConceptModel model) {
-        conceptDao.storeDataSet(dataMapper.map(model));
+        conceptDao.storeDataSet(conceptMapper.map(model));
         eventService.send(ConceptEvent.updated(model));
     }
 
@@ -86,7 +90,7 @@ public class ConceptModelRepository {
         var uuid = UUID.randomUUID();
         model.setUuid(uuid);
 
-        var dataset = dataMapper.map(model);
+        var dataset = conceptMapper.map(model);
         conceptDao.storeDataSet(dataset);
         eventService.send(ConceptEvent.created(model));
 

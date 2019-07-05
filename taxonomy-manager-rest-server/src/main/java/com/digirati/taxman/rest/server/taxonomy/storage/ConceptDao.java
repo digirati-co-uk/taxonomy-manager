@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import javax.sql.DataSource;
 import java.sql.Types;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -29,9 +30,9 @@ public class ConceptDao {
         return jdbcTemplate.query("SELECT * FROM get_all_concepts()", recordMapper).stream();
     }
 
-    public Stream<ConceptRecord> getConceptsByPartialLabel(String label) {
+    public Collection<ConceptRecord> getConceptsByPartialLabel(String label) {
         Object[] args = {label};
-        return jdbcTemplate.query("SELECT * FROM get_concepts_by_partial_label(?)", args, recordMapper).stream();
+        return jdbcTemplate.query("SELECT * FROM get_concepts_by_partial_label(?)", args, recordMapper);
     }
 
     /**
