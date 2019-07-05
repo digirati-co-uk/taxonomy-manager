@@ -67,7 +67,25 @@ tags:
       graph.
   - name: Concept
     description: Operations executed on single concepts.
+  - name: Analysis
+    description: Operations used to run text analysis.
 paths:
+  /0.1/analysis:
+    post:
+      summary: Analyse a text document.
+      tags:
+        - Analysis
+      requestBody:
+        $ref: '#/components/requestBodies/analysis'
+      responses:
+        '200':
+          description: A collection of concepts that were found during analysis.
+          content:
+            'application/ld+json;profile="http://www.w3.org/2004/02/skos/core.jsonld"':
+              example:
+                $ref: './samples/analysis/analysis--response.json'
+              schema:
+                $ref: './schemas/collection/response.json'
   /0.1/project/{project}:
     get:
       parameters:
@@ -257,6 +275,16 @@ paths:
                 $ref: schemas/concept-scheme/response.json
 components:
   requestBodies:
+    analysis:
+      required: true
+      description: JSON representation of a text document.
+      content:
+        'application/ld+json;profile="http://www.w3.org/2004/02/skos/core.jsonld"':
+          example:
+            $ref: './samples/analysis/analysis--request.json'
+          schema:
+            $ref: './schemas/analysis/request.json'
+
     project:
       required: true
       description: JSON-LD representation of the Project.

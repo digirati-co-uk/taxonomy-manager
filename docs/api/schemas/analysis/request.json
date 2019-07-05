@@ -1,0 +1,18 @@
+{
+  "$id": "#/analysis/request",
+  "type": "object",
+  "title": "analysis request",
+  "required": [
+    "text"
+  ],
+  "properties": {
+    "text": {
+      "$id": "#/analysis/request/text",
+      "type": "string",
+      "required": true,
+      "examples": [
+        "This is some text to be analyzed"
+      ]
+    }
+  }
+}
