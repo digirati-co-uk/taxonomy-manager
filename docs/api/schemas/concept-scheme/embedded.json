@@ -22,10 +22,10 @@
             "$id": "#/skos:ConceptScheme/embedded/@type",
             "const": "skos:ConceptScheme"
         },
-        "skos:prefLabel": {
-            "$id": "#/properties/dcterms:hasPart/items/properties/skos:prefLabel",
+        "dcterms:title": {
+            "$id": "#/skos:ConceptScheme/embedded/dcterms:title",
             "type": "array",
-            "title": "SKOS localized lexical labels, used for presentation",
+            "title": "Title of the concept scheme",
             "items": {
                 "$ref": "../rdf/plain-literal.json"
             }

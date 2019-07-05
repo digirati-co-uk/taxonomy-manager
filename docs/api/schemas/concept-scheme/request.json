@@ -1,7 +1,7 @@
 {
     "$id": "#/skos:ConceptScheme/request",
     "type": "object",
-    "title": "skos:ConceptScheme respoonse",
+    "title": "skos:ConceptScheme request",
     "required": [
         "@type",
         "dcterms:title"

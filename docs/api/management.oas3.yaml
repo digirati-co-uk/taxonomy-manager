@@ -94,7 +94,9 @@ paths:
       tags:
         - Project
       responses:
-        '201':
+        '404':
+          $ref: '#/components/responses/notFound'
+        '200':
           description: Compact JSON-LD representation of a Project resource.
           content:
             'application/ld+json;profile="http://www.w3.org/2004/02/skos/core.jsonld"':
@@ -109,6 +111,8 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/project'
       responses:
+        '404':
+          $ref: '#/components/responses/notFound'
         '422':
           $ref: '#/components/responses/validationFailed'
         '204':
@@ -150,6 +154,8 @@ paths:
             schema:
               $ref: './schemas/concept/request.json'
       responses:
+        '404':
+          $ref: '#/components/responses/notFound'
         '422':
           $ref: '#/components/responses/validationFailed'
         '204':
