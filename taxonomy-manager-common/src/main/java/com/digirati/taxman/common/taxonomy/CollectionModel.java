@@ -28,6 +28,6 @@ public class CollectionModel implements RdfModel {
 
     @Override
     public URI getUri() {
-        return URI.create("");
+        throw new UnsupportedOperationException("Collections do not have URIs");
     }
 }
