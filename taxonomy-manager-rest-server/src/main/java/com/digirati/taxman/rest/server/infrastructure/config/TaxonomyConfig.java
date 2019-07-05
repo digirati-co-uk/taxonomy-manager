@@ -3,6 +3,7 @@ package com.digirati.taxman.rest.server.infrastructure.config;
 import com.digirati.taxman.common.rdf.RdfModelFactory;
 import com.digirati.taxman.rest.server.taxonomy.identity.ConceptIdResolver;
 import com.digirati.taxman.rest.server.taxonomy.identity.ConceptSchemeIdResolver;
+import com.digirati.taxman.rest.server.taxonomy.identity.CollectionUriResolver;
 import com.digirati.taxman.rest.server.taxonomy.mapper.CollectionMapper;
 import com.digirati.taxman.rest.server.taxonomy.mapper.ConceptMapper;
 import com.digirati.taxman.rest.server.taxonomy.mapper.ConceptSchemeMapper;
@@ -21,6 +22,9 @@ public class TaxonomyConfig {
     ConceptIdResolver conceptIdResolver;
 
     @Inject
+    CollectionUriResolver collectionUriResolver;
+
+    @Inject
     ConceptSchemeIdResolver conceptSchemeIdResolver;
 
     @Produces
@@ -30,7 +34,7 @@ public class TaxonomyConfig {
 
     @Produces
     CollectionMapper collectionMapper() {
-        return new CollectionMapper(conceptIdResolver, modelFactory);
+        return new CollectionMapper(conceptIdResolver, collectionUriResolver, modelFactory);
     }
 
     @Produces
