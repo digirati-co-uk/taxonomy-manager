@@ -16,9 +16,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import javax.sql.DataSource;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
@@ -123,8 +121,8 @@ public class ConceptDaoTests {
         dao.storeDataSet(new ConceptDataSet(eleven));
         dao.storeDataSet(new ConceptDataSet(hundred));
 
-        var expected = List.of(one, eleven, hundred);
-        var actual = dao.getConceptsByPartialLabel("on");
+        var expected = List.of(one, hundred);
+        var actual = dao.getConceptsByPartialLabel("on", "en");
 
         Assertions.assertEquals(expected, actual);
     }

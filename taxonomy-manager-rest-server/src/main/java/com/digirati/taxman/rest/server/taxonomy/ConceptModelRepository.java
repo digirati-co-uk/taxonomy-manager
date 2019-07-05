@@ -59,8 +59,8 @@ public class ConceptModelRepository {
      * @return all concepts with preferred labels beginning with the given substring
      */
     @Transactional(Transactional.TxType.REQUIRED)
-    public CollectionModel findByPartialLabel(String partialLabel) {
-        Collection<ConceptRecord> concepts = conceptDao.getConceptsByPartialLabel(partialLabel);
+    public CollectionModel findByPartialLabel(String partialLabel, String languageKey) {
+        Collection<ConceptRecord> concepts = conceptDao.getConceptsByPartialLabel(partialLabel, languageKey);
         try {
             return collectionMapper.map(concepts, partialLabel);
         } catch (RdfModelException e) {

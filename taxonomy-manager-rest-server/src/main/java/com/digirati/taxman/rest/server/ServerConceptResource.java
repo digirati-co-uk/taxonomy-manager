@@ -34,8 +34,8 @@ public class ServerConceptResource implements ConceptResource {
     }
 
     @Override
-    public Response getConceptsByPartialLabel(String partialLabel) {
-        CollectionModel matches = concepts.findByPartialLabel(partialLabel);
+    public Response getConceptsByPartialLabel(String partialLabel, String languageKey) {
+        CollectionModel matches = concepts.findByPartialLabel(partialLabel, languageKey);
 
         return Response.ok(matches).build();
     }
