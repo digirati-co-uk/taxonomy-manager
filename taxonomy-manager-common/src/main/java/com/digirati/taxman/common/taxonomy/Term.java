@@ -16,7 +16,7 @@ public class Term {
     }
 
     public Term(Concept concept, String languageKey) {
-        this(concept.getUuid(), concept.getLabels(languageKey).collect(Collectors.toSet()));
+        this(concept.getUuid(), concept.getLabels(languageKey));
     }
 
     public UUID getUuid() {
