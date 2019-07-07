@@ -1,7 +1,9 @@
 package com.digirati.taxman.rest.server.infrastructure.config;
 
+import com.digirati.taxman.common.rdf.RdfModelFactory;
 import com.digirati.taxman.common.taxonomy.Term;
 import com.digirati.taxman.rest.server.analysis.TextAnalyzer;
+import com.digirati.taxman.rest.server.taxonomy.ConceptModelRepository;
 import com.digirati.taxman.rest.server.taxonomy.storage.ConceptDao;
 import com.digirati.taxonomy.manager.lookup.TextLookupService;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -13,19 +15,15 @@ import javax.ws.rs.WebApplicationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class AnalysisConfig {
 
-    @ConfigProperty(name = "taxman.analysis.default-lang.key")
+    @ConfigProperty(name = "taxman.analysis.default-lang.key", defaultValue = "en")
     String defaultLanguageKey;
 
-    @ConfigProperty(name = "taxman.analysis.default-lang.name")
-    String defaultLanguageName = "english";
-
-    @ConfigProperty(name = "taxman.analysis.worker-pool-size")
-    int workerPoolSize;
+    @ConfigProperty(name = "taxman.analysis.default-lang.name", defaultValue = "english")
+    String defaultLanguageName;
 
     @Inject
     ConceptDao conceptDao;
@@ -50,8 +48,8 @@ public class AnalysisConfig {
     }
 
     @Produces
-    TextAnalyzer textAnalyzer(TextLookupService lookupService) {
-        return new TextAnalyzer(lookupService);
+    TextAnalyzer textAnalyzer(TextLookupService lookupService, RdfModelFactory modelFactory, ConceptModelRepository concepts) {
+        return new TextAnalyzer(lookupService, modelFactory, concepts);
     }
 
 }
