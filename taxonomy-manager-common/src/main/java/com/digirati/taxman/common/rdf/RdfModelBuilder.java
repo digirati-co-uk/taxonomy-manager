@@ -52,6 +52,11 @@ public class RdfModelBuilder<T extends RdfModel> {
         return this;
     }
 
+    public RdfModelBuilder addEmbeddedModel(Property property, RdfModel model) throws RdfModelException {
+        properties.put(property, new PendingPropertyValue(model.getResource(), false));
+        return this;
+    }
+
     /**
      * Build and embed a new resource within this model and associate it with a {@code property}.
      *
@@ -60,7 +65,9 @@ public class RdfModelBuilder<T extends RdfModel> {
      * @throws RdfModelException if the embedded resource was invalid.
      */
     public RdfModelBuilder addEmbeddedModel(Property property, RdfModelBuilder embeddedModel) throws RdfModelException {
-        properties.put(property, new PendingPropertyValue(embeddedModel.build(model).getResource()));
+        var resource = embeddedModel.build(model).getResource();
+        properties.put(property, new PendingPropertyValue(resource, true));
+
         return this;
     }
 
@@ -97,7 +104,13 @@ public class RdfModelBuilder<T extends RdfModel> {
                     resource.addLiteral(term, (Literal) value.value);
                     break;
                 case RESOURCE:
-                    resource.addProperty(term, (Resource) value.value);
+                    var resourceValue = (Resource) value.value;
+                    var resourceValueModel = resourceValue.getModel();
+                    if (!value.embedded && !model.containsAll(resourceValueModel.listStatements())) {
+                        model.add(resourceValueModel);
+                    }
+
+                    resource.addProperty(term, resourceValue);
                     break;
             }
         }
@@ -119,15 +132,18 @@ public class RdfModelBuilder<T extends RdfModel> {
     static class PendingPropertyValue {
         final Type type;
         final Object value;
+        final boolean embedded;
 
         PendingPropertyValue(Literal literal) {
             this.type = Type.LITERAL;
             this.value = literal;
+            this.embedded = true;
         }
 
-        PendingPropertyValue(Resource resource) {
+        PendingPropertyValue(Resource resource, boolean embedded) {
             this.type = RESOURCE;
             this.value = resource;
+            this.embedded = embedded;
         }
 
         enum Type {
