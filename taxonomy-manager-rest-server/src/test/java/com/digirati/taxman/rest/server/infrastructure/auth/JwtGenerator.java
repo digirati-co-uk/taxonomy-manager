@@ -26,7 +26,7 @@ public class JwtGenerator {
 
     private static final String CLAIMS_JSON = "/jwtClaims.json";
     private static final long TIMEOUT_SECONDS = 18000; // 5h
-    private static final String PRIVATE_KEY_PATH = "/privateKey.pem";
+    private static final String PRIVATE_KEY_PATH = "/privateTestKey.pem";
 
     public static void main(String[] args) throws Exception {
         PrivateKey pk = loadPrivateKey();
