@@ -279,6 +279,39 @@ paths:
                 $ref: './samples/concept-scheme/new-concept-scheme--response.json'
               schema:
                 $ref: schemas/concept-scheme/response.json
+  /0.1/concept/search/:
+    get:
+      summary: Search for all concepts with a given label prefix in a given language
+      tags:
+        - Concept
+      operationId: searchConcepts
+      parameters:
+        - name: label
+          in: query
+          description: The label prefix to search for
+          required: true
+          schema:
+            type: string
+            example: con
+        - name: language
+          in: query
+          description: The ISO 639-1 language key to search for
+          required: true
+          schema:
+            type: string
+            example: en
+      responses:
+        '200':
+          description: |
+            A `skos:Collection` containing a list of all `skos:Concept`s with a label prefixed with the `label` query
+            parameter, in the language provided by the `language` query parameter.
+          content:
+            'application/ld+json;profile="http://www.w3.org/2004/02/skos/core.jsonld"':
+              example:
+                $ref: './samples/concepts/search-concepts--response.json'
+              schema:
+                $ref: './schemas/collection/response.json'
+
 components:
   requestBodies:
     analysis:

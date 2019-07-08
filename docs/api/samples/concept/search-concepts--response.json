@@ -1,0 +1,46 @@
+{
+  "@graph": [
+    {
+      "@id": "http://taxman.com/0.1/concept/45cadec6-3647-4310-9e59-c6bc85d7b607",
+      "@type": "skos:Concept",
+      "prefLabel": {
+        "@language": "en",
+        "@value": "six"
+      }
+    },
+    {
+      "@id": "http://taxman.com/0.1/concept/470ed598-f9da-4e88-8707-64df3ea78bfa",
+      "@type": "skos:Concept",
+      "prefLabel": {
+        "@language": "en",
+        "@value": "seven"
+      }
+    },
+    {
+      "@id": "http://taxman.com/0.1/concept/search?label=s&language=en",
+      "@type": "skos:Collection",
+      "title": {
+        "@language": "en",
+        "@value": "Search results for \"s\""
+      },
+      "member": [
+        "http://taxman.com/0.1/concept/470ed598-f9da-4e88-8707-64df3ea78bfa",
+        "http://taxman.com/0.1/concept/45cadec6-3647-4310-9e59-c6bc85d7b607"
+      ]
+    }
+  ],
+  "@context": {
+    "prefLabel": {
+      "@id": "http://www.w3.org/2004/02/skos/core#prefLabel"
+    },
+    "title": {
+      "@id": "http://purl.org/dc/terms/title"
+    },
+    "member": {
+      "@id": "http://www.w3.org/2004/02/skos/core#member",
+      "@type": "@id"
+    },
+    "skos": "http://www.w3.org/2004/02/skos/core#",
+    "dcterms": "http://purl.org/dc/terms/"
+  }
+}
