@@ -5,15 +5,21 @@
     "type": "object",
     "title": "skos:Concept request",
     "required": [
-        "skos:prefLabel",
         "skos:altLabel",
+        "skos:broader",
+        "skos:changeNote",
+        "skos:editorialNote",
+        "skos:example",
         "skos:hiddenLabel",
+        "skos:historyNote",
         "skos:narrower",
-        "skos:broader"
+        "skos:note",
+        "skos:prefLabel",
+        "skos:scopeNote"
     ],
     "properties": {
         "skos:prefLabel": {
-            "$id": "#/properties/dcterms:hasPart/items/properties/skos:prefLabel",
+            "$id": "#/skos:Concept/response/properties/skos:prefLabel",
             "type": "array",
             "title": "SKOS localized lexical labels, used for presentation",
             "items": {
@@ -21,7 +27,7 @@
             }
         },
         "skos:altLabel": {
-            "$id": "#/properties/dcterms:hasPart/items/properties/skos:prefLabel",
+            "$id": "#/skos:Concept/response/properties/skos:altLabel",
             "type": "array",
             "title": "SKOS localized lexical labels, used for presentation",
             "items": {
@@ -29,7 +35,7 @@
             }
         },
         "skos:hiddenLabel": {
-            "$id": "#/properties/dcterms:hasPart/items/properties/skos:prefLabel",
+            "$id": "#/skos:Concept/response/properties/skos:hiddenLabel",
             "type": "array",
             "title": "SKOS localized lexical labels, used for presentation",
             "items": {
@@ -37,7 +43,7 @@
             }
         },
         "skos:narrower": {
-            "$id": "#/properties/dcterms:hasPart/items/properties/skos:prefLabel",
+            "$id": "#/skos:Concept/response/properties/skos:narrower",
             "type": "array",
             "title": "Narrower Concepts",
             "items": {
@@ -45,11 +51,59 @@
             }
         },
         "skos:broader": {
-            "$id": "#/properties/dcterms:hasPart/items/properties/skos:prefLabel",
+            "$id": "#/skos:Concept/response/properties/skos:broader",
             "type": "array",
             "title": "Broader Concepts",
             "items": {
                 "$ref": "./embedded.json"
+            }
+        },
+        "skos:note": {
+            "$id": "#/skos:Concept/response/properties/skos:note",
+            "type": "array",
+            "title": "SKOS metadata labels",
+            "items": {
+                "$ref": "../rdf/plain-literal.json"
+            }
+        },
+        "skos:changeNote": {
+            "$id": "#/skos:Concept/response/properties/skos:changeNote",
+            "type": "array",
+            "title": "SKOS metadata labels",
+            "items": {
+                "$ref": "../rdf/plain-literal.json"
+            }
+        },
+        "skos:editorialNote": {
+            "$id": "#/skos:Concept/response/properties/skos:editorialNote",
+            "type": "array",
+            "title": "SKOS metadata labels",
+            "items": {
+                "$ref": "../rdf/plain-literal.json"
+            }
+        },
+        "skos:example": {
+            "$id": "#/skos:Concept/response/properties/skos:example",
+            "type": "array",
+            "title": "SKOS metadata labels",
+            "items": {
+                "$ref": "../rdf/plain-literal.json"
+            }
+        },
+        "skos:historyNote": {
+            "$id": "#/skos:Concept/response/properties/skos:historyNote",
+            "type": "array",
+            "title": "SKOS metadata labels",
+            "items": {
+                "$ref": "../rdf/plain-literal.json"
+            }
+        },
+        "skos:scopeNote": {
+            "$id": "#/skos:Concept/response/properties/skos:scopeNote",
+            "type": "array",
+            "title": "SKOS metadata labels",
+            "items": {
+                "$ref": "../rdf/plain-literal.json"
             }
         }
     }

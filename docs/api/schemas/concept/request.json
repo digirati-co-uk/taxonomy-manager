@@ -9,9 +9,89 @@
     ],
     "properties": {
         "skos:prefLabel": {
-            "$id": "#/properties/dcterms:hasPart/items/properties/skos:prefLabel",
+            "$id": "#/skos:Concept/request/properties/skos:prefLabel",
             "type": "array",
             "title": "SKOS localized lexical labels, used for presentation",
+            "items": {
+                "$ref": "../rdf/plain-literal.json"
+            }
+        },
+        "skos:altLabel": {
+            "$id": "#/skos:Concept/request/properties/skos:altLabel",
+            "type": "array",
+            "title": "SKOS localized lexical labels, used for presentation",
+            "items": {
+                "$ref": "../rdf/plain-literal.json"
+            }
+        },
+        "skos:hiddenLabel": {
+            "$id": "#/skos:Concept/request/properties/skos:hiddenLabel",
+            "type": "array",
+            "title": "SKOS localized lexical labels, used for presentation",
+            "items": {
+                "$ref": "../rdf/plain-literal.json"
+            }
+        },
+        "skos:narrower": {
+            "$id": "#/skos:Concept/request/properties/skos:narrower",
+            "type": "array",
+            "title": "Narrower Concepts",
+            "items": {
+                "$ref": "./embedded.json"
+            }
+        },
+        "skos:broader": {
+            "$id": "#/skos:Concept/request/properties/skos:broader",
+            "type": "array",
+            "title": "Broader Concepts",
+            "items": {
+                "$ref": "./embedded.json"
+            }
+        },
+        "skos:note": {
+            "$id": "#/skos:Concept/request/properties/skos:note",
+            "type": "array",
+            "title": "SKOS metadata labels",
+            "items": {
+                "$ref": "../rdf/plain-literal.json"
+            }
+        },
+        "skos:changeNote": {
+            "$id": "#/skos:Concept/request/properties/skos:changeNote",
+            "type": "array",
+            "title": "SKOS metadata labels",
+            "items": {
+                "$ref": "../rdf/plain-literal.json"
+            }
+        },
+        "skos:editorialNote": {
+            "$id": "#/skos:Concept/request/properties/skos:editorialNote",
+            "type": "array",
+            "title": "SKOS metadata labels",
+            "items": {
+                "$ref": "../rdf/plain-literal.json"
+            }
+        },
+        "skos:example": {
+            "$id": "#/skos:Concept/request/properties/skos:example",
+            "type": "array",
+            "title": "SKOS metadata labels",
+            "items": {
+                "$ref": "../rdf/plain-literal.json"
+            }
+        },
+        "skos:historyNote": {
+            "$id": "#/skos:Concept/request/properties/skos:historyNote",
+            "type": "array",
+            "title": "SKOS metadata labels",
+            "items": {
+                "$ref": "../rdf/plain-literal.json"
+            }
+        },
+        "skos:scopeNote": {
+            "$id": "#/skos:Concept/request/properties/skos:scopeNote",
+            "type": "array",
+            "title": "SKOS metadata labels",
             "items": {
                 "$ref": "../rdf/plain-literal.json"
             }
