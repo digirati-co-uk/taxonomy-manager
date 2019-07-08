@@ -52,7 +52,13 @@ public class RdfModelBuilder<T extends RdfModel> {
         return this;
     }
 
-    public RdfModelBuilder addEmbeddedModel(Property property, RdfModel model) throws RdfModelException {
+    /**
+     * Embed an existing {@link RdfModel} resource within the graph of this builder.
+     *
+     * @param property The property to associate the existing model with.
+     * @param model    The model to add to the underlying RDF graph.
+     */
+    public RdfModelBuilder<T> addEmbeddedModel(Property property, RdfModel model) {
         properties.put(property, new PendingPropertyValue(model.getResource(), false));
         return this;
     }
