@@ -1,0 +1,376 @@
+openapi: 3.0.0
+servers:
+  - url: http://taxman.com
+info:
+
+  title: "Taxonomy Manager API"
+  version: "0.0.1"
+  contact:
+    name: Digirati
+    email: opensource@digirati.com
+    url: https://github.com/digirati-co-uk/digirati-taxonomy-manager
+  description: |
+
+    # Introduction
+
+    This specification covers all actions and operations required to create and manage a SKOS taxonomy.
+
+    # Data Model
+
+    The taxonomy management API is architected as a set of RESTful JSON-LD resources that can be manipulated and traversed
+    by a client. All URIs present in an API response from the management system **MUST** be dereferencable as SKOS resources.
+    The operations listed below specify the actions that can be performed on the collection of taxonomies that TaxMan hosts.
+
+    # Localization
+
+    The SKOS data model puts a large focus on localization of taxonomies, and the API should respect and export this.
+    Any property with a type of rdfs:PlainLiteral should be marshalled to JSON with an embedded language map, even when
+    only one other label exists for the property.
+
+    <small>Conforming Response</small>
+    ```json
+    {
+      "@id": "<x>",
+      "skos:prefLabel": [
+        {
+          "@lang": "en",
+          "@value": "test"
+        }
+      ]
+    }
+    ```
+
+    <small>Non-conforming Response</small>
+    ```json
+    {
+      "@id": "<x>",
+      "skos:prefLabel": "test"
+    }
+    ```
+
+    # Deferencing Resources
+
+    It **MUST** be possible to deference all resources that are referenced by IRI. For example, when a GET request to a _skos:Concept_
+    provides a list of IRIs that are _broader_ or _narrower_ concepts then each of those elements should have an IRI that dereferences to
+    a taxonomy management endpoint. This is in addition to providing all [Lexical labels](https://www.w3.org/TR/skos-reference/#labels) for each resource
+    as described in the Data Model.
+
+
+tags:
+  - name: Project
+    description: |
+      A project is a collection of Concept Schemes, and some associated metadata. A project does not own concept schemes,
+      however can associate itself with them by using the `dcterms:hasPart` term.
+  - name: ConceptScheme
+    description: |
+      A Concept Scheme contains a collection of concepts, with several of as top-level concepts that serve as an entrypoint into the taxonomy
+      graph.
+  - name: Concept
+    description: Operations executed on single concepts.
+  - name: Analysis
+    description: Operations used to run text analysis.
+paths:
+  /0.1/analysis:
+    post:
+      summary: Analyse a text document.
+      tags:
+        - Analysis
+      requestBody:
+        $ref: '#/components/requestBodies/analysis'
+      responses:
+        '200':
+          description: A collection of concepts that were found during analysis.
+          content:
+            'application/ld+json;profile="http://www.w3.org/2004/02/skos/core.jsonld"':
+              example:
+                $ref: './samples/analysis/analysis--response.json'
+              schema:
+                $ref: './schemas/collection/response.json'
+  /0.1/project/{project}:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/project'
+      summary: Get a project
+      tags:
+        - Project
+      responses:
+        '404':
+          $ref: '#/components/responses/notFound'
+        '200':
+          description: Compact JSON-LD representation of a Project resource.
+          content:
+            'application/ld+json;profile="http://www.w3.org/2004/02/skos/core.jsonld"':
+              example:
+                $ref: './samples/project/new-project--response.json'
+              schema:
+                $ref: './schemas/project/response.json'
+    put:
+      summary: Update a project
+      tags:
+        - Project
+      requestBody:
+        $ref: '#/components/requestBodies/project'
+      responses:
+        '404':
+          $ref: '#/components/responses/notFound'
+        '422':
+          $ref: '#/components/responses/validationFailed'
+        '204':
+          description: Update successful. Resource is unchanged from reqest body.
+
+  /0.1/project:
+    post:
+      summary: Create a project
+      tags:
+        - Project
+      requestBody:
+        $ref: '#/components/requestBodies/project'
+      responses:
+        '422':
+          $ref: '#/components/responses/validationFailed'
+        '201':
+          description: JSON-LD representation of the new Project resource.
+          content:
+            'application/ld+json;profile="http://www.w3.org/2004/02/skos/core.jsonld"':
+              example:
+                $ref: samples/project/new-project--response.json
+              schema:
+                $ref: schemas/project/response.json
+
+  /0.1/concept-scheme/{scheme}/concept/{concept}:
+    parameters:
+      - $ref: '#/components/parameters/scheme'
+      - $ref: '#/components/parameters/concept'
+    put:
+      tags:
+        - Concept
+      description: Update an existing Concept.
+      requestBody:
+        description: The updated skos:Concept resource to be saved.
+        content:
+          'application/ld+json;profile="http://www.w3.org/2004/02/skos/core.jsonld"':
+            example:
+              $ref: './samples/concept/update-concept--request.json'
+            schema:
+              $ref: './schemas/concept/request.json'
+      responses:
+        '404':
+          $ref: '#/components/responses/notFound'
+        '422':
+          $ref: '#/components/responses/validationFailed'
+        '204':
+          description: Update successful. Resource is unchanged from request bodyc.
+
+    get:
+      tags:
+        - Concept
+      description: Fetch an existing Concept
+      responses:
+        '200':
+          description: The remote representation of the skos:Concept.
+          content:
+            'application/ld+json;profile="http://www.w3.org/2004/02/skos/core.jsonld"':
+              example:
+                $ref: './samples/concept/new-concept--response.json'
+              schema:
+                $ref: './schemas/concept/response.json'
+        '404':
+          $ref: '#/components/responses/notFound'
+
+  /0.1/concept-scheme/{scheme}/concept:
+    parameters:
+      - $ref: '#/components/parameters/scheme'
+    post:
+      tags:
+        - Concept
+      summary: Create a new Concept
+      operationId: addConceptToScheme
+      requestBody:
+        description: A skos:Concept resource.
+        content:
+          'application/ld+json;profile="http://www.w3.org/2004/02/skos/core.jsonld"':
+            example:
+              $ref: './samples/concept/new-concept--request.json'
+            schema:
+              $ref: './schemas/concept/request.json'
+      responses:
+        '422':
+          $ref: '#/components/responses/validationFailed'
+        '404':
+          $ref: '#/components/responses/notFound'
+        '201':
+          description: The newly created skos:Concept resource, with the additional skos:inScheme property for the new parent.
+          content:
+            'application/ld+json;profile="http://www.w3.org/2004/02/skos/core.jsonld"':
+              example:
+                $ref: samples/concept/new-concept--response.json
+              schema:
+                $ref: schemas/concept/response.json
+
+  /0.1/concept-scheme/{scheme}:
+    parameters:
+      - $ref: '#/components/parameters/scheme'
+    put:
+      summary: Update a ConceptScheme
+      tags:
+        - ConceptScheme
+      requestBody:
+        description: "A JSON-LD representation of the ConceptScheme being updated."
+        content:
+          'application/ld+json;profile="http://www.w3.org/2004/02/skos/core.jsonld"':
+            example:
+              $ref: './samples/concept-scheme/update-concept-scheme--request.json'
+            schema:
+              $ref: './schemas/concept-scheme/request.json'
+      responses:
+        '422':
+          $ref: '#/components/responses/validationFailed'
+        '404':
+          $ref: '#/components/responses/notFound'
+        '204':
+          description: Update was successful. Resource is unchanged from request body.
+
+    get:
+      summary: Get a ConceptScheme
+      tags:
+        - ConceptScheme
+      responses:
+        '404':
+          $ref: '#/components/responses/notFound'
+        '200':
+          description: |
+            A skos:ConceptScheme resource, containing embedded links to the skos:Concept entries
+            appearing within it. Any embedded data (such as a `skos:Concept`, or a linked `skos:Collection`)
+            will contain presentational properties as defined by _Lexical Labels_ in the SKOS specification.
+          content:
+            'application/ld+json;profile="http://www.w3.org/2004/02/skos/core.jsonld"':
+              example:
+                $ref: samples/concept-scheme/new-concept-scheme--response.json
+              schema:
+                $ref: schemas/concept-scheme/response.json
+  /0.1/concept-scheme/:
+    post:
+      summary: Create a ConceptScheme
+      tags:
+        - ConceptScheme
+      operationId: createConceptScheme
+      requestBody:
+        description: "A representation of the ConceptScheme being created."
+        content:
+          'application/ld+json;profile="http://www.w3.org/2004/02/skos/core.jsonld"':
+            example:
+              $ref: './samples/concept-scheme/new-concept-scheme--request.json'
+            schema:
+              $ref: './schemas/concept-scheme/request.json'
+          multipart/form-data:
+            example:
+              $ref: './samples/concept-scheme/new-concept-scheme--request.xml'
+      responses:
+        '201':
+          description: The newly created ConceptScheme resource.
+          links:
+            addConcept:
+              operationId: addConceptToScheme
+              parameters:
+                scheme: $response.body#/@id
+          content:
+            'application/ld+json;profile="http://www.w3.org/2004/02/skos/core.jsonld"':
+              example:
+                $ref: './samples/concept-scheme/new-concept-scheme--response.json'
+              schema:
+                $ref: schemas/concept-scheme/response.json
+components:
+  requestBodies:
+    analysis:
+      required: true
+      description: JSON representation of a text document.
+      content:
+        'application/ld+json;profile="http://www.w3.org/2004/02/skos/core.jsonld"':
+          example:
+            $ref: './samples/analysis/analysis--request.json'
+          schema:
+            $ref: './schemas/analysis/request.json'
+
+    project:
+      required: true
+      description: JSON-LD representation of the Project.
+      content:
+        'application/ld+json;profile="http://www.w3.org/2004/02/skos/core.jsonld"':
+          example:
+            $ref: './samples/project/new-project--request.json'
+          schema:
+            $ref: './schemas/project/response.json'
+  responses:
+    validationFailed:
+      description: The request body failed validation
+      content:
+        'application/problem+json':
+          schema:
+            $ref: '#/components/schemas/validationError'
+    notFound:
+      description: The specified resource was not found
+      content:
+        'application/problem+json':
+          schema:
+            $ref: '#/components/schemas/error'
+    unauthorized:
+      description: Unauthorized
+      content:
+        'application/problem+json':
+          schema:
+            $ref: '#/components/schemas/error'
+
+  schemas:
+    validationError:
+      type: object
+      required:
+        - code
+        - message
+        - errors
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              property:
+                type: string
+              message:
+                type: string
+        code:
+          type: string
+        message:
+          type: string
+
+    error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message
+
+  parameters:
+    project:
+      name: project
+      in: path
+      description: Project identifier. The unique slug for the Project being addressed.
+      schema:
+        type: string
+    concept:
+      name: concept
+      in: path
+      description: Concept identifier. The unique identifier of the Concept being addressed (not its IRI).
+      schema:
+        type: string
+    scheme:
+      name: scheme
+      in: path
+      description: Scheme identifier. The unique identifier of the ConceptScheme being addressed (not its IRI).
+      schema:
+        type: string

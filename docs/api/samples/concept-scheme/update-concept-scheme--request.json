@@ -1,0 +1,14 @@
+{
+    "@context": {
+        "dcterms": "http://purl.org/dc/terms/1.1/",
+        "skos": "http://www.w3.org/2004/02/skos/core#"
+    },
+    "@id": "http://taxman.com/0.1/concept-scheme/1",
+    "@type": "skos:ConceptScheme",
+    "dcterms:title": "New Taxonomy Title",
+    "skos:hasTopConcept": [
+        {
+            "@id": "http://taxman.com/0.1/concept-scheme/2/concept/2"
+        }
+    ]
+}

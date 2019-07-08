@@ -1,0 +1,24 @@
+{
+  "$id": "#/skos:Collection/response",
+  "type": "object",
+  "title": "skos:Collection response",
+  "required": [
+    "@id",
+    "@type",
+    "skos:member"
+  ],
+  "properties": {
+    "@type": {
+      "$id": "#/skos:Collection/embedded/@type",
+      "const": "skos:Collection"
+    },
+    "skos:member": {
+      "$id": "#/skos:Collection/response/skos:membe",
+      "type": "array",
+      "title": "A set of Concepts within this Collection",
+      "items": {
+        "$ref": "../concept/embedded.json"
+      }
+    }
+  }
+}

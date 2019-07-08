@@ -1,0 +1,31 @@
+{
+    "$id": "#/skos:ConceptScheme/request",
+    "type": "object",
+    "title": "skos:ConceptScheme request",
+    "required": [
+        "@type",
+        "dcterms:title"
+    ],
+    "properties": {
+        "@type": {
+            "$id": "#/skos:ConceptScheme/request/@type",
+            "const": "skos:ConceptScheme"
+        },
+        "dcterms:title": {
+            "$id": "#/properties/dcterms:hasPart/items/properties/skos:prefLabel",
+            "type": "array",
+            "title": "Localized ConceptScheme title",
+            "items": {
+                "$ref": "../rdf/plain-literal.json"
+            }
+        },
+        "skos:hasTopConcept": {
+            "$id": "#/skos:ConceptScheme/response/skos:hasTopConcept",
+            "type": "array",
+            "title": "Top-level skos:Concept's of the scheme",
+            "items": {
+                "$ref": "../concept/embedded.json"
+            }
+        }
+    }
+}

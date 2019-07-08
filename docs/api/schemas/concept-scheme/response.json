@@ -1,0 +1,43 @@
+{
+    "$id": "#/skos:ConceptScheme/response",
+    "type": "object",
+    "title": "skos:ConceptScheme response",
+    "required": [
+        "@id",
+        "@type",
+        "dcterms:title",
+        "skos:hasTopConcept"
+    ],
+    "properties": {
+        "@id": {
+            "$id": "#/skos:ConceptScheme/embedded/@id",
+            "type": "string",
+            "title": "A dereferencable URI to a Concept Scheme",
+            "required": true,
+            "examples": [
+                "http://taxman.com/0.1/concept-scheme/1"
+            ],
+            "pattern": "^(.*)$"
+        },
+        "@type": {
+            "$id": "#/skos:ConceptScheme/embedded/@type",
+            "const": "skos:ConceptScheme"
+        },
+        "dcterms:title": {
+            "$id": "#/properties/dcterms:hasPart/items/properties/skos:prefLabel",
+            "type": "array",
+            "title": "Localized ConceptScheme title",
+            "items": {
+                "$ref": "../rdf/plain-literal.json"
+            }
+        },
+        "skos:hasTopConcept": {
+            "$id": "#/skos:ConceptScheme/response/skos:hasTopConcept",
+            "type": "array",
+            "title": "Top-level skos:Concept's of the scheme",
+            "items": {
+                "$ref": "../concept/embedded.json"
+            }
+        }
+    }
+}

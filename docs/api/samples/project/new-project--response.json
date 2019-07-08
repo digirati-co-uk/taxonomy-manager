@@ -1,0 +1,28 @@
+{
+  "@context": {
+    "dc": "http://purl.org/dc/elements/1.1/",
+    "dcterms": "http://purl.org/dc/terms",
+    "skos": "http://www.w3.org/2004/02/skos/core#"
+  },
+  "@id": "http://taxman.com/0.1/project/1",
+  "@type": "rdfs:Dataset",
+  "dcterms:identifier": "my-project-slug",
+  "dcterms:title": [
+    {
+      "@lang": "en",
+      "@value": "My Project Name"
+    }
+  ],
+  "dcterms:hasPart": [
+    {
+      "@id": "http://taxman.com/0.1/concept-scheme/1",
+      "@type": "skos:ConceptScheme",
+      "skos:prefLabel": [
+        {
+          "@lang": "en",
+          "@value": "A concept scheme"
+        }
+      ]
+    }
+  ]
+}
