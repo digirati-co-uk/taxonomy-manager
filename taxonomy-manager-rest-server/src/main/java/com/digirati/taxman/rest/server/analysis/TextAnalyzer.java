@@ -11,6 +11,7 @@ import org.apache.jena.vocabulary.SKOS;
 
 import javax.ws.rs.WebApplicationException;
 import java.net.URI;
+import java.util.stream.Collectors;
 
 public class TextAnalyzer {
     private final TextLookupService lookupService;
@@ -38,17 +39,12 @@ public class TextAnalyzer {
             var builder = modelFactory.createBuilder(CollectionModel.class);
             builder.setUri(URI.create("urn:collection"));
 
-            var matchedConcepts = matches.parallelStream()
+            var matchedConceptUuids = matches.parallelStream()
                     .flatMap(match -> match.getConceptIds().stream())
-                    .map(concepts::find);
+                    .collect(Collectors.toList());
 
-            matchedConcepts.forEach(concept -> {
-                try {
-                    builder.addEmbeddedModel(SKOS.member, concept);
-                } catch (RdfModelException ex) {
-                    throw new WebApplicationException("Produced invalid RDF model tagging document", ex);
-                }
-            });
+            var matchedConcepts = concepts.findAll(matchedConceptUuids);
+            matchedConcepts.forEach(concept -> builder.addEmbeddedModel(SKOS.member, concept));
 
             return builder.build();
         } catch (RdfModelException ex) {
