@@ -18,7 +18,8 @@ val quarkusExtensions = setOf(
         "hibernate-validator",
         "jdbc-postgresql",
         "resteasy",
-        "resteasy-jsonb"
+        "resteasy-jsonb",
+        "smallrye-jwt"
 )
 
 java {
@@ -52,6 +53,7 @@ dependencies {
     implementation("com.google.guava", "guava", "27.1-jre")
 
     testImplementation("io.quarkus", "quarkus-junit5", "0.18.0")
+    testImplementation("com.nimbusds", "nimbus-jose-jwt", "7.4")
 
     integrationTestImplementation("org.junit.jupiter:junit-jupiter-api:5.4.2")
     integrationTestImplementation("org.junit.jupiter:junit-jupiter-params:5.4.2")
