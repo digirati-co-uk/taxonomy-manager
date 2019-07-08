@@ -1,0 +1,8 @@
+{
+    "@context": {
+        "dcterms": "http://purl.org/dc/terms/1.1/",
+        "skos": "http://www.w3.org/2004/02/skos/core#"
+    },
+    "@type": "skos:ConceptScheme",
+    "dcterms:title": "Taxonomy Title"
+}

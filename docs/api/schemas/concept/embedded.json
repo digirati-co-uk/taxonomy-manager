@@ -1,0 +1,34 @@
+{
+    "$id": "#/skos:Concept/embedded",
+    "type": "object",
+    "title": "embedded skos:Concept",
+    "required": [
+        "@id",
+        "@type",
+        "skos:prefLabel"
+    ],
+    "properties": {
+        "@id": {
+            "$id": "#/skos:Concept/embedded/@id",
+            "type": "string",
+            "title": "A dereferencable URI to a Concept Scheme",
+            "required": true,
+            "examples": [
+                "http://taxman.com/0.1/concept-scheme/1"
+            ],
+            "pattern": "^(.*)$"
+        },
+        "@type": {
+            "$id": "#/skos:Concept/embedded/@type",
+            "const": "skos:Concept"
+        },
+        "skos:prefLabel": {
+            "$id": "#/skos:Concept/embedded/skos:prefLabel",
+            "type": "array",
+            "title": "SKOS localized lexical labels, used for presentation",
+            "items": {
+                "$ref": "../rdf/plain-literal.json"
+            }
+        }
+    }
+}

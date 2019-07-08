@@ -1,0 +1,13 @@
+{
+    "@context": {
+        "skos": "http://www.w3.org/2004/02/skos/core#"
+    },
+    "@id": "http://taxman.com/0.1/concept-scheme/1",
+    "dcterms:title": [
+        {
+            "@lang": "en",
+            "@value": "Taxonomy Title"
+        }
+    ],
+    "skos:hasTopConcept": []
+}
