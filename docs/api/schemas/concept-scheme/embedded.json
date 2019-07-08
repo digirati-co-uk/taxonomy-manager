@@ -5,7 +5,7 @@
     "required": [
         "@id",
         "@type",
-        "skos:prefLabel"
+        "dcterms:title"
     ],
     "properties": {
         "@id": {
