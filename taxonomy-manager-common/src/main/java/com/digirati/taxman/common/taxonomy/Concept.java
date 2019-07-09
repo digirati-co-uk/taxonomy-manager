@@ -37,7 +37,7 @@ public interface Concept {
      * @param languageKey the language key of the labels to get
      * @return a set of all labels describing this concept for the given language
      */
-    default Stream<String> getLabels(String languageKey) {
+    default Set<String> getLabels(String languageKey) {
         Set<String> labels = new HashSet<>();
         if (getPreferredLabel().containsKey(languageKey)) {
             labels.add(getPreferredLabel().get(languageKey));
@@ -48,6 +48,6 @@ public interface Concept {
         if (getHiddenLabel().containsKey(languageKey)) {
             labels.add(getHiddenLabel().get(languageKey));
         }
-        return labels.stream();
+        return labels;
     }
 }

@@ -1,6 +1,6 @@
 package com.digirati.taxman.rest.server.infrastructure.event;
 
-import com.digirati.taxman.rest.server.taxonomy.ConceptExtractionService;
+import com.digirati.taxonomy.manager.lookup.TextLookupService;
 import com.google.common.eventbus.Subscribe;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -13,14 +13,14 @@ import javax.inject.Inject;
 public class ConceptEventListener {
 
     @Inject
-    ConceptExtractionService conceptExtractionService;
+    TextLookupService lookupService;
 
     @Subscribe
     public void onEvent(ConceptEvent event) {
         if (event.isNew()) {
-            conceptExtractionService.getTextLookupService().addConcept(event.getConcept());
+            lookupService.addConcept(event.getConcept());
         } else {
-            conceptExtractionService.getTextLookupService().updateConcept(event.getConcept());
+            lookupService.updateConcept(event.getConcept());
         }
     }
 }
