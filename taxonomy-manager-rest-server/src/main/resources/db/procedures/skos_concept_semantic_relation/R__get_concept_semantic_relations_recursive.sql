@@ -40,12 +40,7 @@ BEGIN
                                                    ON sr.relation = _type AND sr.source_id = rsr.target_id
                                WHERE NOT cycle
                                  AND rsr.depth < 5)
-        SELECT scs.uuid            AS source_uuid,
-               sct.uuid            AS target_uuid,
-               sct.preferred_label AS target_preferred_label,
-               r.relation,
-               r.transitive,
-               r.depth
+        SELECT sct.*
         FROM relationships r
                  inner join skos_concept scs
                             ON scs.id = r.source_id
