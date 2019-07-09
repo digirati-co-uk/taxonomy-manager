@@ -4,7 +4,7 @@ import com.digirati.taxman.common.rdf.RdfModelFactory;
 import com.digirati.taxman.rest.server.taxonomy.identity.ConceptIdResolver;
 import com.digirati.taxman.rest.server.taxonomy.identity.ConceptSchemeIdResolver;
 import com.digirati.taxman.rest.server.taxonomy.identity.CollectionUriResolver;
-import com.digirati.taxman.rest.server.taxonomy.mapper.CollectionMapper;
+import com.digirati.taxman.rest.server.taxonomy.mapper.SearchResultsMapper;
 import com.digirati.taxman.rest.server.taxonomy.mapper.ConceptMapper;
 import com.digirati.taxman.rest.server.taxonomy.mapper.ConceptSchemeMapper;
 
@@ -33,8 +33,8 @@ public class TaxonomyConfig {
     }
 
     @Produces
-    CollectionMapper collectionMapper() {
-        return new CollectionMapper(conceptIdResolver, collectionUriResolver, modelFactory);
+    SearchResultsMapper searchResultsMapper() {
+        return new SearchResultsMapper(conceptIdResolver, collectionUriResolver, modelFactory);
     }
 
     @Produces

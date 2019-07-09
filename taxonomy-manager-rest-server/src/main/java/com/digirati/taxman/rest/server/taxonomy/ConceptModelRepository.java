@@ -1,11 +1,10 @@
 package com.digirati.taxman.rest.server.taxonomy;
 
-import com.digirati.taxman.common.rdf.RdfModelException;
 import com.digirati.taxman.common.taxonomy.CollectionModel;
 import com.digirati.taxman.common.taxonomy.ConceptModel;
 import com.digirati.taxman.rest.server.infrastructure.event.ConceptEvent;
 import com.digirati.taxman.rest.server.infrastructure.event.EventService;
-import com.digirati.taxman.rest.server.taxonomy.mapper.CollectionMapper;
+import com.digirati.taxman.rest.server.taxonomy.mapper.SearchResultsMapper;
 import com.digirati.taxman.rest.server.taxonomy.mapper.ConceptMapper;
 import com.digirati.taxman.rest.server.taxonomy.storage.ConceptDao;
 import com.digirati.taxman.rest.server.taxonomy.storage.ConceptDataSet;
@@ -14,7 +13,6 @@ import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRecord;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
-import javax.ws.rs.WebApplicationException;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -30,7 +28,7 @@ public class ConceptModelRepository {
     ConceptMapper conceptMapper;
 
     @Inject
-    CollectionMapper collectionMapper;
+    SearchResultsMapper searchResultsMapper;
 
     @Inject
     ConceptDao conceptDao;
@@ -60,11 +58,7 @@ public class ConceptModelRepository {
     @Transactional(Transactional.TxType.REQUIRED)
     public CollectionModel findByPartialLabel(String partialLabel, String languageKey) {
         Collection<ConceptRecord> concepts = conceptDao.getConceptsByPartialLabel(partialLabel, languageKey);
-        try {
-            return collectionMapper.map(concepts, partialLabel);
-        } catch (RdfModelException e) {
-            throw new WebApplicationException("Internal error occurred creating RDF model from dataset", e);
-        }
+        return searchResultsMapper.map(concepts, partialLabel);
     }
 
     /**
