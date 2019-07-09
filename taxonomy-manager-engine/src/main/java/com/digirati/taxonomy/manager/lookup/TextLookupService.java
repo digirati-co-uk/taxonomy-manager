@@ -135,6 +135,7 @@ public class TextLookupService {
     public void addConcept(ConceptModel concept) {
         UUID conceptUuid = concept.getUuid();
         Set<String> labels = concept.getLabels(languageKey)
+                .stream()
                 .map(textNormaliser::normalise)
                 .collect(Collectors.toSet());
 
@@ -144,6 +145,7 @@ public class TextLookupService {
     public void updateConcept(ConceptModel concept) {
         UUID conceptUuid = concept.getUuid();
         Set<String> labels = concept.getLabels(languageKey)
+                .stream()
                 .map(textNormaliser::normalise)
                 .collect(Collectors.toSet());
 
@@ -153,6 +155,7 @@ public class TextLookupService {
     public void removeConcept(ConceptModel concept) {
         UUID conceptUuid = concept.getUuid();
         Set<String> labels = concept.getLabels(languageKey)
+                .stream()
                 .map(textNormaliser::normalise)
                 .collect(Collectors.toSet());
 
