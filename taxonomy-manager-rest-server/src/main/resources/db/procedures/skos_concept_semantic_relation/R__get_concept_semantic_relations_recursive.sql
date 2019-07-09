@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION get_concept_semantic_relations_recursive(_uuid uuid, _type skos_semantic_relation_type)
-    RETURNS SETOF skos_concept
+RETURNS SETOF skos_concept
 AS
 $$
 BEGIN
@@ -35,7 +35,6 @@ BEGIN
                                  AND rsr.depth < 5)
         SELECT sct.*
         FROM relationships r
-RETURNS SETOF skos_concept
                  inner join skos_concept sct
                             ON sct.id = r.target_id;
 END;
