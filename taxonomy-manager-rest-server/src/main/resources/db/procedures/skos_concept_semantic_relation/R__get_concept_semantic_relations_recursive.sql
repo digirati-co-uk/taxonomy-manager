@@ -4,7 +4,8 @@ RETURNS TABLE (
     target_uuid            uuid,
     target_preferred_label rdf_plain_literal,
     relation               skos_semantic_relation_type,
-    transitive             boolean
+    transitive             boolean,
+    depth                  integer
 )
 AS
 $$
