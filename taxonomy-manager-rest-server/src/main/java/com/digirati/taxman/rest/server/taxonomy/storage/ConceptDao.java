@@ -1,5 +1,6 @@
 package com.digirati.taxman.rest.server.taxonomy.storage;
 
+import com.digirati.taxman.common.taxonomy.ConceptRelationshipType;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRecord;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.mapper.ConceptRecordMapper;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.mapper.ConceptRelationshipRecordMapper;
@@ -52,6 +53,24 @@ public class ConceptDao {
 
         return jdbcTemplate.query(
                 "SELECT * FROM get_concepts_by_uuids(?)",
+                conceptArgs,
+                conceptTypes,
+                recordMapper);
+    }
+
+    /**
+     * Find all the records that are related to the record identified by {@code uuid},
+     * with the given relationship {@code type}.
+     *
+     * @param uuid The identifier of the source record.
+     * @param type The type of relationship to search for.
+     */
+    public List<ConceptRecord> findRelatedRecords(UUID uuid, ConceptRelationshipType type) {
+        Object[] conceptArgs = {uuid, type.toString().toLowerCase()};
+        int[] conceptTypes = {Types.OTHER, Types.OTHER};
+
+        return jdbcTemplate.query(
+                "SELECT * FROM get_concept_semantic_relations_recursive(?, ?)",
                 conceptArgs,
                 conceptTypes,
                 recordMapper);

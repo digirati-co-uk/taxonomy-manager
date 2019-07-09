@@ -1,11 +1,5 @@
 CREATE OR REPLACE FUNCTION get_concept_semantic_relations_recursive(_uuid uuid, _type skos_semantic_relation_type)
-RETURNS TABLE (
-    source_uuid            uuid,
-    target_uuid            uuid,
-    target_preferred_label rdf_plain_literal,
-    relation               skos_semantic_relation_type,
-    transitive             boolean
-)
+RETURNS SETOF skos_concept
 AS
 $$
 BEGIN
@@ -30,24 +24,17 @@ BEGIN
                                SELECT sr.source_id,
                                       sr.target_id,
                                       sr.relation,
-                                      TRUE,
+                                      TRUE AS transitive,
                                       rsr.depth + 1 AS depth,
-                                      rsr.visited_ids || sr.source_id,
-                                      sr.source_id = ANY (rsr.visited_ids)
+                                      rsr.visited_ids || sr.source_id AS visited_ids,
+                                      sr.source_id = ANY (rsr.visited_ids) AS is_cycle
                                FROM relationships rsr
                                         INNER JOIN skos_concept_semantic_relation sr
                                                    ON sr.relation = _type AND sr.source_id = rsr.target_id
                                WHERE NOT cycle
                                  AND rsr.depth < 5)
-        SELECT scs.uuid            AS source_uuid,
-               sct.uuid            AS target_uuid,
-               sct.preferred_label AS target_preferred_label,
-               r.relation,
-               r.transitive,
-               r.depth
+        SELECT sct.*
         FROM relationships r
-                 inner join skos_concept scs
-                            ON scs.id = r.source_id
                  inner join skos_concept sct
                             ON sct.id = r.target_id;
 END;
