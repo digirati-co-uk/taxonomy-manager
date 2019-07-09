@@ -46,9 +46,7 @@ public class SearchResultsMapper {
                                 .setUri(idResolver.resolve(concept.getUuid())));
             }
 
-            var collection = builder.build();
-            collection.setUri(uri);
-            return collection;
+            return builder.build();
         } catch (RdfModelException e) {
             throw new WebApplicationException("Internal error occurred creating RDF model from dataset", e);
         }
