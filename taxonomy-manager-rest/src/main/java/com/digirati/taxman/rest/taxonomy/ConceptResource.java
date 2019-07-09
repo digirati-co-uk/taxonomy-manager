@@ -2,6 +2,7 @@ package com.digirati.taxman.rest.taxonomy;
 
 import com.digirati.taxman.common.rdf.annotation.jsonld.JsonLdFrame;
 import com.digirati.taxman.common.taxonomy.ConceptModel;
+import com.digirati.taxman.common.taxonomy.ConceptRelationshipType;
 import com.digirati.taxman.rest.MediaTypes;
 import com.digirati.taxman.rest.Roles;
 
@@ -36,7 +37,7 @@ public interface ConceptResource {
     @GET
     @Path("/{concept}/relationships")
     @Produces({MediaTypes.APPLICATION_JSONLD_SKOS_VALUE, MediaTypes.APPLICATION_RDF_XML_VALUE})
-    @JsonLdFrame(input = "jsonld/framing/collection.json")
+    @JsonLdFrame(input = "/jsonld/framing/collection.json")
     @RolesAllowed(Roles.ADMIN)
     Response getRelationships(@BeanParam ConceptPath params,
                               @Valid @BeanParam ConceptRelationshipParams relationshipParams);

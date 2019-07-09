@@ -2,6 +2,7 @@ package com.digirati.taxman.rest.server.taxonomy;
 
 import com.digirati.taxman.common.taxonomy.CollectionModel;
 import com.digirati.taxman.common.taxonomy.ConceptModel;
+import com.digirati.taxman.common.taxonomy.ConceptRelationshipType;
 import com.digirati.taxman.rest.server.infrastructure.event.ConceptEvent;
 import com.digirati.taxman.rest.server.infrastructure.event.EventService;
 import com.digirati.taxman.rest.server.taxonomy.mapper.SearchResultsMapper;
