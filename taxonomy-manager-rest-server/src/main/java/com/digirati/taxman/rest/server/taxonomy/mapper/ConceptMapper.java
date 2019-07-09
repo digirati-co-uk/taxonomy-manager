@@ -11,6 +11,7 @@ import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRelationsh
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.SKOS;
 
+import javax.ws.rs.WebApplicationException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.function.BiConsumer;
@@ -34,37 +35,40 @@ public class ConceptMapper {
      *
      * @param dataset The database dataset to convert.
      * @return a typed RDF model.
-     * @throws RdfModelException if the RDF produced from the dataset was invalid.
      */
-    public ConceptModel map(ConceptDataSet dataset) throws RdfModelException {
-        var builder = factory.createBuilder(ConceptModel.class);
-        var record = dataset.getRecord();
+    public ConceptModel map(ConceptDataSet dataset) {
+        try {
+            var builder = factory.createBuilder(ConceptModel.class);
+            var record = dataset.getRecord();
 
-        builder.setUri(idResolver.resolve(record.getUuid()));
-        builder.addPlainLiteral(SKOS.prefLabel, record.getPreferredLabel())
-                .addPlainLiteral(SKOS.altLabel, record.getAltLabel())
-                .addPlainLiteral(SKOS.hiddenLabel, record.getHiddenLabel())
-                .addPlainLiteral(SKOS.note, record.getNote())
-                .addPlainLiteral(SKOS.changeNote, record.getChangeNote())
-                .addPlainLiteral(SKOS.editorialNote, record.getEditorialNote())
-                .addPlainLiteral(SKOS.example, record.getExample())
-                .addPlainLiteral(SKOS.historyNote, record.getHistoryNote())
-                .addPlainLiteral(SKOS.scopeNote, record.getScopeNote());
+            builder.setUri(idResolver.resolve(record.getUuid()));
+            builder.addPlainLiteral(SKOS.prefLabel, record.getPreferredLabel())
+                    .addPlainLiteral(SKOS.altLabel, record.getAltLabel())
+                    .addPlainLiteral(SKOS.hiddenLabel, record.getHiddenLabel())
+                    .addPlainLiteral(SKOS.note, record.getNote())
+                    .addPlainLiteral(SKOS.changeNote, record.getChangeNote())
+                    .addPlainLiteral(SKOS.editorialNote, record.getEditorialNote())
+                    .addPlainLiteral(SKOS.example, record.getExample())
+                    .addPlainLiteral(SKOS.historyNote, record.getHistoryNote())
+                    .addPlainLiteral(SKOS.scopeNote, record.getScopeNote());
 
-        for (ConceptRelationshipRecord relationship : dataset.getRelationshipRecords()) {
-            var type = relationship.getType();
-            var property = type.getSkosProperty(relationship.isTransitive());
+            for (ConceptRelationshipRecord relationship : dataset.getRelationshipRecords()) {
+                var type = relationship.getType();
+                var property = type.getSkosProperty(relationship.isTransitive());
 
-            builder.addEmbeddedModel(
-                    property,
-                    factory.createBuilder(ConceptModel.class)
-                            .addPlainLiteral(SKOS.prefLabel, relationship.getTargetPreferredLabel())
-                            .setUri(idResolver.resolve(relationship.getTarget())));
+                builder.addEmbeddedModel(
+                        property,
+                        factory.createBuilder(ConceptModel.class)
+                                .addPlainLiteral(SKOS.prefLabel, relationship.getTargetPreferredLabel())
+                                .setUri(idResolver.resolve(relationship.getTarget())));
+            }
+
+            ConceptModel concept = builder.build();
+            concept.setUuid(dataset.getRecord().getUuid());
+            return concept;
+        } catch (RdfModelException ex) {
+            throw new WebApplicationException("Mapping concept from data records produced invalid RDF", ex);
         }
-
-        ConceptModel concept = builder.build();
-        concept.setUuid(dataset.getRecord().getUuid());
-        return concept;
     }
 
     /**

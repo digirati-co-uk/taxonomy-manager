@@ -53,6 +53,17 @@ public class RdfModelBuilder<T extends RdfModel> {
     }
 
     /**
+     * Embed an existing {@link RdfModel} resource within the graph of this builder.
+     *
+     * @param property The property to associate the existing model with.
+     * @param model    The model to add to the underlying RDF graph.
+     */
+    public RdfModelBuilder<T> addEmbeddedModel(Property property, RdfModel model) {
+        properties.put(property, new PendingPropertyValue(model.getResource(), false));
+        return this;
+    }
+
+    /**
      * Build and embed a new resource within this model and associate it with a {@code property}.
      *
      * @param property      The property to associate the resource with.
@@ -61,7 +72,9 @@ public class RdfModelBuilder<T extends RdfModel> {
      */
     public RdfModelBuilder<T> addEmbeddedModel(Property property,
                                                RdfModelBuilder embeddedModel) throws RdfModelException {
-        properties.put(property, new PendingPropertyValue(embeddedModel.build(model).getResource()));
+        var resource = embeddedModel.build(model).getResource();
+        properties.put(property, new PendingPropertyValue(resource, true));
+
         return this;
     }
 
@@ -98,7 +111,13 @@ public class RdfModelBuilder<T extends RdfModel> {
                     resource.addLiteral(term, (Literal) value.value);
                     break;
                 case RESOURCE:
-                    resource.addProperty(term, (Resource) value.value);
+                    var resourceValue = (Resource) value.value;
+                    var resourceValueModel = resourceValue.getModel();
+                    if (!value.embedded && !model.containsAll(resourceValueModel.listStatements())) {
+                        model.add(resourceValueModel);
+                    }
+
+                    resource.addProperty(term, resourceValue);
                     break;
             }
         }
@@ -120,15 +139,18 @@ public class RdfModelBuilder<T extends RdfModel> {
     static class PendingPropertyValue {
         final Type type;
         final Object value;
+        final boolean embedded;
 
         PendingPropertyValue(Literal literal) {
             this.type = Type.LITERAL;
             this.value = literal;
+            this.embedded = true;
         }
 
-        PendingPropertyValue(Resource resource) {
+        PendingPropertyValue(Resource resource, boolean embedded) {
             this.type = RESOURCE;
             this.value = resource;
+            this.embedded = embedded;
         }
 
         enum Type {

@@ -7,9 +7,12 @@ import org.json.JSONObject;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
+import java.sql.Array;
+import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -33,6 +36,30 @@ public class ConceptDao {
     public Collection<ConceptRecord> getConceptsByPartialLabel(String label, String languageKey) {
         Object[] args = {label, languageKey};
         return jdbcTemplate.query("SELECT * FROM get_concepts_by_partial_label(?, ?)", args, recordMapper);
+    }
+
+    /**
+     * Find all the records that have a {@code UUID} value in the collection of {@code uuids} given.
+     *
+     * @param uuids A collection of UUIDs representing {@link ConceptRecord}s.
+     */
+    public List<ConceptRecord> findAllRecords(Collection<UUID> uuids) {
+        Array uuidArray;
+
+        try (var conn = jdbcTemplate.getDataSource().getConnection()) {
+            uuidArray = conn.createArrayOf("uuid", uuids.toArray(UUID[]::new));
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        Object[] conceptArgs = {uuidArray};
+        int[] conceptTypes = {Types.ARRAY};
+
+        return jdbcTemplate.query(
+                "SELECT * FROM get_concepts_by_uuids(?)",
+                conceptArgs,
+                conceptTypes,
+                recordMapper);
     }
 
     /**

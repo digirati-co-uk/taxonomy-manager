@@ -16,7 +16,9 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.ws.rs.WebApplicationException;
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * A repository that manages storage of {@link ConceptModel}s.
@@ -45,11 +47,8 @@ public class ConceptModelRepository {
     @Transactional(Transactional.TxType.REQUIRED)
     public ConceptModel find(UUID uuid) {
         ConceptDataSet dataset = conceptDao.loadDataSet(uuid);
-        try {
-            return conceptMapper.map(dataset);
-        } catch (RdfModelException e) {
-            throw new WebApplicationException("Internal error occurred creating RDF model from dataset", e);
-        }
+
+        return conceptMapper.map(dataset);
     }
 
     /**
@@ -66,6 +65,20 @@ public class ConceptModelRepository {
         } catch (RdfModelException e) {
             throw new WebApplicationException("Internal error occurred creating RDF model from dataset", e);
         }
+    }
+
+    /**
+     * Find an RDF model representation of a concept given an identifier.
+     *
+     * @param uuid An identifier of a Concept.
+     * @return the RDF model of the concept requested.
+     */
+    @Transactional(Transactional.TxType.REQUIRED)
+    public List<ConceptModel> findAll(Collection<UUID> uuid) {
+        return conceptDao.findAllRecords(uuid)
+                .stream()
+                .map(record -> conceptMapper.map(new ConceptDataSet(record)))
+                .collect(Collectors.toList());
     }
 
     /**

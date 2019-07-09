@@ -2,7 +2,6 @@ package com.digirati.taxman.common.taxonomy;
 
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class Term {
 
@@ -16,7 +15,7 @@ public class Term {
     }
 
     public Term(Concept concept, String languageKey) {
-        this(concept.getUuid(), concept.getLabels(languageKey).collect(Collectors.toSet()));
+        this(concept.getUuid(), concept.getLabels(languageKey));
     }
 
     public UUID getUuid() {
