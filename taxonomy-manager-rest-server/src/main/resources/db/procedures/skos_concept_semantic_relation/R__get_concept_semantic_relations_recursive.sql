@@ -31,10 +31,10 @@ BEGIN
                                SELECT sr.source_id,
                                       sr.target_id,
                                       sr.relation,
-                                      TRUE,
+                                      TRUE AS transitive,
                                       rsr.depth + 1 AS depth,
-                                      rsr.visited_ids || sr.source_id,
-                                      sr.source_id = ANY (rsr.visited_ids)
+                                      rsr.visited_ids || sr.source_id AS visited_ids,
+                                      sr.source_id = ANY (rsr.visited_ids) AS is_cycle
                                FROM relationships rsr
                                         INNER JOIN skos_concept_semantic_relation sr
                                                    ON sr.relation = _type AND sr.source_id = rsr.target_id
