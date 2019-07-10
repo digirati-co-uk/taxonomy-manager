@@ -35,7 +35,7 @@ pipeline {
             steps {
                 script {
                     def workspace = env.WORKSPACE
-                    sh "$workspace/gradlew -Pci=true clean assemble check"
+                    sh "$workspace/gradlew -Pci=true clean generateTestKeyPair assemble check"
                 }
             }
         }
