@@ -1,8 +1,12 @@
 package com.digirati.taxman.rest.server;
 
+import com.digirati.taxman.common.taxonomy.CollectionModel;
 import com.digirati.taxman.common.taxonomy.ConceptModel;
+import com.digirati.taxman.common.taxonomy.ConceptRelationshipType;
+import com.digirati.taxman.rest.server.taxonomy.ConceptCollectionModelRepository;
 import com.digirati.taxman.rest.server.taxonomy.ConceptModelRepository;
 import com.digirati.taxman.rest.taxonomy.ConceptPath;
+import com.digirati.taxman.rest.taxonomy.ConceptRelationshipParams;
 import com.digirati.taxman.rest.taxonomy.ConceptResource;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -13,6 +17,9 @@ import javax.ws.rs.core.Response;
 
 @ApplicationScoped
 public class ServerConceptResource implements ConceptResource {
+
+    @Inject
+    ConceptCollectionModelRepository conceptCollections;
 
     @Inject
     ConceptModelRepository concepts;
@@ -30,6 +37,17 @@ public class ServerConceptResource implements ConceptResource {
         var model = concepts.find(params.getUuid());
 
         return Response.ok(model).build();
+    }
+
+    @Override
+    public Response getRelationships(@BeanParam ConceptPath params,
+                                     @Valid @BeanParam ConceptRelationshipParams relationshipParams) {
+
+        var uuid = params.getUuid();
+        var type = relationshipParams.getType();
+        var depth = relationshipParams.getDepth();
+
+        return Response.ok(conceptCollections.findRelated(uuid, type, depth)).build();
     }
 
     @Override

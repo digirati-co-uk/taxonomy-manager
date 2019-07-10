@@ -1,7 +1,7 @@
 package com.digirati.taxman.rest.server.taxonomy;
 
-import com.digirati.taxman.common.rdf.RdfModelException;
 import com.digirati.taxman.common.taxonomy.ConceptModel;
+import com.digirati.taxman.common.taxonomy.ConceptRelationshipType;
 import com.digirati.taxman.rest.server.infrastructure.event.ConceptEvent;
 import com.digirati.taxman.rest.server.infrastructure.event.EventService;
 import com.digirati.taxman.rest.server.taxonomy.mapper.ConceptMapper;
@@ -11,7 +11,6 @@ import com.digirati.taxman.rest.server.taxonomy.storage.ConceptDataSet;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
-import javax.ws.rs.WebApplicationException;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
