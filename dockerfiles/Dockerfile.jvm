@@ -2,10 +2,13 @@ FROM registry.access.redhat.com/ubi8/ubi-minimal:8.0 AS build
 LABEL maintainer="Gary Tierney <gary.tierney@digirati.com>"
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+ARG OPENJDK_11_VERSION=11.0.3.7-2.el8_0
+
 RUN microdnf install \
-        java-11-openjdk \
-        java-11-openjdk-headless \
-        java-11-openjdk-devel
+    java-11-openjdk-$OPENJDK_11_VERSION \
+    java-11-openjdk-headless-$OPENJDK_11_VERSION \
+    java-11-openjdk-devel-$OPENJDK_11_VERSION
 
 ENV JAVA_HOME="/usr/lib/jvm/java"
 ENV GRADLE_OPTS="-Dorg.gradle.caching=false -Dorg.gradle.daemon=false -Dorg.gradle.parallel=true"
@@ -22,12 +25,18 @@ COPY taxonomy-manager-engine ./taxonomy-manager-engine/
 RUN ./gradlew assemble && rm -Rf "$HOME/.gradle"
 
 FROM registry.access.redhat.com/ubi8/ubi-minimal:8.0 AS runtime
+
+ARG OPENJDK_11_VERSION=11.0.3.7-2.el8_0
+
 RUN mkdir -p /srv/taxman/
 WORKDIR /srv/taxman/
+
 COPY --from=build /build/taxonomy-manager-rest-server/build/taxonomy-manager-rest-server-runner.jar /srv/taxman/
 COPY --from=build /build/taxonomy-manager-rest-server/build/lib /srv/taxman/lib/
 
-RUN microdnf install java-11-openjdk-headless
+RUN microdnf install \
+    java-11-openjdk-headless-$OPENJDK_11_VERSION
+
 ENV JAVA_OPTIONS="-Dquarkus.http.host=0.0.0.0"
 ENV JAVA_HOME="/usr/lib/jvm/java"
 
