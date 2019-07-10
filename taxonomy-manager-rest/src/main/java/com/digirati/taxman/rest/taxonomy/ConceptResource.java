@@ -2,7 +2,6 @@ package com.digirati.taxman.rest.taxonomy;
 
 import com.digirati.taxman.common.rdf.annotation.jsonld.JsonLdFrame;
 import com.digirati.taxman.common.taxonomy.ConceptModel;
-import com.digirati.taxman.common.taxonomy.ConceptRelationshipType;
 import com.digirati.taxman.rest.MediaTypes;
 import com.digirati.taxman.rest.Roles;
 
@@ -15,7 +14,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
 @Path("/v0.1/concept")
@@ -39,6 +37,7 @@ public interface ConceptResource {
     @Path("/{concept}/relationships")
     @Produces({MediaTypes.APPLICATION_JSONLD_SKOS_VALUE, MediaTypes.APPLICATION_RDF_XML_VALUE})
     @JsonLdFrame(input = "/jsonld/framing/collection.json")
+    @RolesAllowed(Roles.TAXMAN_ADMIN)
     Response getRelationships(@BeanParam ConceptPath params,
                               @Valid @BeanParam ConceptRelationshipParams relationshipParams);
 
