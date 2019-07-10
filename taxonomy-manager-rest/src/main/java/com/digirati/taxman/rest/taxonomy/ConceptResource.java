@@ -30,6 +30,13 @@ public interface ConceptResource {
     Response getConcept(@BeanParam ConceptPath params);
 
     @GET
+    @Path("/{concept}/relationships")
+    @Produces({MediaTypes.APPLICATION_JSONLD_SKOS_VALUE, MediaTypes.APPLICATION_RDF_XML_VALUE})
+    @JsonLdFrame(input = "/jsonld/framing/collection.json")
+    Response getRelationships(@BeanParam ConceptPath params,
+                              @Valid @BeanParam ConceptRelationshipParams relationshipParams);
+
+    @GET
     @Path("/search")
     @Produces({MediaTypes.APPLICATION_JSONLD_SKOS_VALUE, MediaTypes.APPLICATION_RDF_XML_VALUE})
     @JsonLdFrame(input = "/jsonld/framing/collection.json")
