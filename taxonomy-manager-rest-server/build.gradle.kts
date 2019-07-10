@@ -72,6 +72,7 @@ tasks {
 
 tasks.withType<QuarkusDev> {
     debug = "client"
+    jvmArgs = "-Dmp.jwt.verify.issuer=\"http://localhost:8080/\""
 }
 
 val integrationTest = task<Test>("integrationTest") {
