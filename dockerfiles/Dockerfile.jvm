@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi8/ubi-minimal:latest AS build
+FROM registry.access.redhat.com/ubi8/ubi-minimal:8.0 AS build
 LABEL maintainer="Gary Tierney <gary.tierney@digirati.com>"
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
@@ -21,7 +21,7 @@ COPY taxonomy-manager-common ./taxonomy-manager-common/
 COPY taxonomy-manager-engine ./taxonomy-manager-engine/
 RUN ./gradlew assemble && rm -Rf "$HOME/.gradle"
 
-FROM registry.access.redhat.com/ubi8/ubi-minimal:latest AS runtime
+FROM registry.access.redhat.com/ubi8/ubi-minimal:8.0 AS runtime
 RUN mkdir -p /srv/taxman/
 WORKDIR /srv/taxman/
 COPY --from=build /build/taxonomy-manager-rest-server/build/taxonomy-manager-rest-server-runner.jar /srv/taxman/
