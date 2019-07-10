@@ -6,7 +6,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ARG OPENJDK_11_VERSION=11.0.3.7-2.el8_0
 
 RUN microdnf install \
-        java-11-openjdk-devel-$OPENJDK_11_VERSION \
+       java-11-openjdk-devel-$OPENJDK_11_VERSION \
     && microdnf clean all
 
 ENV JAVA_HOME="/usr/lib/jvm/java"
@@ -34,7 +34,7 @@ COPY --from=build /build/taxonomy-manager-rest-server/build/taxonomy-manager-res
 COPY --from=build /build/taxonomy-manager-rest-server/build/lib /srv/taxman/lib/
 
 RUN microdnf install \
-        java-11-openjdk-headless-$OPENJDK_11_VERSION \
+       java-11-openjdk-headless-$OPENJDK_11_VERSION \
     && microdnf clean all
 
 
