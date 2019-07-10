@@ -37,7 +37,6 @@ RUN microdnf install \
        java-11-openjdk-headless-$OPENJDK_11_VERSION \
     && microdnf clean all
 
-
 ENV JAVA_OPTIONS="-Dquarkus.http.host=0.0.0.0"
 ENV JAVA_HOME="/usr/lib/jvm/java"
 
