@@ -14,6 +14,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
 @Path("/v0.1/concept")
@@ -44,6 +45,7 @@ public interface ConceptResource {
     @Path("/search")
     @Produces({MediaTypes.APPLICATION_JSONLD_SKOS_VALUE, MediaTypes.APPLICATION_RDF_XML_VALUE})
     @JsonLdFrame(input = "/jsonld/framing/collection.json")
+    @RolesAllowed(Roles.ADMIN)
     Response getConceptsByPartialLabel(@QueryParam("label") String partialLabel,
                                        @QueryParam("language") String languageKey);
 
