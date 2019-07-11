@@ -131,7 +131,7 @@ pipeline {
 
         stage('deploy image') {
             steps {
-                build job: '../digirati-taxonomy-manager-infra/PR-3',
+                build job: '../digirati-taxonomy-manager-infra/master',
                       parameters:  [
                           [$class: 'StringParameterValue', name: 'ENVIRONMENT', value: 'dev'],
                           [$class: 'StringParameterValue', name: 'BACKEND_IMAGE_TAG', value: "${version}"]
