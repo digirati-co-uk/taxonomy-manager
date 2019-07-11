@@ -8,8 +8,11 @@ pipeline {
     }
 
     environment {
-        IMAGE_AKS_REGISTRY = 'taxman.azurecr.io'
-        IMAGE_AKS_REPOSITORY = 'backend'
+        IMAGE_CREDS_JENKINS_ID = 'aks-taxman'
+        IMAGE_REGISTRY = 'taxman.azurecr.io'
+        IMAGE_REPOSITORY = 'backend'
+        DEPLOYMENT_JOB = '../digirati-taxonomy-manager-infra/master'
+        DEPLOYMENT_ENV = 'dev'
     }
 
     options {
@@ -99,30 +102,30 @@ pipeline {
 
         stage('build image') {
             steps {
-                sh 'docker build -t $IMAGE_AKS_REPOSITORY:latest -f dockerfiles/Dockerfile.jvm .'
+                sh 'docker build -t $IMAGE_REPOSITORY:latest -f dockerfiles/Dockerfile.jvm .'
             }
         }
 
         stage('push image') {
-            //when {
-            //    branch "master"
-            //}
+            when {
+                branch "master"
+            }
 
             steps {
-                withCredentials([usernamePassword(credentialsId: 'aks-taxman', usernameVariable: 'AKS_USERNAME', passwordVariable: 'AKS_PASSWORD')]) {
-                    sh 'docker login $IMAGE_AKS_REGISTRY --username $AKS_USERNAME --password $AKS_PASSWORD'
+                withCredentials([usernamePassword(credentialsId: "$IMAGE_CREDS_JENKINS_ID", usernameVariable: 'IMAGE_REGISTRY_USERNAME', passwordVariable: 'IMAGE_REGISTRY_PASSWORD')]) {
+                    sh 'docker login $IMAGE_REGISTRY --username $IMAGE_REGISTRY_USERNAME --password $IMAGE_REGISTRY_PASSWORD'
                 }
 
                 script {
                     def properties = readProperties(file: 'version.properties')
                     version = "${properties.version}-${currentBuild.startTimeInMillis}.${currentBuild.number}"
                     def images = [
-                        "\$IMAGE_AKS_REGISTRY/\$IMAGE_AKS_REPOSITORY:$version",
-                        "\$IMAGE_AKS_REGISTRY/\$IMAGE_AKS_REPOSITORY:latest"
+                        "\$IMAGE_REGISTRY/\$IMAGE_REPOSITORY:$version",
+                        "\$IMAGE_REGISTRY/\$IMAGE_REPOSITORY:latest"
                     ]
 
                     for (String image : images) {
-                        sh "docker tag \$IMAGE_AKS_REPOSITORY:latest $image"
+                        sh "docker tag \$IMAGE_REPOSITORY:latest $image"
                         sh "docker push $image"
                     }
                 }
@@ -130,10 +133,14 @@ pipeline {
         }
 
         stage('deploy image') {
+            when {
+                branch "master"
+            }
+
             steps {
-                build job: '../digirati-taxonomy-manager-infra/master',
+                build job: '$DEPLOYMENT_JOB',
                       parameters:  [
-                          [$class: 'StringParameterValue', name: 'ENVIRONMENT', value: 'dev'],
+                          [$class: 'StringParameterValue', name: 'ENVIRONMENT', value: '$DEPLOYMENT_ENV'],
                           [$class: 'StringParameterValue', name: 'BACKEND_IMAGE_TAG', value: "${version}"]
                       ],
                       propagate: true
