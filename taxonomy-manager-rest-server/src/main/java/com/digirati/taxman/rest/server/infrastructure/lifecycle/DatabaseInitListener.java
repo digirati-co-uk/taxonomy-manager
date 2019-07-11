@@ -13,7 +13,7 @@ public class DatabaseInitListener {
     @Inject Flyway flyway;
 
     void onStart(@Observes StartupEvent event) {
-        flyway.baseline();
+        //flyway.baseline(); // ToDo @Gary why do we need this? It causes failures when run on a fresh DB...
         flyway.migrate();
     }
 }
