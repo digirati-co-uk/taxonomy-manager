@@ -31,6 +31,7 @@ ARG OPENJDK_11_VERSION=11.0.3.7-2.el8_0
 RUN mkdir -p /srv/taxman/
 WORKDIR /srv/taxman/
 
+COPY dockerfiles/config/srv/taxman/entrypoint.sh /srv/taxman
 COPY --from=build /build/taxonomy-manager-rest-server/build/taxonomy-manager-rest-server-runner.jar /srv/taxman/
 COPY --from=build /build/taxonomy-manager-rest-server/build/lib /srv/taxman/lib/
 
@@ -41,4 +42,5 @@ RUN microdnf install \
 ENV JAVA_OPTIONS="-Dquarkus.http.host=0.0.0.0"
 ENV JAVA_HOME="/usr/lib/jvm/java"
 
+ENTRYPOINT ["/srv/taxman/entrypoint.sh"]
 CMD ["java", "-jar", "/srv/taxman/taxonomy-manager-rest-server-runner.jar"]
