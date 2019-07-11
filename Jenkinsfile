@@ -134,7 +134,7 @@ pipeline {
                 build job: '../digirati-taxonomy-manager-infra/PR-3',
                       parameters:  [
                           [$class: 'StringParameterValue', name: 'ENVIRONMENT', value: 'dev'],
-                          [$class: 'StringParameterValue', name: 'BACKEND_VERSION', value: "${version}"]
+                          [$class: 'StringParameterValue', name: 'BACKEND_IMAGE_TAG', value: "${version}"]
                       ],
                       propagate: true
             }
