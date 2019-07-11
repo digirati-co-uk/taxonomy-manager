@@ -7,6 +7,16 @@ pipeline {
         }
     }
 
+    environment {
+        IMAGE_AKS_REGISTRY = 'taxman.azurecr.io'
+        IMAGE_AKS_REPOSITORY = 'backend'
+    }
+
+    options {
+        ansiColor('xterm')
+        timestamps()
+    }
+
     stages {
         stage('general linting') {
             steps {
@@ -82,6 +92,38 @@ pipeline {
                     script {
                         def workspace = env.WORKSPACE
                         sh "$workspace/gradlew -Pci=true sonarqube"
+                    }
+                }
+            }
+        }
+
+        stage('build image') {
+            steps {
+                sh 'docker build -t $IMAGE_AKS_REPOSITORY:latest -f dockerfiles/Dockerfile.jvm .'
+            }
+        }
+
+        stage('deploy image') {
+            //when {
+            //    branch "master"
+            //}
+
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'aks-taxman', usernameVariable: 'AKS_USERNAME', passwordVariable: 'AKS_PASSWORD')]) {
+                    sh 'docker login $IMAGE_AKS_REGISTRY --username $AKS_USERNAME --password $AKS_PASSWORD'
+                }
+
+                script {
+                    def properties = readProperties(file: 'version.properties')
+                    def version = "${properties.version}-${currentBuild.startTimeInMillis}.${currentBuild.number}"
+                    def images = [
+                        "\$IMAGE_AKS_REGISTRY/\$IMAGE_AKS_REPOSITORY:$version",
+                        "\$IMAGE_AKS_REGISTRY/\$IMAGE_AKS_REPOSITORY:latest"
+                    ]
+
+                    for (String image : images) {
+                        sh "docker tag \$IMAGE_AKS_REPOSITORY:latest $image"
+                        sh "docker push $image"
                     }
                 }
             }

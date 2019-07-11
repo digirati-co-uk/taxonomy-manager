@@ -4,9 +4,10 @@ LABEL maintainer="Gary Tierney <gary.tierney@digirati.com>"
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 ARG OPENJDK_11_VERSION=11.0.3.7-2.el8_0
+ARG OPEN_SSL_VERSION=1.1.1-8.el8
 
 RUN microdnf install \
-       java-11-openjdk-devel-$OPENJDK_11_VERSION \
+       java-11-openjdk-devel-$OPENJDK_11_VERSION openssl-$OPEN_SSL_VERSION \
     && microdnf clean all
 
 ENV JAVA_HOME="/usr/lib/jvm/java"
