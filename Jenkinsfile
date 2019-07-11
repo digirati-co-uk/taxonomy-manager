@@ -103,7 +103,7 @@ pipeline {
             }
         }
 
-        stage('deploy image') {
+        stage('push image') {
             //when {
             //    branch "master"
             //}
@@ -115,7 +115,7 @@ pipeline {
 
                 script {
                     def properties = readProperties(file: 'version.properties')
-                    def version = "${properties.version}-${currentBuild.startTimeInMillis}.${currentBuild.number}"
+                    version = "${properties.version}-${currentBuild.startTimeInMillis}.${currentBuild.number}"
                     def images = [
                         "\$IMAGE_AKS_REGISTRY/\$IMAGE_AKS_REPOSITORY:$version",
                         "\$IMAGE_AKS_REGISTRY/\$IMAGE_AKS_REPOSITORY:latest"
@@ -126,6 +126,17 @@ pipeline {
                         sh "docker push $image"
                     }
                 }
+            }
+        }
+
+        stage('deploy image') {
+            steps {
+                build job: '../digirati-taxonomy-manager-infra/PR-3',
+                      parameters:  [
+                          [$class: 'StringParameterValue', name: 'ENVIRONMENT', value: 'dev'],
+                          [$class: 'StringParameterValue', name: 'BACKEND_VERSION', value: "${version}"]
+                      ],
+                      propagate: true
             }
         }
     }
