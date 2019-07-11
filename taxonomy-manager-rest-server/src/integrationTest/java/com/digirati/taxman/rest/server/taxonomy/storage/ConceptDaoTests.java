@@ -98,6 +98,35 @@ public class ConceptDaoTests {
         Assertions.assertEquals(relationships, dao.loadDataSet(uuidA).getRelationshipRecords());
     }
 
+    @Test
+    public void shouldRetrieveConceptsByPartialLabel() {
+        var one = new ConceptRecord(UUID.randomUUID());
+        one.getPreferredLabel().put("en", "one");
+        one.getPreferredLabel().put("fr", "un");
+
+        var two = new ConceptRecord(UUID.randomUUID());
+        two.getPreferredLabel().put("en", "two");
+
+        var eleven = new ConceptRecord(UUID.randomUUID());
+        eleven.getPreferredLabel().put("en", "eleven");
+        eleven.getAltLabel().put("fr", "onze");
+
+        var hundred = new ConceptRecord(UUID.randomUUID());
+        hundred.getPreferredLabel().put("en", "a hundred");
+        hundred.getHiddenLabel().put("en", "one hundred");
+
+        var dao = new ConceptDao(dataSource);
+        dao.storeDataSet(new ConceptDataSet(one));
+        dao.storeDataSet(new ConceptDataSet(two));
+        dao.storeDataSet(new ConceptDataSet(eleven));
+        dao.storeDataSet(new ConceptDataSet(hundred));
+
+        var expected = List.of(one, hundred);
+        var actual = dao.getConceptsByPartialLabel("on", "en");
+
+        Assertions.assertEquals(expected, actual);
+    }
+
     @FunctionalInterface
     private interface LabelGetter {
         Map<String, String> getLabels(ConceptRecord record);

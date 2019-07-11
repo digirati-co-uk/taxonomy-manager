@@ -34,6 +34,11 @@ public class ConceptDao {
         return jdbcTemplate.query("SELECT * FROM get_all_concepts()", recordMapper).stream();
     }
 
+    public Collection<ConceptRecord> getConceptsByPartialLabel(String label, String languageKey) {
+        Object[] args = {label, languageKey};
+        return jdbcTemplate.query("SELECT * FROM get_concepts_by_partial_label(?, ?)", args, recordMapper);
+    }
+
     /**
      * Find all the records that have a {@code UUID} value in the collection of {@code uuids} given.
      *

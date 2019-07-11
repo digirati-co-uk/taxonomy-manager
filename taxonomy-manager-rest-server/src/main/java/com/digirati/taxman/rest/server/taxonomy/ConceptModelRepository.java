@@ -1,12 +1,14 @@
 package com.digirati.taxman.rest.server.taxonomy;
 
+import com.digirati.taxman.common.taxonomy.CollectionModel;
 import com.digirati.taxman.common.taxonomy.ConceptModel;
-import com.digirati.taxman.common.taxonomy.ConceptRelationshipType;
 import com.digirati.taxman.rest.server.infrastructure.event.ConceptEvent;
 import com.digirati.taxman.rest.server.infrastructure.event.EventService;
+import com.digirati.taxman.rest.server.taxonomy.mapper.SearchResultsMapper;
 import com.digirati.taxman.rest.server.taxonomy.mapper.ConceptMapper;
 import com.digirati.taxman.rest.server.taxonomy.storage.ConceptDao;
 import com.digirati.taxman.rest.server.taxonomy.storage.ConceptDataSet;
+import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRecord;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -23,7 +25,10 @@ import java.util.stream.Collectors;
 public class ConceptModelRepository {
 
     @Inject
-    ConceptMapper dataMapper;
+    ConceptMapper conceptMapper;
+
+    @Inject
+    SearchResultsMapper searchResultsMapper;
 
     @Inject
     ConceptDao conceptDao;
@@ -41,7 +46,19 @@ public class ConceptModelRepository {
     public ConceptModel find(UUID uuid) {
         ConceptDataSet dataset = conceptDao.loadDataSet(uuid);
 
-        return dataMapper.map(dataset);
+        return conceptMapper.map(dataset);
+    }
+
+    /**
+     * Find all concepts with a preferred label in any language beginning with a given String.
+     *
+     * @param partialLabel the label substring to search for
+     * @return all concepts with preferred labels beginning with the given substring
+     */
+    @Transactional(Transactional.TxType.REQUIRED)
+    public CollectionModel findByPartialLabel(String partialLabel, String languageKey) {
+        Collection<ConceptRecord> concepts = conceptDao.getConceptsByPartialLabel(partialLabel, languageKey);
+        return searchResultsMapper.map(concepts, partialLabel);
     }
 
     /**
@@ -54,7 +71,7 @@ public class ConceptModelRepository {
     public List<ConceptModel> findAll(Collection<UUID> uuid) {
         return conceptDao.findAllRecords(uuid)
                 .stream()
-                .map(record -> dataMapper.map(new ConceptDataSet(record)))
+                .map(record -> conceptMapper.map(new ConceptDataSet(record)))
                 .collect(Collectors.toList());
     }
 
@@ -64,7 +81,7 @@ public class ConceptModelRepository {
      */
     @Transactional(Transactional.TxType.REQUIRED)
     public void update(ConceptModel model) {
-        conceptDao.storeDataSet(dataMapper.map(model));
+        conceptDao.storeDataSet(conceptMapper.map(model));
         eventService.send(ConceptEvent.updated(model));
     }
 
@@ -80,7 +97,7 @@ public class ConceptModelRepository {
         var uuid = UUID.randomUUID();
         model.setUuid(uuid);
 
-        var dataset = dataMapper.map(model);
+        var dataset = conceptMapper.map(model);
         conceptDao.storeDataSet(dataset);
         eventService.send(ConceptEvent.created(model));
 

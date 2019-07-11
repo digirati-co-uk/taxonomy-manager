@@ -2,7 +2,6 @@ package com.digirati.taxman.rest.server;
 
 import com.digirati.taxman.common.taxonomy.CollectionModel;
 import com.digirati.taxman.common.taxonomy.ConceptModel;
-import com.digirati.taxman.common.taxonomy.ConceptRelationshipType;
 import com.digirati.taxman.rest.server.taxonomy.ConceptCollectionModelRepository;
 import com.digirati.taxman.rest.server.taxonomy.ConceptModelRepository;
 import com.digirati.taxman.rest.taxonomy.ConceptPath;
@@ -48,6 +47,13 @@ public class ServerConceptResource implements ConceptResource {
         var depth = relationshipParams.getDepth();
 
         return Response.ok(conceptCollections.findRelated(uuid, type, depth)).build();
+    }
+
+    @Override
+    public Response getConceptsByPartialLabel(String partialLabel, String languageKey) {
+        CollectionModel matches = concepts.findByPartialLabel(partialLabel, languageKey);
+
+        return Response.ok(matches).build();
     }
 
     @Override

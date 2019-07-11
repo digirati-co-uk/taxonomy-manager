@@ -40,7 +40,7 @@ public class RdfModelBuilder<T extends RdfModel> {
      * @param values   A map representing the plain literal, where keys are languages and
      *                 the values are the literal strings.
      */
-    public RdfModelBuilder addPlainLiteral(Property property, Map<String, String> values) {
+    public RdfModelBuilder<T> addPlainLiteral(Property property, Map<String, String> values) {
         for (var entry : values.entrySet()) {
             String language = entry.getKey();
             String value = entry.getValue();
@@ -70,7 +70,8 @@ public class RdfModelBuilder<T extends RdfModel> {
      * @param embeddedModel The builder used to produce the new embedded model.
      * @throws RdfModelException if the embedded resource was invalid.
      */
-    public RdfModelBuilder addEmbeddedModel(Property property, RdfModelBuilder embeddedModel) throws RdfModelException {
+    public RdfModelBuilder<T> addEmbeddedModel(Property property,
+                                               RdfModelBuilder embeddedModel) throws RdfModelException {
         var resource = embeddedModel.build(model).getResource();
         properties.put(property, new PendingPropertyValue(resource, true));
 
