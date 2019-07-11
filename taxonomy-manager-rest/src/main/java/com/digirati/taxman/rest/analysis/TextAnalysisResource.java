@@ -1,9 +1,10 @@
 package com.digirati.taxman.rest.analysis;
 
 import com.digirati.taxman.common.rdf.annotation.jsonld.JsonLdFrame;
-import com.digirati.taxman.common.taxonomy.ConceptModel;
 import com.digirati.taxman.rest.MediaTypes;
+import com.digirati.taxman.rest.Roles;
 
+import javax.annotation.security.RolesAllowed;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -19,5 +20,6 @@ public interface TextAnalysisResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaTypes.APPLICATION_RDF_XML_VALUE, MediaTypes.APPLICATION_JSONLD_SKOS_VALUE})
     @JsonLdFrame(input = "/jsonld/framing/collection.json")
+    @RolesAllowed(Roles.ADMIN)
     Response analyze(@Valid TextAnalysisInput input);
 }
