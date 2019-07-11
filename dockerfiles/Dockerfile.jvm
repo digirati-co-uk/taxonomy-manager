@@ -32,10 +32,7 @@ ARG OPENJDK_11_VERSION=11.0.3.7-2.el8_0
 RUN microdnf install \
        java-11-openjdk-headless-$OPENJDK_11_VERSION \
     && microdnf clean all \
-    && mkdir -p /srv/taxman/bin \
-    && mkdir -p /srv/taxman/conf/jwt \
-    && mkdir -p /srv/taxman/jwt-public-key \
-    && ln -s /srv/taxman/jwt-public-key/public.pem /srv/taxman/conf/jwt/public.pem
+    && mkdir -p /srv/taxman/bin
 
 COPY dockerfiles/config/srv/taxman/entrypoint.sh /srv/taxman/bin
 COPY --from=build /build/taxonomy-manager-rest-server/build/taxonomy-manager-rest-server-runner.jar /srv/taxman/
