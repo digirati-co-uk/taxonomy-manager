@@ -45,6 +45,7 @@ CREATE TABLE skos_concept_scheme_concept
     concept_id        bigint references skos_concept (id),
     is_top_concept    boolean
 );
+CREATE UNIQUE INDEX ON skos_concept_scheme_concept(concept_scheme_id, concept_id);
 
 
 CREATE TABLE skos_concept_semantic_relation

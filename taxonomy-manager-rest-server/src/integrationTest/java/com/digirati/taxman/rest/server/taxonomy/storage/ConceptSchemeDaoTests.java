@@ -10,6 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -53,32 +54,32 @@ public class ConceptSchemeDaoTests {
 
     @Test
     public void shouldRemoveTopConcepts() throws Exception {
-        var conceptId = createDummyConcept();
+        var conceptA = new ConceptReference(createDummyConcept(), new HashMap<>());
+        var conceptB = new ConceptReference(createDummyConcept(), new HashMap<>());
+        var conceptC = new ConceptReference(createDummyConcept(), new HashMap<>());
 
         var dao = new ConceptSchemeDao(dataSource);
         var record = new ConceptSchemeRecord(DUMMY_SCHEME_ID);
-        var topConcepts = List.of(new ConceptReference(conceptId, Map.of()));
 
-        dao.storeDataSet(new ConceptSchemeDataSet(record, topConcepts));
-        dao.storeDataSet(new ConceptSchemeDataSet(record, List.of()));
+        dao.storeDataSet(new ConceptSchemeDataSet(record, List.of(conceptA, conceptB)));
+        dao.storeDataSet(new ConceptSchemeDataSet(record, List.of(conceptB, conceptC)));
 
         var updatedDataset = dao.loadDataSet(DUMMY_SCHEME_ID);
 
-        assertEquals(List.of(), updatedDataset.getTopConcepts());
+        assertEquals(List.of(conceptB, conceptC), updatedDataset.getTopConcepts());
     }
 
-
     private UUID createDummyConcept() throws SQLException {
+        UUID uuid = UUID.randomUUID();
         try (var conn = dataSource.getConnection();
              var stmt = conn.prepareStatement("INSERT INTO skos_concept (uuid) VALUES (?)")) {
 
-            stmt.setObject(1, DUMMY_CONCEPT_ID, Types.OTHER);
+            stmt.setObject(1, uuid, Types.OTHER);
             assumeTrue(stmt.executeUpdate() > 0);
         }
 
-        return DUMMY_CONCEPT_ID;
+        return uuid;
     }
 
-    private static final UUID DUMMY_CONCEPT_ID = UUID.fromString("f0ea2717-1114-46f4-bc51-a25985571a01");
     private static final UUID DUMMY_SCHEME_ID = UUID.fromString("3828f4e5-ad0d-402c-978a-e2b9939332c7");
 }
