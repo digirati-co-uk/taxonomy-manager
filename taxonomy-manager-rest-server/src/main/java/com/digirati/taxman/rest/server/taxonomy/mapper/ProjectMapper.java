@@ -17,6 +17,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * Maps between RDF and database representations of a project.
+ */
 public class ProjectMapper {
 
     private final ProjectIdResolver projectIdResolver;

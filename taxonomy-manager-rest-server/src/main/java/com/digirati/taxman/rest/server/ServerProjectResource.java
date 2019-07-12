@@ -28,7 +28,7 @@ public class ServerProjectResource implements ProjectResource {
 
     @Override
     public Response updateProject(ProjectPath projectPath, @Valid ProjectModel project) {
-        projectModelRepository.store(project);
+        projectModelRepository.update(project);
         return Response.noContent().build();
     }
 }

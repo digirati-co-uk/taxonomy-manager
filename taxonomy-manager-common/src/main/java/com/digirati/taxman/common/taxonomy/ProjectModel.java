@@ -12,6 +12,9 @@ import org.apache.jena.vocabulary.DCTerms;
 import java.util.Map;
 import java.util.stream.Stream;
 
+/**
+ * Models the RDF representation of a project.
+ */
 @RdfType("rdfs:Dataset")
 @RdfContext({"dcterms=" + DCTerms.NS})
 public class ProjectModel implements RdfModel {
@@ -36,6 +39,11 @@ public class ProjectModel implements RdfModel {
         return getPlainLiteral(DCTerms.title);
     }
 
+    /**
+     * Gets a stream of all {@link ConceptSchemeModel}s associated with this project.
+     *
+     * @return the concept schemes associated with this project
+     */
     public Stream<ConceptSchemeModel> getConceptSchemes() {
         return Streams.stream(resource.listProperties(DCTerms.hasPart))
                 .map(Statement::getResource)

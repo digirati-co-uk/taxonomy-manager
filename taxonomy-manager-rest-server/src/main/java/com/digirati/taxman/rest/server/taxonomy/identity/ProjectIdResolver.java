@@ -12,6 +12,12 @@ public class ProjectIdResolver {
     @Inject
     UriInfo uriInfo;
 
+    /**
+     * Gets the URI of a project with a given slug.
+     *
+     * @param projectSlug the slug of the project to get the URI for
+     * @return the URI of the project with the given slug
+     */
     public URI resolve(String projectSlug) {
         URI uri = uriInfo.getRequestUri();
         return UriBuilder.fromUri("/v0.1/project/{slug}")

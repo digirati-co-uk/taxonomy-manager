@@ -13,6 +13,9 @@ import java.sql.Types;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * DAO for persisting and retrieving projects.
+ */
 public class ProjectDao {
 
     private final ProjectRecordMapper projectRecordMapper = new ProjectRecordMapper();
@@ -25,6 +28,12 @@ public class ProjectDao {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
+    /**
+     * Retrieves a project with a given slug identifier.
+     *
+     * @param slug the identifier of the project to retrieve
+     * @return the project with the given slug
+     */
     public ProjectDataSet loadDataSet(String slug) {
         Object[] recordArgs = {slug};
         int[] recordTypes = {Types.OTHER};
@@ -38,6 +47,14 @@ public class ProjectDao {
         return new ProjectDataSet(project, conceptSchemes);
     }
 
+    /**
+     * Persists a project to the database. Note that this could be either a new project, or an update to an existing
+     * project. In the case that this is called as an update, the association between the project and any schemes not
+     * provided in the {@code dataSet} will be removed.
+     *
+     * @param dataSet the project to persist
+     * @return true if any changes to existing records have occurred, false otherwise
+     */
     public boolean storeDataSet(ProjectDataSet dataSet) {
         String slug = dataSet.getProject().getSlug();
         JSONObject title = new JSONObject(dataSet.getProject().getTitle());
