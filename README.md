@@ -21,6 +21,11 @@ and bring it back down with:
 docker-compose stop
 ```
 
+To only run the database you can run:
+```
+docker-compose up postgres
+```
+
 ## Key Dependencies
 
 The following key dependencies are used in this application:
