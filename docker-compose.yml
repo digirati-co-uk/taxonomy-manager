@@ -17,7 +17,7 @@ services:
     links:
       - postgres
     ports:
-      - 8104:8080
+      - 8080:8080
     environment:
       - QUARKUS_DATASOURCE_URL=jdbc:postgresql://taxman-postgres:5432/taxman
       - QUARKUS_DATASURCE_DRIVER=org.postgresql.Driver
