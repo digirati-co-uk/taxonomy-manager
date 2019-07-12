@@ -1,5 +1,6 @@
 package com.digirati.taxman.common.rdf;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
@@ -32,6 +33,12 @@ public interface RdfModel {
                 .collect(
                         Collectors.toMap(
                                 Statement::getLanguage, Statement::getString, (l, r) -> l));
+    }
+
+    default String getStringProperty(Property property) {
+        return Iterables.getOnlyElement(Streams.stream(getResource().listProperties(property))
+                .map(Statement::getString)
+                .collect(Collectors.toSet()));
     }
 
     /**

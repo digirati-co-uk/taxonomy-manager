@@ -78,6 +78,11 @@ public class RdfModelBuilder<T extends RdfModel> {
         return this;
     }
 
+    public RdfModelBuilder<T> addStringProperty(Property property, String value) {
+        properties.put(property, new PendingPropertyValue(model.createLiteral(value)));
+        return this;
+    }
+
     /**
      * Set the URI of the resource being built.
      *
