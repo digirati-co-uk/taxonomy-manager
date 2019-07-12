@@ -29,6 +29,8 @@ To only run the database you can run:
 docker-compose up postgres
 ```
 
+*Note: The `docker-compose.yml` is not yet production ready and is for development use only at the moment.*
+
 ## Key Dependencies
 
 The following key dependencies are used in this application:
