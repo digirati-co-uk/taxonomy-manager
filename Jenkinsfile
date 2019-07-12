@@ -7,6 +7,19 @@ pipeline {
         }
     }
 
+    environment {
+        IMAGE_CREDS_JENKINS_ID = 'aks-taxman'
+        IMAGE_REGISTRY = 'taxman.azurecr.io'
+        IMAGE_REPOSITORY = 'backend'
+        DEPLOYMENT_JOB = '../digirati-taxonomy-manager-infra/master'
+        DEPLOYMENT_ENV = 'dev'
+    }
+
+    options {
+        ansiColor('xterm')
+        timestamps()
+    }
+
     stages {
         stage('general linting') {
             steps {
@@ -84,6 +97,53 @@ pipeline {
                         sh "$workspace/gradlew -Pci=true sonarqube"
                     }
                 }
+            }
+        }
+
+        stage('build image') {
+            steps {
+                sh 'docker build -t $IMAGE_REPOSITORY:latest -f dockerfiles/Dockerfile.jvm .'
+            }
+        }
+
+        stage('push image') {
+            when {
+                branch "master"
+            }
+
+            steps {
+                withCredentials([usernamePassword(credentialsId: "$IMAGE_CREDS_JENKINS_ID", usernameVariable: 'IMAGE_REGISTRY_USERNAME', passwordVariable: 'IMAGE_REGISTRY_PASSWORD')]) {
+                    sh 'docker login $IMAGE_REGISTRY --username $IMAGE_REGISTRY_USERNAME --password $IMAGE_REGISTRY_PASSWORD'
+                }
+
+                script {
+                    def properties = readProperties(file: 'version.properties')
+                    version = "${properties.version}-${currentBuild.startTimeInMillis}.${currentBuild.number}"
+                    def images = [
+                        "\$IMAGE_REGISTRY/\$IMAGE_REPOSITORY:$version",
+                        "\$IMAGE_REGISTRY/\$IMAGE_REPOSITORY:latest"
+                    ]
+
+                    for (String image : images) {
+                        sh "docker tag \$IMAGE_REPOSITORY:latest $image"
+                        sh "docker push $image"
+                    }
+                }
+            }
+        }
+
+        stage('deploy image') {
+            when {
+                branch "master"
+            }
+
+            steps {
+                build job: '$DEPLOYMENT_JOB',
+                      parameters:  [
+                          [$class: 'StringParameterValue', name: 'ENVIRONMENT', value: '$DEPLOYMENT_ENV'],
+                          [$class: 'StringParameterValue', name: 'BACKEND_IMAGE_TAG', value: "${version}"]
+                      ],
+                      propagate: true
             }
         }
     }
