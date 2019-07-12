@@ -1,20 +1,23 @@
 package com.digirati.taxman.rest.server.taxonomy.storage.record;
 
+import com.google.common.base.MoreObjects;
+import com.google.common.base.Objects;
+
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
 
-public class ConceptSchemeRecord {
-    private final UUID uuid;
+public class ProjectRecord {
+
+    private final String slug;
+
     private Map<String, String> title = new HashMap<>();
 
-    public ConceptSchemeRecord(UUID uuid) {
-        this.uuid = uuid;
+    public ProjectRecord(String uuid) {
+        this.slug = uuid;
     }
 
-    public UUID getUuid() {
-        return uuid;
+    public String getSlug() {
+        return slug;
     }
 
     public Map<String, String> getTitle() {
@@ -33,12 +36,20 @@ public class ConceptSchemeRecord {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        ConceptSchemeRecord that = (ConceptSchemeRecord) o;
-        return Objects.equals(uuid, that.uuid);
+        ProjectRecord that = (ProjectRecord) o;
+        return Objects.equal(slug, that.slug);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uuid);
+        return Objects.hashCode(slug);
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("slug", slug)
+                .add("title", title)
+                .toString();
     }
 }

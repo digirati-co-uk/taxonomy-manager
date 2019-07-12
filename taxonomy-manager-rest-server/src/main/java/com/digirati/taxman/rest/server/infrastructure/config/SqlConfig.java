@@ -2,6 +2,7 @@ package com.digirati.taxman.rest.server.infrastructure.config;
 
 import com.digirati.taxman.rest.server.taxonomy.storage.ConceptDao;
 import com.digirati.taxman.rest.server.taxonomy.storage.ConceptSchemeDao;
+import com.digirati.taxman.rest.server.taxonomy.storage.ProjectDao;
 import io.agroal.api.AgroalDataSource;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -20,5 +21,10 @@ public class SqlConfig {
     @Produces
     public ConceptSchemeDao conceptSchemeDao() {
         return new ConceptSchemeDao(dataSource);
+    }
+
+    @Produces
+    public ProjectDao projectDao() {
+        return new ProjectDao(dataSource);
     }
 }

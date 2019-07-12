@@ -10,7 +10,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
 import java.sql.Array;
-import java.sql.SQLException;
 import java.sql.Types;
 import java.util.UUID;
 
@@ -73,13 +72,7 @@ public class ConceptSchemeDao {
                 .map(ConceptReference::getId)
                 .toArray(UUID[]::new);
 
-        Array uuidArray;
-        try (var conn = dataSource.getConnection()) {
-            uuidArray = conn.createArrayOf("uuid", uuids);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-
+        Array uuidArray = DaoUtils.createArrayOf(uuids, "uuid", dataSource);
         Object[] conceptArgs = {uuid, uuidArray};
         int[] conceptTypes = {Types.OTHER, Types.ARRAY};
 
