@@ -1,15 +1,15 @@
 package com.digirati.taxman.rest.server.infrastructure.config;
 
-import com.digirati.taxman.common.rdf.RdfModelFactory;
 import com.digirati.taxman.common.taxonomy.Term;
-import com.digirati.taxman.rest.server.analysis.TextAnalyzer;
-import com.digirati.taxman.rest.server.taxonomy.ConceptModelRepository;
 import com.digirati.taxman.rest.server.taxonomy.storage.ConceptDao;
 import com.digirati.taxonomy.manager.lookup.TextLookupService;
+import io.quarkus.runtime.StartupEvent;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Produces;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 import java.util.concurrent.ExecutionException;
@@ -17,7 +17,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 @ApplicationScoped
-public class AnalysisConfig {
+public class TextLookupServiceProvider {
+
+    private static final Logger logger = LoggerFactory.getLogger(TextLookupServiceProvider.class);
 
     @ConfigProperty(name = "taxman.analysis.default-lang.key", defaultValue = "en")
     String defaultLanguageKey;
@@ -28,8 +30,9 @@ public class AnalysisConfig {
     @Inject
     ConceptDao conceptDao;
 
-    @Produces
-    TextLookupService textLookupService() {
+    private TextLookupService textLookupService;
+
+    void onStartup(@Observes StartupEvent event) {
         try (var conceptRecords = conceptDao.loadAllRecords()) {
             var terms = conceptRecords.map(c -> new Term(c.getUuid(), c.getLabels(defaultLanguageKey)));
             var serviceFuture = TextLookupService.initialiseLookupService(
@@ -38,7 +41,8 @@ public class AnalysisConfig {
                     defaultLanguageName
             );
 
-            return serviceFuture.get(10, TimeUnit.SECONDS);
+            textLookupService = serviceFuture.get(10, TimeUnit.SECONDS);
+            logger.info("Finished building TextLookupService");
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new WebApplicationException("Text Lookup Service was interrupted during initialization", e);
@@ -47,9 +51,7 @@ public class AnalysisConfig {
         }
     }
 
-    @Produces
-    TextAnalyzer textAnalyzer(TextLookupService lookupService, RdfModelFactory modelFactory, ConceptModelRepository concepts) {
-        return new TextAnalyzer(lookupService, modelFactory, concepts);
+    public TextLookupService getTextLookupService() {
+        return textLookupService;
     }
-
 }
