@@ -20,13 +20,13 @@ public interface ProjectResource {
     @POST
     @Consumes({MediaTypes.APPLICATION_RDF_XML_VALUE, MediaTypes.APPLICATION_JSONLD_SKOS_VALUE})
     @Produces({MediaTypes.APPLICATION_RDF_XML_VALUE, MediaTypes.APPLICATION_JSONLD_SKOS_VALUE})
-    @JsonLdFrame(input = "/jsonld/framing/project.json")
+    @JsonLdFrame(input = "jsonld/framing/project.json")
     Response createProject(@Valid ProjectModel project);
 
     @GET
     @Path("/{project}")
     @Produces({MediaTypes.APPLICATION_JSONLD_SKOS_VALUE, MediaTypes.APPLICATION_RDF_XML_VALUE})
-    @JsonLdFrame(input = "/jsonld/framing/project.json")
+    @JsonLdFrame(input = "jsonld/framing/project.json")
     Response getProject(@BeanParam ProjectPath projectPath);
 
     @PUT
