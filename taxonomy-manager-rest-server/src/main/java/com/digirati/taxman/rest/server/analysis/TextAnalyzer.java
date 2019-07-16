@@ -5,24 +5,28 @@ import com.digirati.taxman.common.rdf.RdfModelFactory;
 import com.digirati.taxman.common.taxonomy.CollectionModel;
 import com.digirati.taxman.common.taxonomy.ConceptModel;
 import com.digirati.taxman.rest.analysis.TextAnalysisInput;
+import com.digirati.taxman.rest.server.infrastructure.config.TextLookupServiceProvider;
 import com.digirati.taxman.rest.server.taxonomy.ConceptModelRepository;
 import com.digirati.taxonomy.manager.lookup.TextLookupService;
 import org.apache.jena.vocabulary.SKOS;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 import java.net.URI;
 import java.util.stream.Collectors;
 
+@ApplicationScoped
 public class TextAnalyzer {
-    private final TextLookupService lookupService;
-    private final RdfModelFactory modelFactory;
-    private final ConceptModelRepository concepts;
 
-    public TextAnalyzer(TextLookupService lookupService, RdfModelFactory modelFactory, ConceptModelRepository concepts) {
-        this.lookupService = lookupService;
-        this.modelFactory = modelFactory;
-        this.concepts = concepts;
-    }
+    @Inject
+    TextLookupServiceProvider lookupServiceProvider;
+
+    @Inject
+    RdfModelFactory modelFactory;
+
+    @Inject
+    ConceptModelRepository concepts;
 
     /**
      * Run the auto-tagger implementation on the given {@code input} and return a collection of {@link ConceptModel}s that
@@ -32,7 +36,8 @@ public class TextAnalyzer {
      * @return A list of {@link ConceptModel}s appearing as tags.
      */
     public CollectionModel tagDocument(TextAnalysisInput input) {
-        var ctx = lookupService.search(input.getText());
+        TextLookupService textLookupService = lookupServiceProvider.getTextLookupService();
+        var ctx = textLookupService.search(input.getText());
         var matches = ctx.getMatchedConcepts();
 
         try {
