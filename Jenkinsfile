@@ -138,9 +138,9 @@ pipeline {
             }
 
             steps {
-                build job: '$DEPLOYMENT_JOB',
+                build job: "$DEPLOYMENT_JOB",
                       parameters:  [
-                          [$class: 'StringParameterValue', name: 'ENVIRONMENT', value: '$DEPLOYMENT_ENV'],
+                          [$class: 'StringParameterValue', name: 'ENVIRONMENT', value: "$DEPLOYMENT_ENV"],
                           [$class: 'StringParameterValue', name: 'BACKEND_IMAGE_TAG', value: "${version}"]
                       ],
                       propagate: true
