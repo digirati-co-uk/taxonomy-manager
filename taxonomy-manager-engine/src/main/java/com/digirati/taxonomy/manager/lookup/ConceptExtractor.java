@@ -71,6 +71,13 @@ class ConceptExtractor {
         }
     }
 
+    public void addConcepts(Multimap<UUID, String> conceptUuidToLabels) {
+        for (Map.Entry<UUID, String> entry : conceptUuidToLabels.entries()) {
+            conceptLookupTable.put(entry.getValue(), entry.getKey());
+        }
+        textSearcher = textSearcher.rebuild(getTerms());
+    }
+
     /**
      * Updates the details of a concept in the lookup table and reconstructs the text searcher with
      * the updated terms.

@@ -9,6 +9,8 @@ import com.digirati.taxonomy.manager.lookup.model.TermMatch;
 import com.digirati.taxonomy.manager.lookup.normalisation.TextNormaliser;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
 import java.util.Collection;
@@ -140,6 +142,17 @@ public class TextLookupService {
                 .collect(Collectors.toSet());
 
         conceptExtractor.addConcept(conceptUuid, labels);
+    }
+
+    public void addConcepts(Collection<ConceptModel> concepts) {
+        Multimap<UUID, String> conceptUuidToLabels = HashMultimap.create();
+        concepts.forEach(concept ->
+            conceptUuidToLabels.putAll(concept.getUuid(), concept.getLabels(languageKey)
+                    .stream()
+                    .map(textNormaliser::normalise)
+                    .collect(Collectors.toSet())));
+
+        conceptExtractor.addConcepts(conceptUuidToLabels);
     }
 
     public void updateConcept(ConceptModel concept) {

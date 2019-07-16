@@ -17,7 +17,9 @@ public class ConceptEventListener {
 
     @Subscribe
     public void onEvent(ConceptEvent event) {
-        if (event.isNew()) {
+        if (event.isImport()) {
+            lookupService.addConcepts(event.getConcepts());
+        } else if (event.isNew()) {
             lookupService.addConcept(event.getConcept());
         } else {
             lookupService.updateConcept(event.getConcept());
