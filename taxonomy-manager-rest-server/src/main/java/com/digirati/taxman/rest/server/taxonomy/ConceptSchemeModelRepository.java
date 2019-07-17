@@ -64,6 +64,7 @@ public class ConceptSchemeModelRepository {
      */
     @Transactional(Transactional.TxType.REQUIRED)
     public boolean update(ConceptSchemeModel conceptScheme) {
+        conceptSchemeDao.loadDataSet(conceptScheme.getUuid());
         ConceptSchemeDataSet dataset = dataMapper.map(conceptScheme);
 
         return conceptSchemeDao.storeDataSet(dataset);
