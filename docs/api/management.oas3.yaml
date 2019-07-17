@@ -86,8 +86,6 @@ paths:
                 $ref: './samples/analysis/analysis--response.json'
               schema:
                 $ref: './schemas/collection/response.json'
-        '409':
-          $ref: '#/components/responses/validationFailed'
   /0.1/project/{project}:
     get:
       parameters:
@@ -128,6 +126,8 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/project'
       responses:
+        '409':
+          $ref: '#/components/responses/conflict'
         '422':
           $ref: '#/components/responses/validationFailed'
         '201':
