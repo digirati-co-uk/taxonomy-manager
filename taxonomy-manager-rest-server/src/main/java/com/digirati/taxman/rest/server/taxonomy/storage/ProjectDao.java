@@ -5,6 +5,7 @@ import com.digirati.taxman.rest.server.taxonomy.storage.record.ProjectRecord;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.mapper.ConceptSchemeRecordMapper;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.mapper.ProjectRecordMapper;
 import org.json.JSONObject;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
@@ -33,8 +34,9 @@ public class ProjectDao {
      *
      * @param slug the identifier of the project to retrieve
      * @return the project with the given slug
+     * @throws EmptyResultDataAccessException when no project can be found with the given slug
      */
-    public ProjectDataSet loadDataSet(String slug) {
+    public ProjectDataSet loadDataSet(String slug) throws EmptyResultDataAccessException {
         Object[] recordArgs = {slug};
         int[] recordTypes = {Types.VARCHAR};
 
