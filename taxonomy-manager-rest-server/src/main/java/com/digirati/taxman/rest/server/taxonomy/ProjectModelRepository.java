@@ -1,7 +1,9 @@
 package com.digirati.taxman.rest.server.taxonomy;
 
+import com.digirati.taxman.common.taxonomy.CollectionModel;
 import com.digirati.taxman.common.taxonomy.ProjectModel;
 import com.digirati.taxman.rest.server.infrastructure.exception.ProjectAlreadyExistsException;
+import com.digirati.taxman.rest.server.taxonomy.mapper.ProjectListingMapper;
 import com.digirati.taxman.rest.server.taxonomy.mapper.ProjectMapper;
 import com.digirati.taxman.rest.server.taxonomy.storage.ProjectDao;
 import com.digirati.taxman.rest.server.taxonomy.storage.ProjectDataSet;
@@ -9,6 +11,8 @@ import com.digirati.taxman.rest.server.taxonomy.storage.ProjectDataSet;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class ProjectModelRepository {
@@ -18,6 +22,9 @@ public class ProjectModelRepository {
 
     @Inject
     ProjectMapper projectMapper;
+
+    @Inject
+    ProjectListingMapper projectListingMapper;
 
     /**
      * Stores a new project in the database, along with mappings between the project and any associated concept schemes.
@@ -45,6 +52,14 @@ public class ProjectModelRepository {
     public ProjectModel find(String slug) {
         ProjectDataSet dataSet = projectDao.loadDataSet(slug);
         return projectMapper.map(dataSet);
+    }
+
+    @Transactional(Transactional.TxType.REQUIRED)
+    public CollectionModel listAll() {
+        List<ProjectModel> projects = projectDao.findAll().stream()
+                .map(record -> projectMapper.map(new ProjectDataSet(record, List.of())))
+                .collect(Collectors.toList());
+        return projectListingMapper.map(projects);
     }
 
     /**

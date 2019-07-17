@@ -138,6 +138,19 @@ paths:
                 $ref: samples/project/new-project--response.json
               schema:
                 $ref: schemas/project/response.json
+    get:
+      summary: Gets all projects
+      tags:
+        - Project
+      responses:
+        '200':
+          description: A collection of all projects
+          content:
+            'application/ld+json;profile="http://www.w3.org/2004/02/skos/core.jsonld"':
+              example:
+                $ref: './samples/analysis/analysis--response.json'
+              schema:
+                $ref: './schemas/collection/response.json'
 
   /0.1/concept-scheme/{scheme}/concept/{concept}:
     parameters:

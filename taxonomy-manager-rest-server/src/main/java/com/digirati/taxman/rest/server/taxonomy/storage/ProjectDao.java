@@ -49,6 +49,10 @@ public class ProjectDao {
         return new ProjectDataSet(project, conceptSchemes);
     }
 
+    public List<ProjectRecord> findAll() {
+        return jdbcTemplate.query("SELECT * FROM get_all_projects()", new Object[]{}, new int[]{}, projectRecordMapper);
+    }
+
     /**
      * Determines whether a project with a given slug already exists.
      *

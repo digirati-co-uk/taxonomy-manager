@@ -5,6 +5,7 @@ import com.digirati.taxman.rest.server.taxonomy.identity.ConceptIdResolver;
 import com.digirati.taxman.rest.server.taxonomy.identity.ConceptSchemeIdResolver;
 import com.digirati.taxman.rest.server.taxonomy.identity.CollectionUriResolver;
 import com.digirati.taxman.rest.server.taxonomy.identity.ProjectIdResolver;
+import com.digirati.taxman.rest.server.taxonomy.mapper.ProjectListingMapper;
 import com.digirati.taxman.rest.server.taxonomy.mapper.ProjectMapper;
 import com.digirati.taxman.rest.server.taxonomy.mapper.SearchResultsMapper;
 import com.digirati.taxman.rest.server.taxonomy.mapper.ConceptMapper;
@@ -50,5 +51,10 @@ public class TaxonomyConfig {
     @Produces
     ProjectMapper projectMapper() {
         return new ProjectMapper(projectIdResolver, conceptSchemeIdResolver, modelFactory);
+    }
+
+    @Produces
+    ProjectListingMapper projectListingMapper() {
+        return new ProjectListingMapper(projectIdResolver, collectionUriResolver, modelFactory);
     }
 }

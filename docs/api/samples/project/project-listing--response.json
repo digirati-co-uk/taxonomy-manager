@@ -1,0 +1,23 @@
+{
+  "@context" : {
+    "dcterms" : "http://purl.org/dc/terms/",
+    "skos" : "http://www.w3.org/2004/02/skos/core#"
+  },
+  "@id" : "http://taxman.com/0.1/project",
+  "@type" : "skos:Collection",
+  "skos:member" : [ {
+    "@id" : "http://taxman.com/0.1/project/1",
+    "@type" : "skos:Concept",
+    "dcterms:title" : {
+      "@language" : "en",
+      "@value" : "Project 1"
+    }
+  }, {
+    "@id" : "http://taxman.com/0.1/project/2",
+    "@type" : "skos:Concept",
+    "dcterms:title" : {
+      "@language" : "en",
+      "@value" : "Project 2"
+    }
+  } ]
+}

@@ -19,6 +19,12 @@ import javax.ws.rs.core.Response;
 @Path("/v0.1/project")
 public interface ProjectResource {
 
+    @GET
+    @Produces({MediaTypes.APPLICATION_JSONLD_SKOS_VALUE, MediaTypes.APPLICATION_RDF_XML_VALUE})
+    @JsonLdFrame(input = "jsonld/framing/collection.json")
+    @RolesAllowed(Roles.ADMIN)
+    Response listProjects();
+
     @POST
     @Consumes({MediaTypes.APPLICATION_RDF_XML_VALUE, MediaTypes.APPLICATION_JSONLD_SKOS_VALUE})
     @Produces({MediaTypes.APPLICATION_RDF_XML_VALUE, MediaTypes.APPLICATION_JSONLD_SKOS_VALUE})

@@ -17,6 +17,11 @@ public class ServerProjectResource implements ProjectResource {
     ProjectModelRepository projectModelRepository;
 
     @Override
+    public Response listProjects() {
+        return Response.ok(projectModelRepository.listAll()).build();
+    }
+
+    @Override
     public Response createProject(@Valid ProjectModel project) {
         return Response.ok(projectModelRepository.create(project)).build();
     }
