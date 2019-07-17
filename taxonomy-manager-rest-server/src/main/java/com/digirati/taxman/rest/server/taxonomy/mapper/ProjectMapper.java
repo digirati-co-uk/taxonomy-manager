@@ -58,8 +58,8 @@ public class ProjectMapper {
         }
     }
 
-    public ProjectDataSet map(ProjectModel model) {
-        ProjectRecord record = new ProjectRecord(model.getSlug());
+    public ProjectDataSet map(String slug, ProjectModel model) {
+        ProjectRecord record = new ProjectRecord(slug);
         record.setTitle(model.getTitle());
 
         List<ConceptSchemeRecord> schemes = model.getConceptSchemes()

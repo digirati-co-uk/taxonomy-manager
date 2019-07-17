@@ -30,7 +30,7 @@ public class ProjectModelRepository {
         if (projectDao.projectExists(project.getSlug())) {
             throw new ProjectAlreadyExistsException(project.getSlug());
         }
-        ProjectDataSet dataSet = projectMapper.map(project);
+        ProjectDataSet dataSet = projectMapper.map(project.getSlug(), project);
         projectDao.storeDataSet(dataSet);
         return find(project.getSlug());
     }
@@ -55,8 +55,9 @@ public class ProjectModelRepository {
      * @return true if anything changed, false otherwise
      */
     @Transactional(Transactional.TxType.REQUIRED)
-    public boolean update(ProjectModel project) {
-        ProjectDataSet dataSet = projectMapper.map(project);
+    public boolean update(String slug, ProjectModel project) {
+        projectDao.loadDataSet(slug);
+        ProjectDataSet dataSet = projectMapper.map(slug, project);
         return projectDao.storeDataSet(dataSet);
     }
 }

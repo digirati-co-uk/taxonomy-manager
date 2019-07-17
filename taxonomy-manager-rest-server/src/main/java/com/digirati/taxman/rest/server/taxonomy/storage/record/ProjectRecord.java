@@ -12,8 +12,8 @@ public class ProjectRecord {
 
     private Map<String, String> title = new HashMap<>();
 
-    public ProjectRecord(String uuid) {
-        this.slug = uuid;
+    public ProjectRecord(String slug) {
+        this.slug = slug;
     }
 
     public String getSlug() {
