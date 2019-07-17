@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 @ExtendWith(DatabaseTestExtension.class)
@@ -79,6 +79,49 @@ class ProjectDaoTests {
 
         // Then
         assertEquals(updatedSchemeList, retrieved.getConceptSchemes());
+    }
+
+    @Test
+    void shouldDetermineThatAProjectAlreadyExists() throws SQLException {
+        // Given
+        ProjectDao dao = new ProjectDao(dataSource);
+        ConceptSchemeRecord scheme = new ConceptSchemeRecord(createDummyScheme());
+        ProjectRecord record = new ProjectRecord("test-project");
+        ProjectDataSet dataSet = new ProjectDataSet(record, List.of(scheme));
+        dao.storeDataSet(dataSet);
+
+        // When/Then
+        assertTrue(dao.projectExists("test-project"));
+    }
+
+    @Test
+    void shouldDetermineThatAProjectDoesNotAlreadyExist() {
+        // Given
+        ProjectDao dao = new ProjectDao(dataSource);
+
+        // When/Then
+        assertFalse(dao.projectExists("test-project"));
+    }
+
+    @Test
+    void shouldListAllProjects() throws SQLException {
+        // Given
+        ProjectDao dao = new ProjectDao(dataSource);
+        ConceptSchemeRecord scheme = new ConceptSchemeRecord(createDummyScheme());
+
+        ProjectRecord record1 = new ProjectRecord("project-1");
+        ProjectDataSet dataSet1 = new ProjectDataSet(record1, List.of(scheme));
+        dao.storeDataSet(dataSet1);
+
+        ProjectRecord record2 = new ProjectRecord("project-2");
+        ProjectDataSet dataSet2 = new ProjectDataSet(record2, List.of(scheme));
+        dao.storeDataSet(dataSet2);
+
+        // When
+        List<ProjectRecord> allProjects = dao.findAll();
+
+        // Then
+        assertEquals(List.of(record1, record2), allProjects);
     }
 
     private UUID createDummyScheme() throws SQLException {
