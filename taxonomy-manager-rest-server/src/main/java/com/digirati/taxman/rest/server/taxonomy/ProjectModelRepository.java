@@ -1,6 +1,7 @@
 package com.digirati.taxman.rest.server.taxonomy;
 
 import com.digirati.taxman.common.taxonomy.ProjectModel;
+import com.digirati.taxman.rest.server.infrastructure.exception.ProjectAlreadyExistsException;
 import com.digirati.taxman.rest.server.taxonomy.mapper.ProjectMapper;
 import com.digirati.taxman.rest.server.taxonomy.storage.ProjectDao;
 import com.digirati.taxman.rest.server.taxonomy.storage.ProjectDataSet;
@@ -25,7 +26,10 @@ public class ProjectModelRepository {
      * @return the created project
      */
     @Transactional(Transactional.TxType.REQUIRED)
-    public ProjectModel create(ProjectModel project) {
+    public ProjectModel create(ProjectModel project) throws ProjectAlreadyExistsException {
+        if (projectDao.projectExists(project.getSlug())) {
+            throw new ProjectAlreadyExistsException(project.getSlug());
+        }
         ProjectDataSet dataSet = projectMapper.map(project);
         projectDao.storeDataSet(dataSet);
         return find(project.getSlug());

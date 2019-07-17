@@ -86,6 +86,8 @@ paths:
                 $ref: './samples/analysis/analysis--response.json'
               schema:
                 $ref: './schemas/collection/response.json'
+        '409':
+          $ref: '#/components/responses/validationFailed'
   /0.1/project/{project}:
     get:
       parameters:
@@ -348,6 +350,12 @@ components:
             $ref: '#/components/schemas/error'
     unauthorized:
       description: Unauthorized
+      content:
+        'application/problem+json':
+          schema:
+            $ref: '#/components/schemas/error'
+    conflict:
+      description: Conflict
       content:
         'application/problem+json':
           schema:

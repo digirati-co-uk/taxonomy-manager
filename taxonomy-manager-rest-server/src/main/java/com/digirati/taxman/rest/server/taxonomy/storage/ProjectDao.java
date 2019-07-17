@@ -50,6 +50,21 @@ public class ProjectDao {
     }
 
     /**
+     * Determines whether a project with a given slug already exists.
+     *
+     * @param slug the project slug to check
+     * @return true if a project with the slug exists; false otherwise
+     */
+    public boolean projectExists(String slug) {
+        try {
+            loadDataSet(slug);
+            return true;
+        } catch (EmptyResultDataAccessException e) {
+            return false;
+        }
+    }
+
+    /**
      * Persists a project to the database. Note that this could be either a new project, or an update to an existing
      * project. In the case that this is called as an update, the association between the project and any schemes not
      * provided in the {@code dataSet} will be removed.
