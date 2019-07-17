@@ -36,7 +36,7 @@ public class ProjectDao {
      */
     public ProjectDataSet loadDataSet(String slug) {
         Object[] recordArgs = {slug};
-        int[] recordTypes = {Types.OTHER};
+        int[] recordTypes = {Types.VARCHAR};
 
         ProjectRecord project = jdbcTemplate.queryForObject("SELECT * FROM get_project(?)",
                 recordArgs, recordTypes, projectRecordMapper);
