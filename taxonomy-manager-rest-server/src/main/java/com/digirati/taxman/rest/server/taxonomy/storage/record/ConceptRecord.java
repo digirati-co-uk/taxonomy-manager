@@ -14,6 +14,7 @@ import java.util.UUID;
 public class ConceptRecord implements Concept {
     private final UUID uuid;
 
+    private String source;
     private Map<String, String> preferredLabel = new HashMap<>();
     private Map<String, String> altLabel = new HashMap<>();
     private Map<String, String> hiddenLabel = new HashMap<>();
@@ -31,6 +32,15 @@ public class ConceptRecord implements Concept {
     @Override
     public UUID getUuid() {
         return uuid;
+    }
+
+    @Override
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
     }
 
     @Override
