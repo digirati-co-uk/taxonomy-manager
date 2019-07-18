@@ -2,6 +2,7 @@ package com.digirati.taxman.rest.server.taxonomy.mapper;
 
 import com.digirati.taxman.common.rdf.RdfModelException;
 import com.digirati.taxman.common.rdf.RdfModelFactory;
+import com.digirati.taxman.common.taxonomy.Concept;
 import com.digirati.taxman.common.taxonomy.ConceptModel;
 import com.digirati.taxman.common.taxonomy.ConceptSchemeModel;
 import com.digirati.taxman.rest.server.taxonomy.identity.ConceptIdResolver;
@@ -13,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.vocabulary.SKOS;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -79,6 +81,19 @@ public class ConceptSchemeMapper {
                 .collect(Collectors.toList());
 
         return new ConceptSchemeDataSet(record, topConcepts);
+    }
+
+    public ConceptSchemeDataSet map(ConceptSchemeModel model, Collection<? extends Concept> topConcepts) {
+        var uuid = model.getUuid();
+
+        var record = new ConceptSchemeRecord(uuid);
+        record.setTitle(model.getTitle());
+
+        var topConceptRefs = topConcepts.stream()
+                .map(concept -> new ConceptReference(concept.getUuid(), Map.of()))
+                .collect(Collectors.toList());
+
+        return new ConceptSchemeDataSet(record, topConceptRefs);
     }
 
 

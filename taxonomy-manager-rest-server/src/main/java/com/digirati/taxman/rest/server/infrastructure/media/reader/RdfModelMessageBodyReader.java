@@ -5,18 +5,14 @@ import com.digirati.taxman.common.rdf.RdfModelException;
 import com.digirati.taxman.common.rdf.RdfModelFactory;
 import com.digirati.taxman.common.rdf.RdfModelFormat;
 import com.digirati.taxman.common.rdf.io.RdfModelReader;
-import com.digirati.taxman.rest.MediaTypes;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.NoContentException;
-import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.Provider;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PushbackInputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
@@ -26,7 +22,7 @@ import java.lang.reflect.Type;
  * provided RDF was well formed.
  */
 @Provider
-public class RdfModelMessageBodyReader implements MessageBodyReader<RdfModel> {
+public class RdfModelMessageBodyReader extends AbstractMessageBodyReader<RdfModel> {
 
     private final RdfModelFactory modelFactory;
 
@@ -55,23 +51,8 @@ public class RdfModelMessageBodyReader implements MessageBodyReader<RdfModel> {
             InputStream entityStream)
             throws IOException {
 
-        var pushbackStream = new PushbackInputStream(entityStream, 1);
-        int read = pushbackStream.read();
-        if (read == -1) {
-            throw new NoContentException("No content available in request body");
-        }
-
-        pushbackStream.unread(read);
-
-        RdfModelFormat format;
-        if (mediaType.isCompatible(MediaTypes.APPLICATION_RDF_XML)) {
-            format = RdfModelFormat.RDFXML;
-        } else if (mediaType.isCompatible(MediaTypes.APPLICATION_JSONLD_SKOS)) {
-            format = RdfModelFormat.JSON_LD;
-        } else {
-            throw new WebApplicationException("Unsupported media type");
-        }
-
+        var pushbackStream = getPushbackInputStream(entityStream);
+        RdfModelFormat format = getRdfModelFormat(mediaType);
         RdfModelReader reader = new RdfModelReader(modelFactory);
         try {
             return reader.read(type, format, pushbackStream);

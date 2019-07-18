@@ -1,6 +1,7 @@
 package com.digirati.taxman.rest.taxonomy;
 
 import com.digirati.taxman.common.rdf.annotation.jsonld.JsonLdFrame;
+import com.digirati.taxman.common.taxonomy.ConceptSchemeImportModel;
 import com.digirati.taxman.common.taxonomy.ConceptSchemeModel;
 import com.digirati.taxman.rest.MediaTypes;
 import com.digirati.taxman.rest.Roles;
@@ -24,6 +25,14 @@ public interface ConceptSchemeResource {
     @JsonLdFrame(input = "jsonld/framing/concept-scheme.json")
     @RolesAllowed(Roles.ADMIN)
     Response createConceptScheme(@Valid ConceptSchemeModel model);
+
+    @POST
+    @Path("/import")
+    @Consumes({MediaTypes.APPLICATION_RDF_XML_VALUE, MediaTypes.APPLICATION_JSONLD_SKOS_VALUE})
+    @Produces({MediaTypes.APPLICATION_RDF_XML_VALUE, MediaTypes.APPLICATION_JSONLD_SKOS_VALUE})
+    @JsonLdFrame(input = "jsonld/framing/concept-scheme.json")
+    @RolesAllowed(Roles.ADMIN)
+    Response importConceptScheme(ConceptSchemeImportModel conceptSchemeImport);
 
     @GET
     @Path("/{scheme}")

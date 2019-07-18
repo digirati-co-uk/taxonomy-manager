@@ -1,6 +1,8 @@
 package com.digirati.taxman.rest.server;
 
+import com.digirati.taxman.common.taxonomy.ConceptSchemeImportModel;
 import com.digirati.taxman.common.taxonomy.ConceptSchemeModel;
+import com.digirati.taxman.rest.server.taxonomy.ConceptModelRepository;
 import com.digirati.taxman.rest.server.taxonomy.ConceptSchemeModelRepository;
 import com.digirati.taxman.rest.taxonomy.ConceptSchemePath;
 import com.digirati.taxman.rest.taxonomy.ConceptSchemeResource;
@@ -16,9 +18,20 @@ public class ServerConceptSchemeResource implements ConceptSchemeResource {
     @Inject
     ConceptSchemeModelRepository conceptSchemes;
 
+    @Inject
+    ConceptModelRepository concepts;
+
     @Override
     public Response createConceptScheme(@Valid ConceptSchemeModel model) {
         var updatedModel = conceptSchemes.create(model);
+        var uri = updatedModel.getUri();
+
+        return Response.created(uri).entity(updatedModel).build();
+    }
+
+    @Override
+    public Response importConceptScheme(ConceptSchemeImportModel conceptSchemeImport) {
+        var updatedModel = conceptSchemes.importScheme(conceptSchemeImport);
         var uri = updatedModel.getUri();
 
         return Response.created(uri).entity(updatedModel).build();

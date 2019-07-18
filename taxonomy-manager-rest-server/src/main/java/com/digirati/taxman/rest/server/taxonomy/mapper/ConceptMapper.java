@@ -16,6 +16,10 @@ import org.apache.jena.vocabulary.SKOS;
 import javax.ws.rs.WebApplicationException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
@@ -85,18 +89,7 @@ public class ConceptMapper {
      */
     public ConceptDataSet map(ConceptModel model) {
         var uuid = model.getUuid();
-
-        var record = new ConceptRecord(uuid);
-        record.setSource(model.getSource());
-        record.setPreferredLabel(model.getPreferredLabel());
-        record.setAltLabel(model.getAltLabel());
-        record.setHiddenLabel(model.getHiddenLabel());
-        record.setNote(model.getNote());
-        record.setChangeNote(model.getChangeNote());
-        record.setEditorialNote(model.getEditorialNote());
-        record.setExample(model.getExample());
-        record.setHistoryNote(model.getHistoryNote());
-        record.setScopeNote(model.getScopeNote());
+        var record = createRecord(uuid, model);
 
         var relationshipRecords = new ArrayList<ConceptRelationshipRecord>();
 
@@ -119,5 +112,51 @@ public class ConceptMapper {
         }
 
         return new ConceptDataSet(record, relationshipRecords);
+    }
+
+    public List<ConceptDataSet> map(Collection<ConceptModel> concepts, Map<URI, UUID> originalUriToGeneratedUri) {
+        List<ConceptDataSet> conceptDataSets = new ArrayList<>();
+        for (ConceptModel concept : concepts) {
+            UUID conceptUuid = originalUriToGeneratedUri.get(concept.getUri());
+            ConceptRecord conceptRecord = createRecord(conceptUuid, concept);
+            List<ConceptRelationshipRecord> relationshipRecords = new ArrayList<>();
+            for (ConceptRelationshipType type : ConceptRelationshipType.VALUES) {
+                boolean transitiveSupported = type.hasTransitiveProperty();
+
+                Stream<Resource> relationships = concept.getRelationships(type, false);
+                Stream<Resource> transitiveRelationships =
+                        transitiveSupported ? concept.getRelationships(type, true) : Stream.of();
+                BiConsumer<Resource, Boolean> relationshipMapper = (resource, transitive) -> {
+                    URI targetUri = URI.create(resource.getURI());
+                    UUID targetUuid = originalUriToGeneratedUri.get(targetUri);
+                    if (targetUuid != null) {
+                        relationshipRecords.add(new ConceptRelationshipRecord(conceptUuid, targetUuid, type, transitive));
+                    } else {
+                        System.out.println("Failed to add relationship for original target URI: " + targetUri.toASCIIString());
+                    }
+                };
+
+                relationships.forEach(r -> relationshipMapper.accept(r, false));
+                transitiveRelationships.forEach(tr -> relationshipMapper.accept(tr, true));
+            }
+
+            conceptDataSets.add(new ConceptDataSet(conceptRecord, relationshipRecords));
+        }
+        return conceptDataSets;
+    }
+
+    private ConceptRecord createRecord(UUID uuid, ConceptModel model) {
+        var record = new ConceptRecord(uuid);
+        record.setSource(model.getSource());
+        record.setPreferredLabel(model.getPreferredLabel());
+        record.setAltLabel(model.getAltLabel());
+        record.setHiddenLabel(model.getHiddenLabel());
+        record.setNote(model.getNote());
+        record.setChangeNote(model.getChangeNote());
+        record.setEditorialNote(model.getEditorialNote());
+        record.setExample(model.getExample());
+        record.setHistoryNote(model.getHistoryNote());
+        record.setScopeNote(model.getScopeNote());
+        return record;
     }
 }
