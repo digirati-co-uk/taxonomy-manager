@@ -9,6 +9,8 @@ import com.digirati.taxman.rest.server.taxonomy.mapper.ConceptMapper;
 import com.digirati.taxman.rest.server.taxonomy.storage.ConceptDao;
 import com.digirati.taxman.rest.server.taxonomy.storage.ConceptDataSet;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRecord;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.jena.vocabulary.DCTerms;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -94,6 +96,10 @@ public class ConceptModelRepository {
      */
     @Transactional(Transactional.TxType.REQUIRED)
     public ConceptModel create(ConceptModel model) {
+        String originalUri = model.getResource().getURI();
+        if (StringUtils.isNotBlank(originalUri)) {
+            model.getResource().addProperty(DCTerms.source, originalUri);
+        }
         var uuid = UUID.randomUUID();
         model.setUuid(uuid);
 

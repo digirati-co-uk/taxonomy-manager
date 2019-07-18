@@ -44,6 +44,11 @@ public class ConceptSchemeModel implements RdfModel, PersistentModel {
         this.uuid = uuid;
     }
 
+    public String getSource() {
+        Statement sourceStatement = resource.getProperty(DCTerms.source);
+        return sourceStatement == null ? null : sourceStatement.getString();
+    }
+
     @Override
     public Resource getResource() {
         return resource;

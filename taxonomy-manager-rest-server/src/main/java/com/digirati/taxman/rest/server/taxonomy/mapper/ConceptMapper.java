@@ -8,7 +8,9 @@ import com.digirati.taxman.rest.server.taxonomy.identity.ConceptIdResolver;
 import com.digirati.taxman.rest.server.taxonomy.storage.ConceptDataSet;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRecord;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRelationshipRecord;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.vocabulary.SKOS;
 
 import javax.ws.rs.WebApplicationException;
@@ -52,6 +54,10 @@ public class ConceptMapper {
                     .addPlainLiteral(SKOS.historyNote, record.getHistoryNote())
                     .addPlainLiteral(SKOS.scopeNote, record.getScopeNote());
 
+            if (StringUtils.isNotBlank(record.getSource())) {
+                builder.addStringProperty(DCTerms.source, record.getSource());
+            }
+
             for (ConceptRelationshipRecord relationship : dataset.getRelationshipRecords()) {
                 var type = relationship.getType();
                 var property = type.getSkosProperty(relationship.isTransitive());
@@ -81,6 +87,7 @@ public class ConceptMapper {
         var uuid = model.getUuid();
 
         var record = new ConceptRecord(uuid);
+        record.setSource(model.getSource());
         record.setPreferredLabel(model.getPreferredLabel());
         record.setAltLabel(model.getAltLabel());
         record.setHiddenLabel(model.getHiddenLabel());

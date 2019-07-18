@@ -8,6 +8,7 @@ import java.util.UUID;
 public class ConceptSchemeRecord {
     private final UUID uuid;
     private Map<String, String> title = new HashMap<>();
+    private String source;
 
     public ConceptSchemeRecord(UUID uuid) {
         this.uuid = uuid;
@@ -23,6 +24,14 @@ public class ConceptSchemeRecord {
 
     public void setTitle(Map<String, String> title) {
         this.title = title;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
     }
 
     @Override
