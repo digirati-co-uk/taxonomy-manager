@@ -14,6 +14,7 @@ public class ConceptSchemeRecordMapper implements RowMapper<ConceptSchemeRecord>
         ConceptSchemeRecord record = new ConceptSchemeRecord(rs.getObject("uuid", UUID.class));
 
         record.setTitle(ResultSetUtils.getPlainLiteralMap(rs, "title"));
+        record.setSource(rs.getString("source"));
 
         return record;
     }

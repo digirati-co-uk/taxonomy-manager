@@ -1,0 +1,28 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:11.4
+    container_name: taxman-postgres
+    ports:
+      - 5432:5432
+    restart: always
+    environment:
+      POSTGRES_USER: taxman
+      POSTGRES_DATABASE: taxman
+      POSTGRES_PASSWORD: taxman
+  taxman:
+    build:
+      dockerfile: ./dockerfiles/Dockerfile.jvm
+      context: .
+    links:
+      - postgres
+    ports:
+      - 8080:8080
+    environment:
+      - QUARKUS_DATASOURCE_URL=jdbc:postgresql://taxman-postgres:5432/taxman
+      - QUARKUS_DATASURCE_DRIVER=org.postgresql.Driver
+      - QUARKUS_DATASOURCE_USERNAME=taxman
+      - QUARKUS_DATASOURCE_PASSWORD=taxman
+      - QUARKUS_FLYWAY_MIGRATE_AT_START=true
+      - MP_JWT_VERIFY_PUBLICKEY=
+      - MP_JWT_VERIFY_ISSUER=localhost:5102

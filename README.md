@@ -11,6 +11,26 @@ To build the Digirati Taxonomy Manager, use the included gradle wrapper:
 ./gradlew build
 ```
 
+Once you have built the project locally you can use docker-compose to get an environment up, with a database and sample configuration:
+
+```
+docker-compose up -d
+```
+
+and bring it back down with:
+
+```
+docker-compose stop
+```
+
+To only run the database you can run:
+
+```
+docker-compose up postgres
+```
+
+*Note: The `docker-compose.yml` is not yet production ready and is for development use only at the moment.*
+
 ## Key Dependencies
 
 The following key dependencies are used in this application:

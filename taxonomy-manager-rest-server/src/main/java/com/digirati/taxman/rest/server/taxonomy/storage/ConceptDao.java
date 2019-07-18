@@ -113,6 +113,7 @@ public class ConceptDao {
 
         Object[] recordArgs = {
             record.getUuid(),
+            record.getSource(),
             new JSONObject(record.getPreferredLabel()),
             new JSONObject(record.getAltLabel()),
             new JSONObject(record.getHiddenLabel()),
@@ -127,7 +128,7 @@ public class ConceptDao {
         int[] recordTypes = new int[recordArgs.length];
         Arrays.fill(recordTypes, Types.OTHER);
 
-        jdbcTemplate.update("CALL update_concept(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", recordArgs, recordTypes);
+        jdbcTemplate.update("CALL update_concept(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", recordArgs, recordTypes);
 
         int[] relationTypes = {Types.OTHER, Types.OTHER};
         Object[] relationArgs = {record.getUuid(), dataset.getRelationshipRecordsJson()};

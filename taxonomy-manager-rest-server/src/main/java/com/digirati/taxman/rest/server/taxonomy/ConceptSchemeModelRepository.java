@@ -5,6 +5,8 @@ import com.digirati.taxman.common.taxonomy.ConceptSchemeModel;
 import com.digirati.taxman.rest.server.taxonomy.mapper.ConceptSchemeMapper;
 import com.digirati.taxman.rest.server.taxonomy.storage.ConceptSchemeDao;
 import com.digirati.taxman.rest.server.taxonomy.storage.ConceptSchemeDataSet;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.jena.vocabulary.DCTerms;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -47,6 +49,10 @@ public class ConceptSchemeModelRepository {
      */
     @Transactional(Transactional.TxType.REQUIRED)
     public ConceptSchemeModel create(ConceptSchemeModel model) {
+        String originalUri = model.getResource().getURI();
+        if (StringUtils.isNotBlank(originalUri)) {
+            model.getResource().addProperty(DCTerms.source, originalUri);
+        }
         var uuid = UUID.randomUUID();
         model.setUuid(uuid);
 
@@ -64,6 +70,7 @@ public class ConceptSchemeModelRepository {
      */
     @Transactional(Transactional.TxType.REQUIRED)
     public boolean update(ConceptSchemeModel conceptScheme) {
+        conceptSchemeDao.loadDataSet(conceptScheme.getUuid());
         ConceptSchemeDataSet dataset = dataMapper.map(conceptScheme);
 
         return conceptSchemeDao.storeDataSet(dataset);

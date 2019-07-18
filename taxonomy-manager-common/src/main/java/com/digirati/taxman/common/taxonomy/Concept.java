@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 /**
  * A representation of a SKOS concept.
@@ -12,6 +11,8 @@ import java.util.stream.Stream;
 public interface Concept {
 
     UUID getUuid();
+
+    String getSource();
 
     Map<String, String> getPreferredLabel();
 

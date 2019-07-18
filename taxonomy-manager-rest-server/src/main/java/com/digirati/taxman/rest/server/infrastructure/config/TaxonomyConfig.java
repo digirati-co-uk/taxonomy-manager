@@ -4,6 +4,9 @@ import com.digirati.taxman.common.rdf.RdfModelFactory;
 import com.digirati.taxman.rest.server.taxonomy.identity.ConceptIdResolver;
 import com.digirati.taxman.rest.server.taxonomy.identity.ConceptSchemeIdResolver;
 import com.digirati.taxman.rest.server.taxonomy.identity.CollectionUriResolver;
+import com.digirati.taxman.rest.server.taxonomy.identity.ProjectIdResolver;
+import com.digirati.taxman.rest.server.taxonomy.mapper.ProjectListingMapper;
+import com.digirati.taxman.rest.server.taxonomy.mapper.ProjectMapper;
 import com.digirati.taxman.rest.server.taxonomy.mapper.SearchResultsMapper;
 import com.digirati.taxman.rest.server.taxonomy.mapper.ConceptMapper;
 import com.digirati.taxman.rest.server.taxonomy.mapper.ConceptSchemeMapper;
@@ -27,6 +30,9 @@ public class TaxonomyConfig {
     @Inject
     ConceptSchemeIdResolver conceptSchemeIdResolver;
 
+    @Inject
+    ProjectIdResolver projectIdResolver;
+
     @Produces
     ConceptMapper conceptMapper() {
         return new ConceptMapper(conceptIdResolver, modelFactory);
@@ -40,5 +46,15 @@ public class TaxonomyConfig {
     @Produces
     ConceptSchemeMapper conceptSchemeMapper() {
         return new ConceptSchemeMapper(conceptSchemeIdResolver, conceptIdResolver, modelFactory);
+    }
+
+    @Produces
+    ProjectMapper projectMapper() {
+        return new ProjectMapper(projectIdResolver, conceptSchemeIdResolver, modelFactory);
+    }
+
+    @Produces
+    ProjectListingMapper projectListingMapper() {
+        return new ProjectListingMapper(projectIdResolver, collectionUriResolver, modelFactory);
     }
 }

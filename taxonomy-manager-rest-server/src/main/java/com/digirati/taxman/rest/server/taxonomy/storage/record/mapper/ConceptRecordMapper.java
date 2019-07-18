@@ -12,6 +12,7 @@ public class ConceptRecordMapper implements RowMapper<ConceptRecord> {
     public ConceptRecord mapRow(ResultSet rs, int rowNum) throws SQLException {
         ConceptRecord record = new ConceptRecord(rs.getObject("uuid", UUID.class));
 
+        record.setSource(rs.getString("source"));
         record.setPreferredLabel(ResultSetUtils.getPlainLiteralMap(rs, "preferred_label"));
         record.setAltLabel(ResultSetUtils.getPlainLiteralMap(rs, "alt_label"));
         record.setHiddenLabel(ResultSetUtils.getPlainLiteralMap(rs, "hidden_label"));

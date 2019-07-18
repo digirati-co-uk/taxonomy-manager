@@ -79,6 +79,18 @@ public class RdfModelBuilder<T extends RdfModel> {
     }
 
     /**
+     * Adds a single String property to the underlying resource.
+     *
+     * @param property the type of property to add
+     * @param value the value of that property
+     * @return this {@link RdfModelBuilder}
+     */
+    public RdfModelBuilder<T> addStringProperty(Property property, String value) {
+        properties.put(property, new PendingPropertyValue(model.createLiteral(value)));
+        return this;
+    }
+
+    /**
      * Set the URI of the resource being built.
      *
      * @param uri The URI of the resource.

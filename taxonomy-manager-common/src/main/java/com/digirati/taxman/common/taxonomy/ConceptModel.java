@@ -46,6 +46,12 @@ public final class ConceptModel implements RdfModel, PersistentModel, Concept {
     }
 
     @Override
+    public String getSource() {
+        Statement sourceStatement = resource.getProperty(DCTerms.source);
+        return sourceStatement == null ? null : sourceStatement.getString();
+    }
+
+    @Override
     public Resource getResource() {
         return resource;
     }

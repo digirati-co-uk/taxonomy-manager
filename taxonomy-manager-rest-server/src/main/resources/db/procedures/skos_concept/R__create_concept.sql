@@ -1,5 +1,6 @@
 DROP PROCEDURE IF EXISTS create_concept;
 CREATE OR REPLACE PROCEDURE create_concept(_uuid uuid,
+                                           _source varchar,
                                            _preferred_label rdf_plain_literal,
                                            _alt_label rdf_plain_literal,
                                            _hidden_label rdf_plain_literal,
@@ -13,6 +14,7 @@ CREATE OR REPLACE PROCEDURE create_concept(_uuid uuid,
 AS
 $$
 INSERT INTO skos_concept (uuid,
+                          source,
                           preferred_label,
                           alt_label,
                           hidden_label,
@@ -23,6 +25,7 @@ INSERT INTO skos_concept (uuid,
                           history_note,
                           scope_note)
 VALUES (_uuid,
+        _source,
         _preferred_label,
         _alt_label,
         _hidden_label,

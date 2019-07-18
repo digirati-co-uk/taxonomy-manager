@@ -10,7 +10,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
 import java.sql.Array;
-import java.sql.SQLException;
 import java.sql.Types;
 import java.util.UUID;
 
@@ -63,23 +62,17 @@ public class ConceptSchemeDao {
     public boolean storeDataSet(ConceptSchemeDataSet dataset) {
         ConceptSchemeRecord record = dataset.getRecord();
         UUID uuid = record.getUuid();
-        Object[] recordArgs = {uuid, new JSONObject(record.getTitle())};
-        int[] recordTypes = {Types.OTHER, Types.OTHER};
+        Object[] recordArgs = {uuid, record.getSource(), new JSONObject(record.getTitle())};
+        int[] recordTypes = {Types.OTHER, Types.VARCHAR, Types.OTHER};
 
-        boolean changed = jdbcTemplate.update("CALL create_or_update_concept_scheme(?, ?)", recordArgs, recordTypes) > 0;
+        boolean changed = jdbcTemplate.update("CALL create_or_update_concept_scheme(?, ?, ?)", recordArgs, recordTypes) > 0;
 
         UUID[] uuids = dataset.getTopConcepts()
                 .stream()
                 .map(ConceptReference::getId)
                 .toArray(UUID[]::new);
 
-        Array uuidArray;
-        try (var conn = dataSource.getConnection()) {
-            uuidArray = conn.createArrayOf("uuid", uuids);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-
+        Array uuidArray = DaoUtils.createArrayOf(uuids, "uuid", dataSource);
         Object[] conceptArgs = {uuid, uuidArray};
         int[] conceptTypes = {Types.OTHER, Types.ARRAY};
 

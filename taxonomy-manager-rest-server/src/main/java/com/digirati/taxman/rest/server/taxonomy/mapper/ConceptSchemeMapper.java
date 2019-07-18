@@ -9,6 +9,7 @@ import com.digirati.taxman.rest.server.taxonomy.identity.ConceptSchemeIdResolver
 import com.digirati.taxman.rest.server.taxonomy.storage.ConceptSchemeDataSet;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptReference;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptSchemeRecord;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.vocabulary.SKOS;
 
@@ -45,6 +46,10 @@ public class ConceptSchemeMapper {
         builder.setUri(schemeIdResolver.resolve(record.getUuid()));
         builder.addPlainLiteral(DCTerms.title, record.getTitle());
 
+        if (StringUtils.isNotBlank(record.getSource())) {
+            builder.addStringProperty(DCTerms.source, record.getSource());
+        }
+
         for (ConceptReference topConceptReference : dataset.getTopConcepts()) {
             builder.addEmbeddedModel(
                     SKOS.hasTopConcept,
@@ -67,6 +72,7 @@ public class ConceptSchemeMapper {
 
         var record = new ConceptSchemeRecord(uuid);
         record.setTitle(model.getTitle());
+        record.setSource(model.getSource());
 
         var topConcepts = model.getTopConcepts()
                 .map(concept -> new ConceptReference(conceptIdResolver.resolve(concept.getUri()), Map.of()))

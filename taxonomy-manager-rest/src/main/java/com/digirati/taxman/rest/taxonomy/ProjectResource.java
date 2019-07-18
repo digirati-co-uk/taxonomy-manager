@@ -1,7 +1,7 @@
 package com.digirati.taxman.rest.taxonomy;
 
 import com.digirati.taxman.common.rdf.annotation.jsonld.JsonLdFrame;
-import com.digirati.taxman.common.taxonomy.ConceptSchemeModel;
+import com.digirati.taxman.common.taxonomy.ProjectModel;
 import com.digirati.taxman.rest.MediaTypes;
 import com.digirati.taxman.rest.Roles;
 
@@ -16,26 +16,32 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
-@Path("/v0.1/concept-scheme")
-public interface ConceptSchemeResource {
+@Path("/v0.1/project")
+public interface ProjectResource {
+
+    @GET
+    @Produces({MediaTypes.APPLICATION_JSONLD_SKOS_VALUE, MediaTypes.APPLICATION_RDF_XML_VALUE})
+    @JsonLdFrame(input = "jsonld/framing/collection.json")
+    @RolesAllowed(Roles.ADMIN)
+    Response listProjects();
+
     @POST
     @Consumes({MediaTypes.APPLICATION_RDF_XML_VALUE, MediaTypes.APPLICATION_JSONLD_SKOS_VALUE})
     @Produces({MediaTypes.APPLICATION_RDF_XML_VALUE, MediaTypes.APPLICATION_JSONLD_SKOS_VALUE})
-    @JsonLdFrame(input = "jsonld/framing/concept-scheme.json")
+    @JsonLdFrame(input = "jsonld/framing/project.json")
     @RolesAllowed(Roles.ADMIN)
-    Response createConceptScheme(@Valid ConceptSchemeModel model);
+    Response createProject(@Valid ProjectModel project);
 
     @GET
-    @Path("/{scheme}")
-    @Consumes({MediaTypes.APPLICATION_JSONLD_SKOS_VALUE, MediaTypes.APPLICATION_RDF_XML_VALUE})
+    @Path("/{project}")
     @Produces({MediaTypes.APPLICATION_JSONLD_SKOS_VALUE, MediaTypes.APPLICATION_RDF_XML_VALUE})
-    @JsonLdFrame(input = "jsonld/framing/concept-scheme.json")
+    @JsonLdFrame(input = "jsonld/framing/project.json")
     @RolesAllowed(Roles.ADMIN)
-    Response getConceptScheme(@BeanParam ConceptSchemePath params);
+    Response getProject(@BeanParam ProjectPath projectPath);
 
     @PUT
-    @Path("/{scheme}")
+    @Path("/{project}")
     @Consumes({MediaTypes.APPLICATION_RDF_XML_VALUE, MediaTypes.APPLICATION_JSONLD_SKOS_VALUE})
     @RolesAllowed(Roles.ADMIN)
-    Response updateConceptScheme(@BeanParam ConceptSchemePath params, @Valid ConceptSchemeModel model);
+    Response updateProject(@BeanParam ProjectPath projectPath, @Valid ProjectModel project);
 }
