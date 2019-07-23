@@ -3,6 +3,7 @@ package com.digirati.taxman.rest.server.taxonomy.identity;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -19,14 +20,14 @@ abstract class AbstractIdResolver {
         this.template = template.replace(":id:", "{id}");
     }
 
-    public UUID resolve(URI uri) {
+    public Optional<UUID> resolve(URI uri) {
         var match = pattern.matcher(uri.getPath());
         if (!match.find()) {
-            throw new IllegalArgumentException("No UUID found in URI");
+            return Optional.empty();
         }
 
         var uuid = match.group(1);
-        return UUID.fromString(uuid);
+        return Optional.of(UUID.fromString(uuid));
     }
 
     public URI resolve(UUID uuid) {

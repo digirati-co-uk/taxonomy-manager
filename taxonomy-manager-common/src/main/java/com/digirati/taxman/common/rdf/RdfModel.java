@@ -2,13 +2,20 @@ package com.digirati.taxman.common.rdf;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
+import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.ResIterator;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.vocabulary.DC;
+import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
 
 import java.net.URI;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 
 /**
  * A typed RDF model that represents a single composite node within a graph.
@@ -19,7 +26,63 @@ public interface RdfModel {
      *
      * @return The Jena {@code Resource} of this model.
      */
-    Resource getResource();
+    default Resource getResource() {
+        return getContext().getResource();
+    }
+
+    RdfModelContext getContext();
+
+    /**
+     * Find all of the resources identified by the given {@code type} that appear in the same graph as this model,
+     * regardless of any relations between them.
+     *
+     * @param type
+     * @param <T>
+     * @return
+     */
+    default <T extends RdfModel> Stream<T> getAllResources(Class<T> type) {
+        var context = getContext();
+        var model = getResource().getModel();
+        var factory = context.getModelFactory();
+
+        RdfModelMetadata metadata;
+        try {
+            metadata = RdfModelMetadata.from(type);
+        } catch (RdfModelException e) {
+            throw new RuntimeException(e);
+        }
+
+        var iter = model.listResourcesWithProperty(RDF.type, metadata.type);
+
+        return Streams.stream(iter)
+                .map(res -> {
+                    try {
+                        return factory.create(type, res);
+                    } catch (RdfModelException e) {
+                        // Need a better way of re-throwing this as unchecked,
+                        // ultimately, this only arises from programmer error.
+                        throw new RuntimeException(e);
+                    }
+                });
+    }
+
+    default <T extends RdfModel> Stream<T> getResources(Class<T> type, Property property) {
+        var context = getContext();
+        var resource = getResource();
+        var factory = context.getModelFactory();
+
+        return Streams.stream(resource.listProperties(property))
+                .map(Statement::getResource)
+                .map(res -> {
+                    try {
+                        return factory.create(type, res);
+                    } catch (RdfModelException e) {
+                        // Need a better way of re-throwing this as unchecked,
+                        // ultimately, this only arises from programmer error.
+                        throw new RuntimeException(e);
+                    }
+                });
+    }
 
     /**
      * Get a map of {@code language} to {@code value} from a given RDF {@link Property} that represents

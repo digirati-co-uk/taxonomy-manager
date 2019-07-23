@@ -37,7 +37,7 @@ public interface ConceptResource {
     @GET
     @Path("/{concept}/relationships")
     @Produces({MediaTypes.APPLICATION_JSONLD_SKOS_VALUE, MediaTypes.APPLICATION_RDF_XML_VALUE})
-    @JsonLdFrame(input = "/jsonld/framing/collection.json")
+    @JsonLdFrame(input = "jsonld/framing/collection.json")
     @RolesAllowed(Roles.ADMIN)
     Response getRelationships(@BeanParam ConceptPath params,
                               @Valid @BeanParam ConceptRelationshipParams relationshipParams);

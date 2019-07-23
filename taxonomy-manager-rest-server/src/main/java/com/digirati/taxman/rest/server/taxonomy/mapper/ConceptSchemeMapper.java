@@ -4,16 +4,21 @@ import com.digirati.taxman.common.rdf.RdfModelException;
 import com.digirati.taxman.common.rdf.RdfModelFactory;
 import com.digirati.taxman.common.taxonomy.ConceptModel;
 import com.digirati.taxman.common.taxonomy.ConceptSchemeModel;
+import com.digirati.taxman.rest.server.taxonomy.ModelMappingContext;
 import com.digirati.taxman.rest.server.taxonomy.identity.ConceptIdResolver;
 import com.digirati.taxman.rest.server.taxonomy.identity.ConceptSchemeIdResolver;
 import com.digirati.taxman.rest.server.taxonomy.storage.ConceptSchemeDataSet;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptReference;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptSchemeRecord;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.vocabulary.SKOS;
 
+import javax.ws.rs.WebApplicationException;
 import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -54,6 +59,7 @@ public class ConceptSchemeMapper {
             builder.addEmbeddedModel(
                     SKOS.hasTopConcept,
                     modelFactory.createBuilder(ConceptModel.class)
+                            .addPlainLiteral(DCTerms.source, topConceptReference.getPreferredLabel())
                             .addPlainLiteral(SKOS.prefLabel, topConceptReference.getPreferredLabel())
                             .setUri(conceptIdResolver.resolve(topConceptReference.getId())));
         }
@@ -75,11 +81,22 @@ public class ConceptSchemeMapper {
         record.setSource(model.getSource());
 
         var topConcepts = model.getTopConcepts()
-                .map(concept -> new ConceptReference(conceptIdResolver.resolve(concept.getUri()), Map.of()))
+                .map(concept -> {
+                    UUID id = conceptIdResolver.resolve(concept.getUri()).orElse(null);
+                    Resource resource = concept.getResource();
+
+                    var targetSourceResource = resource.getPropertyResourceValue(DCTerms.source);
+
+                    String targetSourceResourceUri = null;
+                    if (targetSourceResource != null) {
+                        targetSourceResourceUri = targetSourceResource.getURI();
+                    }
+
+                    return new ConceptReference(id, targetSourceResourceUri, Map.of());
+                })
                 .collect(Collectors.toList());
 
         return new ConceptSchemeDataSet(record, topConcepts);
     }
-
 
 }

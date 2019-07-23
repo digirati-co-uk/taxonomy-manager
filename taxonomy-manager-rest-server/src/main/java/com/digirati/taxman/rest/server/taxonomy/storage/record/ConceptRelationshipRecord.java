@@ -15,6 +15,7 @@ import java.util.UUID;
 public class ConceptRelationshipRecord {
     private final UUID source;
     private final UUID target;
+    private final String targetSource;
     private final ConceptRelationshipType type;
     private final boolean transitive;
 
@@ -22,25 +23,26 @@ public class ConceptRelationshipRecord {
 
     /**
      * Create a new {@link ConceptRelationshipRecord} without a preferred label.
-     *
-     * @param source The identity of the source {@link ConceptRecord}.
+     *  @param source The identity of the source {@link ConceptRecord}.
      * @param target The identity of the target {@link ConceptRecord}.
+     * @param targetSource
      * @param type The type of the relationship.
      * @param transitive If this relationship is transitive.
      */
     public ConceptRelationshipRecord(
-            UUID source, UUID target, ConceptRelationshipType type, boolean transitive) {
-        this(source, target, type, transitive, Map.of());
+            UUID source, UUID target, String targetSource, ConceptRelationshipType type, boolean transitive) {
+        this(source, target, targetSource, type, transitive, Map.of());
     }
 
     public ConceptRelationshipRecord(
             UUID source,
             UUID target,
-            ConceptRelationshipType type,
+            String targetSource, ConceptRelationshipType type,
             boolean transitive,
             Map<String, String> targetPrefLabel) {
         this.source = source;
         this.target = target;
+        this.targetSource = targetSource;
         this.type = type;
         this.transitive = transitive;
         this.targetPreferredLabel = targetPrefLabel;
@@ -111,5 +113,9 @@ public class ConceptRelationshipRecord {
     @Override
     public int hashCode() {
         return Objects.hashCode(source, target, type, transitive, targetPreferredLabel);
+    }
+
+    public String getTargetSource() {
+        return targetSource;
     }
 }

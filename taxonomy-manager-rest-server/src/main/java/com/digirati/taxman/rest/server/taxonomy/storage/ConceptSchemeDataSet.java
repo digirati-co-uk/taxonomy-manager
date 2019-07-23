@@ -2,6 +2,8 @@ package com.digirati.taxman.rest.server.taxonomy.storage;
 
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptReference;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptSchemeRecord;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.List;
 
@@ -20,5 +22,18 @@ public class ConceptSchemeDataSet {
 
     public List<ConceptReference> getTopConcepts() {
         return topConcepts;
+    }
+
+    public JSONArray getTopConceptsJson() {
+        var array = new JSONArray();
+
+        for (var relationship : topConcepts) {
+            var recordJson = new JSONObject();
+            recordJson.put("uuid", relationship.getId());
+            recordJson.put("source", relationship.getSource());
+            array.put(recordJson);
+        }
+
+        return array;
     }
 }

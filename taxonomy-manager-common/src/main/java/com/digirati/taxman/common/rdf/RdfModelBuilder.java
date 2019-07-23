@@ -19,6 +19,7 @@ import static com.digirati.taxman.common.rdf.RdfModelBuilder.PendingPropertyValu
  */
 public class RdfModelBuilder<T extends RdfModel> {
 
+    private final RdfModelFactory modelFactory;
     private final Model model;
     private final RdfModelMetadata<T> metadata;
     private final Multimap<Property, PendingPropertyValue> properties = MultimapBuilder
@@ -28,7 +29,8 @@ public class RdfModelBuilder<T extends RdfModel> {
 
     private URI uri;
 
-    RdfModelBuilder(Model model, RdfModelMetadata<T> metadata) {
+    RdfModelBuilder(RdfModelFactory modelFactory, Model model, RdfModelMetadata<T> metadata) {
+        this.modelFactory = modelFactory;
         this.model = model;
         this.metadata = metadata;
     }
@@ -53,6 +55,17 @@ public class RdfModelBuilder<T extends RdfModel> {
     }
 
     /**
+     * Add a new literal property to the underlying resource.
+     *
+     * @param property The property to literal is keyed on.
+     * @param value The literal string value.
+     */
+    public RdfModelBuilder<T> addLiteral(Property property, String value) {
+        properties.put(property, new PendingPropertyValue(model.createLiteral(value)));
+        return this;
+    }
+
+    /**
      * Embed an existing {@link RdfModel} resource within the graph of this builder.
      *
      * @param property The property to associate the existing model with.
@@ -60,6 +73,11 @@ public class RdfModelBuilder<T extends RdfModel> {
      */
     public RdfModelBuilder<T> addEmbeddedModel(Property property, RdfModel model) {
         properties.put(property, new PendingPropertyValue(model.getResource(), false));
+        return this;
+    }
+
+    public RdfModelBuilder<T> addEmbeddedModel(Property property, URI uri) {
+        properties.put(property, new PendingPropertyValue(model.getResource(uri.toASCIIString()), true));
         return this;
     }
 
@@ -135,7 +153,7 @@ public class RdfModelBuilder<T extends RdfModel> {
         }
 
         try {
-            return metadata.constructor.newInstance(resource);
+            return metadata.constructor.newInstance(new RdfModelContext(modelFactory, resource));
         } catch (ReflectiveOperationException e) {
             throw new RdfModelException("Unable to create RDF mapped model class", e);
         }

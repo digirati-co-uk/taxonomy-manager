@@ -6,6 +6,6 @@ public interface PersistentModel {
     UUID getUuid();
 
     default boolean isNew() {
-        return getUuid() != null;
+        return getUuid() == null;
     }
 }

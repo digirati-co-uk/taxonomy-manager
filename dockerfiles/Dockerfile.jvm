@@ -35,7 +35,7 @@ COPY --from=build /build/taxonomy-manager-rest-server/build/lib /srv/taxman/lib/
 
 WORKDIR /srv/taxman/
 
-ENV JAVA_OPTIONS="-Dquarkus.http.host=0.0.0.0"
+ENV JAVA_OPTIONS="-Dquarkus.http.host=0.0.0.0 -Dquarkus.log.level=DEBUG"
 ENV JAVA_HOME="/usr/lib/jvm/java"
 
 ENTRYPOINT ["/srv/taxman/bin/entrypoint.sh"]

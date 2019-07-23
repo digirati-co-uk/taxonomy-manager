@@ -1,9 +1,11 @@
 package com.digirati.taxman.common.rdf;
 
+import com.google.common.collect.Iterables;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.ResIterator;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.vocabulary.RDF;
 
 import java.util.ArrayList;
@@ -28,7 +30,26 @@ public class RdfModelFactory {
         Model model = ModelFactory.createDefaultModel();
         model.setNsPrefixes(Map.copyOf(metadata.namespacePrefixes));
 
-        return new RdfModelBuilder<>(model, metadata);
+        return new RdfModelBuilder<>(this, model, metadata);
+    }
+
+    public <T extends RdfModel> T create(Class<T> type, Resource resource) throws RdfModelException {
+        RdfModelMetadata<T> metadata = RdfModelMetadata.from(type);
+
+        try {
+            var uri = resource.getURI();
+            if (uri != null) {
+                resource.addProperty(DCTerms.source, resource);
+            }
+
+            return metadata.constructor.newInstance(new RdfModelContext(this, resource));
+        } catch (ReflectiveOperationException e) {
+            throw new RdfModelException("Unable to create RDF mapped model class", e);
+        }
+    }
+
+    public <T extends RdfModel> T create(Class<T> type, Model model) throws RdfModelException {
+        return Iterables.getOnlyElement(createListFromModel(type, model));
     }
 
     /**
@@ -51,12 +72,7 @@ public class RdfModelFactory {
         ResIterator resourceIterator = model.listResourcesWithProperty(RDF.type, metadata.type);
         while (resourceIterator.hasNext()) {
             Resource resource = resourceIterator.nextResource();
-
-            try {
-                resources.add(metadata.constructor.newInstance(resource));
-            } catch (ReflectiveOperationException e) {
-                throw new RdfModelException("Unable to create RDF mapped model class", e);
-            }
+            resources.add(create(type, resource));
         }
 
         return resources;

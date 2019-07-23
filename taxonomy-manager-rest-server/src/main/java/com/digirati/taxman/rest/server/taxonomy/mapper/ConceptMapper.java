@@ -1,5 +1,6 @@
 package com.digirati.taxman.rest.server.taxonomy.mapper;
 
+import com.digirati.taxman.common.rdf.RdfModelBuilder;
 import com.digirati.taxman.common.rdf.RdfModelException;
 import com.digirati.taxman.common.rdf.RdfModelFactory;
 import com.digirati.taxman.common.taxonomy.ConceptModel;
@@ -9,13 +10,13 @@ import com.digirati.taxman.rest.server.taxonomy.storage.ConceptDataSet;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRecord;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRelationshipRecord;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.vocabulary.SKOS;
 
 import javax.ws.rs.WebApplicationException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
@@ -42,17 +43,10 @@ public class ConceptMapper {
         try {
             var builder = factory.createBuilder(ConceptModel.class);
             var record = dataset.getRecord();
+            var extractor = new ConceptLabelExtractor(record);
 
             builder.setUri(idResolver.resolve(record.getUuid()));
-            builder.addPlainLiteral(SKOS.prefLabel, record.getPreferredLabel())
-                    .addPlainLiteral(SKOS.altLabel, record.getAltLabel())
-                    .addPlainLiteral(SKOS.hiddenLabel, record.getHiddenLabel())
-                    .addPlainLiteral(SKOS.note, record.getNote())
-                    .addPlainLiteral(SKOS.changeNote, record.getChangeNote())
-                    .addPlainLiteral(SKOS.editorialNote, record.getEditorialNote())
-                    .addPlainLiteral(SKOS.example, record.getExample())
-                    .addPlainLiteral(SKOS.historyNote, record.getHistoryNote())
-                    .addPlainLiteral(SKOS.scopeNote, record.getScopeNote());
+            extractor.extractTo(builder);
 
             if (StringUtils.isNotBlank(record.getSource())) {
                 builder.addStringProperty(DCTerms.source, record.getSource());
@@ -61,12 +55,17 @@ public class ConceptMapper {
             for (ConceptRelationshipRecord relationship : dataset.getRelationshipRecords()) {
                 var type = relationship.getType();
                 var property = type.getSkosProperty(relationship.isTransitive());
+                var source = relationship.getTargetSource();
 
-                builder.addEmbeddedModel(
-                        property,
-                        factory.createBuilder(ConceptModel.class)
-                                .addPlainLiteral(SKOS.prefLabel, relationship.getTargetPreferredLabel())
-                                .setUri(idResolver.resolve(relationship.getTarget())));
+                RdfModelBuilder<ConceptModel> embeddedModel = factory.createBuilder(ConceptModel.class)
+                        .addPlainLiteral(SKOS.prefLabel, relationship.getTargetPreferredLabel())
+                        .setUri(idResolver.resolve(relationship.getTarget()));
+
+                if (source != null) {
+                    embeddedModel.addEmbeddedModel(DCTerms.source, URI.create(source));
+                }
+
+                builder.addEmbeddedModel(property, embeddedModel);
             }
 
             ConceptModel concept = builder.build();
@@ -84,7 +83,7 @@ public class ConceptMapper {
      * @return a database data representation of the {@link ConceptModel}.
      */
     public ConceptDataSet map(ConceptModel model) {
-        var uuid = model.getUuid();
+        final UUID uuid = model.getUuid();
 
         var record = new ConceptRecord(uuid);
         record.setSource(model.getSource());
@@ -103,14 +102,15 @@ public class ConceptMapper {
         for (var type : ConceptRelationshipType.VALUES) {
             boolean transitiveSupported = type.hasTransitiveProperty();
 
-            Stream<Resource> relationships = model.getRelationships(type, false);
-            Stream<Resource> transitiveRelationships = transitiveSupported ? model.getRelationships(type, true) : Stream.of();
+            Stream<ConceptModel> relationships = model.getRelationships(type, false);
+            Stream<ConceptModel> transitiveRelationships = transitiveSupported ? model.getRelationships(type, true) : Stream.of();
 
-            BiConsumer<Resource, Boolean> relationshipMapper = (resource, transitive) -> {
-                var targetUri = resource.getURI();
-                var targetUuid = idResolver.resolve(URI.create(targetUri));
-                var relationshipRecord = new ConceptRelationshipRecord(uuid, targetUuid, type, transitive);
+            BiConsumer<ConceptModel, Boolean> relationshipMapper = (resource, transitive) -> {
+                var targetUri = resource.getUri();
+                var targetUuid = idResolver.resolve(targetUri).orElse(UUID.randomUUID());
+                var targetSource = resource.getSource();
 
+                var relationshipRecord = new ConceptRelationshipRecord(uuid, targetUuid, targetSource, type, transitive);
                 relationshipRecords.add(relationshipRecord);
             };
 
@@ -120,4 +120,5 @@ public class ConceptMapper {
 
         return new ConceptDataSet(record, relationshipRecords);
     }
+
 }

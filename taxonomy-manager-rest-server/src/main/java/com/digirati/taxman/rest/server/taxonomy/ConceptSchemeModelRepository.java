@@ -47,7 +47,6 @@ public class ConceptSchemeModelRepository {
      * @param model The {@code skos:ConceptScheme} model to store.
      * @return the stored {@link com.digirati.taxman.common.taxonomy.ConceptSchemeModel}.
      */
-    @Transactional(Transactional.TxType.REQUIRED)
     public ConceptSchemeModel create(ConceptSchemeModel model) {
         String originalUri = model.getResource().getURI();
         if (StringUtils.isNotBlank(originalUri)) {

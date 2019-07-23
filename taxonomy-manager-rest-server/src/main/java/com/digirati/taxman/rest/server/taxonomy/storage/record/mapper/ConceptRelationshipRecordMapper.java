@@ -13,10 +13,11 @@ public class ConceptRelationshipRecordMapper implements RowMapper<ConceptRelatio
     public ConceptRelationshipRecord mapRow(ResultSet rs, int rowNum) throws SQLException {
         var source = rs.getObject("source_uuid", UUID.class);
         var target = rs.getObject("target_uuid", UUID.class);
+        var targetSource = rs.getString("target_source");
         var type = ConceptRelationshipType.valueOf(rs.getString("relation").toUpperCase());
         var transitive = rs.getBoolean("transitive");
         var preferredLabel = ResultSetUtils.getPlainLiteralMap(rs, "target_preferred_label");
 
-        return new ConceptRelationshipRecord(source, target, type, transitive, preferredLabel);
+        return new ConceptRelationshipRecord(source, target, targetSource, type, transitive, preferredLabel);
     }
 }

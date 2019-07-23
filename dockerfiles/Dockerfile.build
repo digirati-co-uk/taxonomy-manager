@@ -4,6 +4,8 @@ LABEL maintainer="Daniel Grant <daniel.grant@digirati.com>"
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ARG DEBIAN_FRONTEND=noninteractive
 
+ARG PRE_COMMIT_VERSION=1.17.0
+
 RUN apt-get update \
     && apt-get install -y --no-install-recommends python3 python3-setuptools python3-pip python3-wheel ssh curl git \
        software-properties-common apt-transport-https gnupg-agent openjdk-11-jdk-headless \
@@ -13,7 +15,7 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends docker-ce \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
-    && pip3 install pre-commit \
+    && pip3 install pre-commit==$PRE_COMMIT_VERSION \
     && useradd -m -d /home/build -s /bin/bash -u 1010 build
 
 ENV JAVA_HOME="/usr/lib/jvm/java-11-openjdk-amd64"

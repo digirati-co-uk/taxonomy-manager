@@ -14,6 +14,6 @@ public class ConceptReferenceMapper implements RowMapper<ConceptReference> {
         UUID uuid = rs.getObject("uuid", UUID.class);
         Map<String, String> preferredLabel = ResultSetUtils.getPlainLiteralMap(rs, "preferred_label");
 
-        return new ConceptReference(uuid, preferredLabel);
+        return new ConceptReference(uuid, null, preferredLabel);
     }
 }

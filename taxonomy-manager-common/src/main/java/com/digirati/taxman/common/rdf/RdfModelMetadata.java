@@ -53,7 +53,7 @@ public class RdfModelMetadata<T extends RdfModel> {
         Constructor<T> constructor;
 
         try {
-            constructor = type.getConstructor(Resource.class);
+            constructor = type.getConstructor(RdfModelContext.class);
         } catch (NoSuchMethodException e) {
             throw new RdfModelException("No RdfModel constructor found", e);
         }

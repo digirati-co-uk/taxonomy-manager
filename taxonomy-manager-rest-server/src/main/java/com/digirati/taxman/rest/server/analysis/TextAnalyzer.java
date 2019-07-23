@@ -5,22 +5,24 @@ import com.digirati.taxman.common.rdf.RdfModelFactory;
 import com.digirati.taxman.common.taxonomy.CollectionModel;
 import com.digirati.taxman.common.taxonomy.ConceptModel;
 import com.digirati.taxman.rest.analysis.TextAnalysisInput;
-import com.digirati.taxman.rest.server.infrastructure.config.TextLookupServiceProvider;
 import com.digirati.taxman.rest.server.taxonomy.ConceptModelRepository;
-import com.digirati.taxonomy.manager.lookup.TextLookupService;
+import com.digirati.taxman.analysis.index.TermIndex;
 import org.apache.jena.vocabulary.SKOS;
+import org.jboss.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 import java.net.URI;
-import java.util.stream.Collectors;
+import java.util.UUID;
 
 @ApplicationScoped
 public class TextAnalyzer {
 
+    private static final Logger logger = Logger.getLogger(TextAnalyzer.class.getName());
+
     @Inject
-    TextLookupServiceProvider lookupServiceProvider;
+    TermIndex<UUID> termIndex;
 
     @Inject
     RdfModelFactory modelFactory;
@@ -36,19 +38,15 @@ public class TextAnalyzer {
      * @return A list of {@link ConceptModel}s appearing as tags.
      */
     public CollectionModel tagDocument(TextAnalysisInput input) {
-        TextLookupService textLookupService = lookupServiceProvider.getTextLookupService();
-        var ctx = textLookupService.search(input.getText());
-        var matches = ctx.getMatchedConcepts();
+        logger.debug(input.getText());
+
+        var matches = termIndex.search(input.getText());
 
         try {
             var builder = modelFactory.createBuilder(CollectionModel.class);
             builder.setUri(URI.create("urn:collection"));
 
-            var matchedConceptUuids = matches.parallelStream()
-                    .flatMap(match -> match.getConceptIds().stream())
-                    .collect(Collectors.toList());
-
-            var matchedConcepts = concepts.findAll(matchedConceptUuids);
+            var matchedConcepts = concepts.findAll(matches);
             matchedConcepts.forEach(concept -> builder.addEmbeddedModel(SKOS.member, concept));
 
             return builder.build();

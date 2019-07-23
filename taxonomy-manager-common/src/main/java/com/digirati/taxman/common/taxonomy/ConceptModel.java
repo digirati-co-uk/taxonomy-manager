@@ -2,6 +2,7 @@ package com.digirati.taxman.common.taxonomy;
 
 import com.digirati.taxman.common.rdf.PersistentModel;
 import com.digirati.taxman.common.rdf.RdfModel;
+import com.digirati.taxman.common.rdf.RdfModelContext;
 import com.digirati.taxman.common.rdf.annotation.RdfConstructor;
 import com.digirati.taxman.common.rdf.annotation.RdfContext;
 import com.digirati.taxman.common.rdf.annotation.RdfType;
@@ -19,25 +20,22 @@ import java.util.stream.Stream;
 @RdfContext({"skos=" + SKOS.uri, "dcterms=" + DCTerms.NS})
 public final class ConceptModel implements RdfModel, PersistentModel, Concept {
 
-    private final Resource resource;
+    private final RdfModelContext context;
     private UUID uuid;
 
     @RdfConstructor
-    public ConceptModel(Resource resource) {
-        this.resource = resource;
+    public ConceptModel(RdfModelContext context) {
+        this.context = context;
         this.uuid = null;
     }
 
-    public ConceptModel(UUID uuid, Resource resource) {
+    public ConceptModel(UUID uuid, RdfModelContext context) {
         this.uuid = uuid;
-        this.resource = resource;
+        this.context = context;
     }
 
     @Override
     public UUID getUuid() {
-        if (uuid == null) {
-            throw new IllegalStateException("Concept schemes must have a UUID.");
-        }
         return uuid;
     }
 
@@ -47,13 +45,13 @@ public final class ConceptModel implements RdfModel, PersistentModel, Concept {
 
     @Override
     public String getSource() {
-        Statement sourceStatement = resource.getProperty(DCTerms.source);
-        return sourceStatement == null ? null : sourceStatement.getString();
+        Resource sourceResource = getResource().getPropertyResourceValue(DCTerms.source);
+        return sourceResource == null ? null : sourceResource.getURI();
     }
 
     @Override
-    public Resource getResource() {
-        return resource;
+    public RdfModelContext getContext() {
+        return context;
     }
 
     @Override
@@ -109,11 +107,10 @@ public final class ConceptModel implements RdfModel, PersistentModel, Concept {
      * @param transitive If transitive relationships should be searched for, rather than non-transitive relationships.
      * @return A stream of all the resources related to this {@link ConceptModel}.
      */
-    public Stream<Resource> getRelationships(ConceptRelationshipType type, boolean transitive) {
+    public Stream<ConceptModel> getRelationships(ConceptRelationshipType type, boolean transitive) {
         var skosProperty = type.getSkosProperty(transitive);
-        var stmtIterator = resource.listProperties(skosProperty);
 
-        return Streams.stream(stmtIterator).map(Statement::getResource);
+        return getResources(ConceptModel.class, skosProperty);
 
     }
 }

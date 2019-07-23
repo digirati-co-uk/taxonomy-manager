@@ -71,8 +71,6 @@ tasks {
 }
 
 tasks.withType<QuarkusDev> {
-    debug = "client"
-    jvmArgs = "-Dmp.jwt.verify.issuer=http://localhost:8080/"
 }
 
 val integrationTest = task<Test>("integrationTest") {
@@ -102,13 +100,9 @@ val mergeBuildOutput = task<Copy>("mergeBuildOutput") {
     into("$buildDir/classes/java/main/")
 }
 
-val generateTestKeyPair = task("generateTestKeyPair") {
-    exec {
-        executable = "sh"
-        args = listOf("./generate-key-pair.sh")
-    }
+val generateTestKeyPair = task<Exec>("generateTestKeyPair") {
+    commandLine = listOf("sh", "$projectDir/generate-key-pair.sh")
 }
 
 tasks.classes { dependsOn(mergeBuildOutput) }
 tasks.check { dependsOn(integrationTest) }
-tasks.quarkusDev { dependsOn(generateTestKeyPair) }

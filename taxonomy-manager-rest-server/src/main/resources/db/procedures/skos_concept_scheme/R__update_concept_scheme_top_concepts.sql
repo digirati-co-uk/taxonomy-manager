@@ -1,6 +1,6 @@
 DROP PROCEDURE IF EXISTS update_concept_scheme_top_concepts;
 CREATE OR REPLACE PROCEDURE update_concept_scheme_top_concepts(_uuid uuid,
-                                                               _concept_uuids uuid[])
+                                                               _concept_ids JSONB)
     LANGUAGE SQL AS
 $$
 
@@ -10,9 +10,9 @@ INSERT INTO skos_concept_scheme_concept (concept_id, concept_scheme_id, is_top_c
 SELECT c.id,
     cs.id,
     true
-FROM unnest(_concept_uuids) concept_uuid
+FROM jsonb_array_elements(_concept_ids) concept_id
     INNER JOIN skos_concept c
-        ON c.uuid = concept_uuid
+        ON c.uuid = (concept_id ->> 'uuid')::uuid OR c.source = (concept_id ->> 'source')
     INNER JOIN skos_concept_scheme cs
         ON cs.uuid = _uuid
 ON CONFLICT DO NOTHING;
@@ -25,11 +25,12 @@ DELETE FROM skos_concept_scheme_concept USING skos_concept_scheme_concept csc
     INNER JOIN skos_concept_scheme cs
         ON cs.id = csc.concept_scheme_id
 
-    LEFT OUTER JOIN unnest(_concept_uuids) concept_uuid
-        ON concept_uuid = c.uuid
+    LEFT OUTER JOIN jsonb_array_elements(_concept_ids) cid
+        ON (cid ->> 'uuid')::uuid = c.uuid OR
+           (cid ->> 'source') = c.source
 WHERE skos_concept_scheme_concept.concept_scheme_id = csc.concept_scheme_id
   AND skos_concept_scheme_concept.concept_id = csc.concept_id
   AND skos_concept_scheme_concept.is_top_concept = true
-  AND concept_uuid IS NULL;
-
+  AND (cid ->> 'uuid') IS NULL
+  AND cs.uuid = _uuid;
 $$;

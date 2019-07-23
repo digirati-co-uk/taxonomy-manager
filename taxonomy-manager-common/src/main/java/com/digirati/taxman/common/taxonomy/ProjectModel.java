@@ -1,6 +1,7 @@
 package com.digirati.taxman.common.taxonomy;
 
 import com.digirati.taxman.common.rdf.RdfModel;
+import com.digirati.taxman.common.rdf.RdfModelContext;
 import com.digirati.taxman.common.rdf.annotation.RdfConstructor;
 import com.digirati.taxman.common.rdf.annotation.RdfContext;
 import com.digirati.taxman.common.rdf.annotation.RdfType;
@@ -19,16 +20,15 @@ import java.util.stream.Stream;
 @RdfContext({"dcterms=" + DCTerms.NS})
 public class ProjectModel implements RdfModel {
 
-    private final Resource resource;
+    private final RdfModelContext context;
 
     @RdfConstructor
-    public ProjectModel(Resource resource) {
-        this.resource = resource;
+    public ProjectModel(RdfModelContext context) {
+        this.context = context;
     }
 
-    @Override
-    public Resource getResource() {
-        return resource;
+    public RdfModelContext getContext() {
+        return context;
     }
 
     public String getSlug() {
@@ -45,8 +45,6 @@ public class ProjectModel implements RdfModel {
      * @return the concept schemes associated with this project
      */
     public Stream<ConceptSchemeModel> getConceptSchemes() {
-        return Streams.stream(resource.listProperties(DCTerms.hasPart))
-                .map(Statement::getResource)
-                .map(ConceptSchemeModel::new);
+        return getResources(ConceptSchemeModel.class, DCTerms.hasPart);
     }
 }

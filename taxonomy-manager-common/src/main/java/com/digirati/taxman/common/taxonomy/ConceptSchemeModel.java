@@ -2,6 +2,7 @@ package com.digirati.taxman.common.taxonomy;
 
 import com.digirati.taxman.common.rdf.PersistentModel;
 import com.digirati.taxman.common.rdf.RdfModel;
+import com.digirati.taxman.common.rdf.RdfModelContext;
 import com.digirati.taxman.common.rdf.annotation.RdfConstructor;
 import com.digirati.taxman.common.rdf.annotation.RdfContext;
 import com.digirati.taxman.common.rdf.annotation.RdfType;
@@ -19,17 +20,21 @@ import java.util.stream.Stream;
 @RdfContext({"skos=" + SKOS.uri, "dcterms=" + DCTerms.NS})
 public class ConceptSchemeModel implements RdfModel, PersistentModel {
 
-    private final Resource resource;
+    private final RdfModelContext context;
     private UUID uuid;
 
     @RdfConstructor
-    public ConceptSchemeModel(Resource resource) {
-        this(null, resource);
+    public ConceptSchemeModel(RdfModelContext context) {
+        this(null, context);
     }
 
-    public ConceptSchemeModel(UUID uuid, Resource resource) {
+    public ConceptSchemeModel(UUID uuid, RdfModelContext context) {
         this.uuid = uuid;
-        this.resource = resource;
+        this.context = context;
+    }
+
+    public RdfModelContext getContext() {
+        return context;
     }
 
     @Override
@@ -44,27 +49,22 @@ public class ConceptSchemeModel implements RdfModel, PersistentModel {
         this.uuid = uuid;
     }
 
-    public String getSource() {
-        Statement sourceStatement = resource.getProperty(DCTerms.source);
-        return sourceStatement == null ? null : sourceStatement.getString();
-    }
 
-    @Override
-    public Resource getResource() {
-        return resource;
+    public String getSource() {
+        Resource sourceResource = getResource().getPropertyResourceValue(DCTerms.source);
+        return sourceResource == null ? null : sourceResource.getURI();
     }
 
     public Map<String, String> getTitle() {
         return getPlainLiteral(DCTerms.title);
     }
 
+
+
     /**
-     * Get a stream of all the {@code top-level} concepts that appear within the RDF graph of this
-     * concept scheme.
+     * Get a stream of all the concepts that are related to this concept scheme.
      */
     public Stream<ConceptModel> getTopConcepts() {
-        return Streams.stream(resource.listProperties(SKOS.hasTopConcept))
-                .map(Statement::getResource)
-                .map(ConceptModel::new);
+        return getResources(ConceptModel.class, SKOS.hasTopConcept);
     }
 }

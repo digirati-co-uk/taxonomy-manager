@@ -44,7 +44,7 @@ public class ConceptSchemeDaoTests {
 
         var dao = new ConceptSchemeDao(dataSource);
         var record = new ConceptSchemeRecord(DUMMY_SCHEME_ID);
-        var expectedTopConcepts = List.of(new ConceptReference(conceptId, Map.of()));
+        var expectedTopConcepts = List.of(new ConceptReference(conceptId, null, Map.of()));
 
         dao.storeDataSet(new ConceptSchemeDataSet(record, expectedTopConcepts));
 
@@ -54,9 +54,9 @@ public class ConceptSchemeDaoTests {
 
     @Test
     public void shouldRemoveTopConcepts() throws Exception {
-        var conceptA = new ConceptReference(createDummyConcept(), new HashMap<>());
-        var conceptB = new ConceptReference(createDummyConcept(), new HashMap<>());
-        var conceptC = new ConceptReference(createDummyConcept(), new HashMap<>());
+        var conceptA = new ConceptReference(createDummyConcept(), null, new HashMap<>());
+        var conceptB = new ConceptReference(createDummyConcept(), null, new HashMap<>());
+        var conceptC = new ConceptReference(createDummyConcept(), null, new HashMap<>());
 
         var dao = new ConceptSchemeDao(dataSource);
         var record = new ConceptSchemeRecord(DUMMY_SCHEME_ID);

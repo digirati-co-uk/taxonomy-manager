@@ -22,5 +22,6 @@ DELETE FROM project_skos_concept_scheme USING project_skos_concept_scheme pcs
         ON scheme_uuid = cs.uuid
 WHERE project_skos_concept_scheme.concept_scheme_id = pcs.concept_scheme_id
   AND project_skos_concept_scheme.project_id = p.id
-  AND scheme_uuid IS NULL;
+  AND scheme_uuid IS NULL
+  AND p.slug = _slug;
 $$;

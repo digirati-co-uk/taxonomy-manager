@@ -60,6 +60,7 @@ public class ConceptDataSet {
             var recordJson = new JSONObject();
             recordJson.put("source_id", relationship.getSource().toString());
             recordJson.put("target_id", relationship.getTarget().toString());
+            recordJson.put("target_source", relationship.getTargetSource());
             recordJson.put("relation", relationship.getType().toString().toLowerCase());
             recordJson.put("transitive", relationship.isTransitive());
 

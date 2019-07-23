@@ -66,16 +66,16 @@ public class ConceptDao {
     /**
      * Find all the records that are related to the record identified by {@code uuid},
      * with the given relationship {@code type}.
-     *
-     * @param uuid The identifier of the source record.
+     *  @param uuid The identifier of the source record.
      * @param type The type of relationship to search for.
+     * @param depth
      */
-    public List<ConceptRecord> findRelatedRecords(UUID uuid, ConceptRelationshipType type) {
-        Object[] conceptArgs = {uuid, type.toString().toLowerCase()};
-        int[] conceptTypes = {Types.OTHER, Types.OTHER};
+    public List<ConceptRecord> findRelatedRecords(UUID uuid, ConceptRelationshipType type, int depth) {
+        Object[] conceptArgs = {uuid, type.toString().toLowerCase(), depth};
+        int[] conceptTypes = {Types.OTHER, Types.OTHER, Types.INTEGER};
 
         return jdbcTemplate.query(
-                "SELECT * FROM get_concept_semantic_relations_recursive(?, ?)",
+                "SELECT * FROM get_concept_semantic_relations_recursive(?, ?, ?)",
                 conceptArgs,
                 conceptTypes,
                 recordMapper);
@@ -130,9 +130,9 @@ public class ConceptDao {
 
         jdbcTemplate.update("CALL update_concept(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", recordArgs, recordTypes);
 
-        int[] relationTypes = {Types.OTHER, Types.OTHER};
-        Object[] relationArgs = {record.getUuid(), dataset.getRelationshipRecordsJson()};
+        int[] relationTypes = {Types.OTHER, Types.VARCHAR, Types.OTHER};
+        Object[] relationArgs = {record.getUuid(), record.getSource(), dataset.getRelationshipRecordsJson()};
 
-        jdbcTemplate.update("CALL update_concept_semantic_relations(?, ?)", relationArgs, relationTypes);
+        jdbcTemplate.update("CALL update_concept_semantic_relations(?, ?, ?)", relationArgs, relationTypes);
     }
 }

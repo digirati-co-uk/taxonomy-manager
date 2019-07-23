@@ -90,7 +90,7 @@ public class ConceptDaoTests {
 
         var uuidA = UUID.fromString("3828f4e5-ad0d-402c-978a-e2b9939332c7");
         var uuidB = UUID.fromString("f0ea2717-1114-46f4-bc51-a25985571a01");
-        var relationships = List.of(new ConceptRelationshipRecord(uuidA, uuidB, ConceptRelationshipType.BROADER, false));
+        var relationships = List.of(new ConceptRelationshipRecord(uuidA, uuidB, targetSource, ConceptRelationshipType.BROADER, false));
 
         dao.storeDataSet(new ConceptDataSet(new ConceptRecord(uuidB)));
         dao.storeDataSet(new ConceptDataSet(new ConceptRecord(uuidA), relationships));

@@ -5,6 +5,7 @@ import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptReference;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptSchemeRecord;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.mapper.ConceptReferenceMapper;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.mapper.ConceptSchemeRecordMapper;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -72,9 +73,9 @@ public class ConceptSchemeDao {
                 .map(ConceptReference::getId)
                 .toArray(UUID[]::new);
 
-        Array uuidArray = DaoUtils.createArrayOf(uuids, "uuid", dataSource);
+        JSONArray uuidArray = dataset.getTopConceptsJson();
         Object[] conceptArgs = {uuid, uuidArray};
-        int[] conceptTypes = {Types.OTHER, Types.ARRAY};
+        int[] conceptTypes = {Types.OTHER, Types.OTHER};
 
         changed |= jdbcTemplate.update("CALL update_concept_scheme_top_concepts(?, ?)", conceptArgs, conceptTypes) > 0;
         return changed;

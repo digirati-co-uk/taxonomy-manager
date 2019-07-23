@@ -1,10 +1,12 @@
 package com.digirati.taxman.rest.server.infrastructure.event;
 
-import com.digirati.taxman.rest.server.infrastructure.config.TextLookupServiceProvider;
+import com.digirati.taxman.analysis.index.TermIndex;
+import com.digirati.taxman.rest.server.infrastructure.config.TaxonomyIndexConfig;
 import com.google.common.eventbus.Subscribe;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import java.util.UUID;
 
 /**
  * Listener to respond to changes in the state of a concept.
@@ -13,14 +15,6 @@ import javax.inject.Inject;
 public class ConceptEventListener {
 
     @Inject
-    TextLookupServiceProvider lookupService;
+    TermIndex<UUID> index;
 
-    @Subscribe
-    public void onEvent(ConceptEvent event) {
-        if (event.isNew()) {
-            lookupService.getTextLookupService().addConcept(event.getConcept());
-        } else {
-            lookupService.getTextLookupService().updateConcept(event.getConcept());
-        }
-    }
 }

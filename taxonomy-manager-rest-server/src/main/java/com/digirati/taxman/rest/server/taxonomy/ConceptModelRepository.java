@@ -82,8 +82,10 @@ public class ConceptModelRepository {
      * Perform an idempotent update of an existing {@link ConceptModel}, updating all stored properties
      * as well relationships.
      */
-    @Transactional(Transactional.TxType.REQUIRED)
     public void update(ConceptModel model) {
+        if (model.getUuid() == null) {
+            model.setUuid(UUID.randomUUID());
+        }
         conceptDao.storeDataSet(conceptMapper.map(model));
         eventService.send(ConceptEvent.updated(model));
     }
@@ -101,9 +103,12 @@ public class ConceptModelRepository {
         if (StringUtils.isNotBlank(originalUri)) {
             model.getResource().addProperty(DCTerms.source, originalUri);
         }
-        var uuid = UUID.randomUUID();
-        model.setUuid(uuid);
 
+        if (model.isNew()) {
+            model.setUuid(UUID.randomUUID());
+        }
+
+        var uuid = model.getUuid();
         var dataset = conceptMapper.map(model);
         conceptDao.storeDataSet(dataset);
         eventService.send(ConceptEvent.created(model));

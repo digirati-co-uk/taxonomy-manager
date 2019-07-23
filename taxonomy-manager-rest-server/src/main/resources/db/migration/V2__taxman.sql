@@ -20,22 +20,22 @@ CREATE TABLE skos_concept_scheme
 (
     id    bigserial primary key,
     uuid  uuid unique not null,
-    title rdf_plain_literal
+    title rdf_plain_literal NOT NULL
 );
 
 CREATE TABLE skos_concept
 (
     id              bigserial primary key,
-    uuid            uuid unique not null,
-    preferred_label rdf_plain_literal,
-    alt_label       rdf_plain_literal,
-    hidden_label    rdf_plain_literal,
-    note            rdf_plain_literal,
-    change_note     rdf_plain_literal,
-    editorial_note  rdf_plain_literal,
-    example         rdf_plain_literal,
-    history_note    rdf_plain_literal,
-    scope_note      rdf_plain_literal
+    uuid            uuid UNIQUE                    NOT NULL,
+    preferred_label rdf_plain_literal DEFAULT '{}' NOT NULL,
+    alt_label       rdf_plain_literal DEFAULT '{}' NOT NULL,
+    hidden_label    rdf_plain_literal DEFAULT '{}' NOT NULL,
+    note            rdf_plain_literal DEFAULT '{}' NOT NULL,
+    change_note     rdf_plain_literal DEFAULT '{}' NOT NULL,
+    editorial_note  rdf_plain_literal DEFAULT '{}' NOT NULL,
+    example         rdf_plain_literal DEFAULT '{}' NOT NULL,
+    history_note    rdf_plain_literal DEFAULT '{}' NOT NULL,
+    scope_note      rdf_plain_literal DEFAULT '{}' NOT NULL
 );
 
 

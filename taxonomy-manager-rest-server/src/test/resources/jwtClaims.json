@@ -1,9 +1,9 @@
 {
-  "iss": "http://localhost:8080/",
   "jti": "a-123",
   "sub": "jdoe-using-jwt-rbac",
   "upn": "jdoe@quarkus.io",
   "preferred_username": "jdoe",
+    "iss": "http://localhost:8080/",
   "aud": "https://dev.taxman.digirati.com/",
   "birthdate": "2001-07-13",
   "groups": [

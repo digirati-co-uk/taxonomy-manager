@@ -12,10 +12,12 @@ import java.util.UUID;
  */
 public class ConceptReference {
     private final UUID target;
+    private final String targetSource;
     private final Map<String, String> preferredLabel;
 
-    public ConceptReference(UUID target, Map<String, String> preferredLabel) {
+    public ConceptReference(UUID target, String source, Map<String, String> preferredLabel) {
         this.target = target;
+        this.targetSource = source;
         this.preferredLabel = preferredLabel;
     }
 
@@ -47,5 +49,9 @@ public class ConceptReference {
     @Override
     public int hashCode() {
         return Objects.hashCode(target);
+    }
+
+    public String getSource() {
+        return targetSource;
     }
 }
