@@ -3,11 +3,8 @@ LABEL maintainer="Gary Tierney <gary.tierney@digirati.com>"
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-ARG OPENJDK_11_VERSION=11.0.3.7-2.el8_0
-ARG OPEN_SSL_VERSION=1.1.1-8.el8
-
 RUN microdnf install \
-       java-11-openjdk-devel-$OPENJDK_11_VERSION openssl-$OPEN_SSL_VERSION \
+       java-11-openjdk-devel openssl \
     && microdnf clean all \
     && mkdir -p /build
 
@@ -27,10 +24,8 @@ RUN ./gradlew assemble && rm -Rf "$HOME/.gradle"
 
 FROM registry.access.redhat.com/ubi8/ubi-minimal:8.0 AS runtime
 
-ARG OPENJDK_11_VERSION=11.0.3.7-2.el8_0
-
 RUN microdnf install \
-       java-11-openjdk-headless-$OPENJDK_11_VERSION \
+       java-11-openjdk-headless \
     && microdnf clean all \
     && mkdir -p /srv/taxman/bin
 
