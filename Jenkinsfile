@@ -132,7 +132,7 @@ pipeline {
 
         stage('determine release candidate tag') {
             when {
-                branch 'feature/enhanced_jenkins_pipeline'
+                branch 'master'
             }
 
             steps {
@@ -158,7 +158,7 @@ pipeline {
         stage('create github release') {
             when {
                 anyOf {
-                    branch 'feature/enhanced_jenkins_pipeline'
+                    branch 'master'
                     tag pattern: /\d+.\d+.\d+$/, comparator: 'REGEXP'
                 }
             }
@@ -189,7 +189,7 @@ pipeline {
         stage('push image') {
             when {
                 anyOf {
-                    branch 'feature/enhanced_jenkins_pipeline'
+                    branch 'master'
                     tag pattern: /\d+.\d+.\d+$/, comparator: 'REGEXP'
                 }
             }
