@@ -145,7 +145,7 @@ pipeline {
 
         stage('determine release tag') {
             when {
-                tag pattern: /^\d+.\d+.\d+\$/, comparator: 'REGEXP'
+                tag pattern: /^\d+.\d+.\d+$/, comparator: 'REGEXP'
             }
 
             steps {
