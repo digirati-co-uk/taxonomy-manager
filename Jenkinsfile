@@ -217,7 +217,7 @@ pipeline {
                 build job: DEPLOYMENT_JOB,
                     parameters:  [
                         stringParam(name: 'ENVIRONMENT', value: DEPLOYMENT_ENV),
-                        stringParam(name: 'FRONTEND_VERSION', value: tagVersion)
+                        stringParam(name: 'BACKEND_IMAGE_TAG', value: tagVersion)
                     ],
                     propagate: true
             }
