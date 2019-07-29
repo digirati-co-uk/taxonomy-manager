@@ -132,7 +132,7 @@ pipeline {
 
         stage('determine release candidate tag') {
             when {
-                branch 'master'
+                branch 'feature/enhanced_jenkins_pipeline'
             }
 
             steps {
@@ -158,7 +158,7 @@ pipeline {
         stage('create github release') {
             when {
                 anyOf {
-                    branch 'master'
+                    branch 'feature/enhanced_jenkins_pipeline'
                     tag pattern: /\d+.\d+.\d+$/, comparator: 'REGEXP'
                 }
             }
@@ -188,24 +188,17 @@ pipeline {
 
         stage('push image') {
             when {
-                branch "master"
+                anyOf {
+                    branch 'feature/enhanced_jenkins_pipeline'
+                    tag pattern: /\d+.\d+.\d+$/, comparator: 'REGEXP'
+                }
             }
 
             steps {
                 withCredentials([usernamePassword(credentialsId: "$IMAGE_CREDS_JENKINS_ID", usernameVariable: 'IMAGE_REGISTRY_USERNAME', passwordVariable: 'IMAGE_REGISTRY_PASSWORD')]) {
                     sh 'docker login $IMAGE_REGISTRY --username $IMAGE_REGISTRY_USERNAME --password $IMAGE_REGISTRY_PASSWORD'
-                }
-
-                script {
-                    def images = [
-                        "\$IMAGE_REGISTRY/\$IMAGE_REPOSITORY:$tagVersion",
-                        "\$IMAGE_REGISTRY/\$IMAGE_REPOSITORY:latest"
-                    ]
-
-                    for (String image : images) {
-                        sh "docker tag \$IMAGE_REPOSITORY:latest $image"
-                        sh "docker push $image"
-                    }
+                    sh "docker tag \$IMAGE_REPOSITORY:latest \$IMAGE_REGISTRY/\$IMAGE_REPOSITORY:$tagVersion"
+                    sh "docker push \$IMAGE_REGISTRY/\$IMAGE_REPOSITORY:$tagVersion"
                 }
             }
         }
