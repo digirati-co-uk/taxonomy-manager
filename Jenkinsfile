@@ -9,7 +9,7 @@ pipeline {
 
     environment {
         RELEASE_TAG_REGEX = /^\d+\.\d+\.\d+$/
-        RC_TAG_REGEX = /^\d+.\d+.\d+-.+$/
+        RC_TAG_REGEX = /^\d+\.\d+\.\d+-.+$/
         GIT_COMMITER_EMAIL = 'digirati-ci@digirati.com'
         GIT_COMMITER_USERNAME = 'digirati-ci'
         GITHUB_REPO_PATH = 'digirati-co-uk/taxonomy-manager'
