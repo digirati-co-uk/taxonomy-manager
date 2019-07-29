@@ -207,7 +207,10 @@ pipeline {
 
         stage('deploy image') {
             when {
-                branch "master"
+                anyOf {
+                    branch 'master'
+                    tag pattern: RELEASE_TAG_REGEX, comparator: 'REGEXP'
+                }
             }
 
             steps {
