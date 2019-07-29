@@ -197,8 +197,8 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: "$IMAGE_CREDS_JENKINS_ID", usernameVariable: 'IMAGE_REGISTRY_USERNAME', passwordVariable: 'IMAGE_REGISTRY_PASSWORD')]) {
                     sh 'docker login $IMAGE_REGISTRY --username $IMAGE_REGISTRY_USERNAME --password $IMAGE_REGISTRY_PASSWORD'
-                    sh "docker tag \$IMAGE_REPOSITORY:latest \$IMAGE_REGISTRY/\$IMAGE_REPOSITORY:$tagVersion"
-                    sh "docker push \$IMAGE_REGISTRY/\$IMAGE_REPOSITORY:$tagVersion"
+                    sh "docker tag \$IMAGE_REPOSITORY:latest \$IMAGE_REGISTRY/\$IMAGE_REPOSITORY:${tagVersion}"
+                    sh "docker push \$IMAGE_REGISTRY/\$IMAGE_REPOSITORY:${tagVersion}"
                 }
             }
         }
