@@ -8,6 +8,8 @@ pipeline {
     }
 
     environment {
+        RELEASE_TAG_REGEX = /^\d+\.\d+\.\d+$/
+        RC_TAG_REGEX = /^\d+.\d+.\d+-.+$/
         GIT_COMMITER_EMAIL = 'digirati-ci@digirati.com'
         GIT_COMMITER_USERNAME = 'digirati-ci'
         GITHUB_REPO_PATH = 'digirati-co-uk/taxonomy-manager'
@@ -26,7 +28,7 @@ pipeline {
     stages {
         stage('abort if release candidate tag') {
             when {
-                tag pattern: /^\d+.\d+.\d+-.+$/, comparator: 'REGEXP'
+                tag pattern: RC_TAG_REGEX, comparator: 'REGEXP'
             }
 
             steps {
@@ -145,7 +147,7 @@ pipeline {
 
         stage('determine release tag') {
             when {
-                tag pattern: /^\d+.\d+.\d+$/, comparator: 'REGEXP'
+                tag pattern: RELEASE_TAG_REGEX, comparator: 'REGEXP'
             }
 
             steps {
@@ -159,7 +161,7 @@ pipeline {
             when {
                 anyOf {
                     branch 'master'
-                    tag pattern: /\d+.\d+.\d+$/, comparator: 'REGEXP'
+                    tag pattern: RELEASE_TAG_REGEX, comparator: 'REGEXP'
                 }
             }
 
@@ -177,7 +179,7 @@ pipeline {
                                          "tag_name": "${tagVersion}",
                                          "target_commitish": "$GIT_COMMIT",
                                          "name": "${tagVersion}",
-                                         "prerelease": ${tagVersion ==~ /^\d+.\d+.\d+-.+$/}
+                                         "prerelease": ${tagVersion ==~ RC_TAG_REGEX}
                                      }'
                             """
                         )
@@ -190,7 +192,7 @@ pipeline {
             when {
                 anyOf {
                     branch 'master'
-                    tag pattern: /\d+.\d+.\d+$/, comparator: 'REGEXP'
+                    tag pattern: RELEASE_TAG_REGEX, comparator: 'REGEXP'
                 }
             }
 
