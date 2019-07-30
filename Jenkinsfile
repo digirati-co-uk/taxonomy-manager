@@ -129,9 +129,9 @@ pipeline {
         stage('build image') {
             steps {
                 script {
-                    backendImage = docker.build(REPOSITORY_NAME,
-                            "-f dockerfiles/Dockerfile.jvm " +
-                                    "."
+                    backendImage = docker.build(IMAGE_REPOSITORY,
+                        "-f dockerfiles/Dockerfile.jvm " +
+                        "."
                     )
                 }
             }
