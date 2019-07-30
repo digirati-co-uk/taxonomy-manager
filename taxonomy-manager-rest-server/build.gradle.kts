@@ -19,8 +19,7 @@ val quarkusExtensions = setOf(
         "jdbc-postgresql",
         "resteasy",
         "resteasy-jsonb",
-        "smallrye-jwt",
-        "undertow"
+        "smallrye-jwt"
 )
 
 java {
