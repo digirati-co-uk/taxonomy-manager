@@ -15,8 +15,7 @@ set_java_opts() {
         -Dquarkus.datasource.password=${QUARKUS_DATASOURCE_PASSWORD} \
         -Dmp.jwt.verify.publickey.location='' \
         -Dmp.jwt.verify.publickey=${MP_JWT_VERIFY_PUBLICKEY} \
-        -Dmp.jwt.verify.issuer=${MP_JWT_VERIFY_ISSUER} \
-        -Dquarkus.http.cors.origins=${QUARKUS_HTTP_CORS_ORIGINS}"
+        -Dmp.jwt.verify.issuer=${MP_JWT_VERIFY_ISSUER}"
 }
 
 run_backend() {
