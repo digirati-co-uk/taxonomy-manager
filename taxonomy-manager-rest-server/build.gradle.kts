@@ -19,7 +19,8 @@ val quarkusExtensions = setOf(
         "jdbc-postgresql",
         "resteasy",
         "resteasy-jsonb",
-        "smallrye-jwt"
+        "smallrye-jwt",
+        "undertow"
 )
 
 java {
@@ -72,7 +73,7 @@ tasks {
 
 tasks.withType<QuarkusDev> {
     debug = "client"
-    jvmArgs = "-Dmp.jwt.verify.issuer=\"http://localhost:8080/\""
+    jvmArgs = "-Dmp.jwt.verify.issuer=http://localhost:8080/"
 }
 
 val integrationTest = task<Test>("integrationTest") {
