@@ -127,11 +127,13 @@ pipeline {
         }
 
         stage('build image') {
-            script {
-                backendImage = docker.build(REPOSITORY_NAME,
-                    "-f dockerfiles/Dockerfile.jvm " +
-                    "."
-                )
+            steps {
+                script {
+                    backendImage = docker.build(REPOSITORY_NAME,
+                            "-f dockerfiles/Dockerfile.jvm " +
+                                    "."
+                    )
+                }
             }
         }
 
@@ -199,13 +201,15 @@ pipeline {
                 }
             }
 
-            script {
-                withCredentials([usernamePassword(credentialsId: "$IMAGE_CREDS_JENKINS_ID", usernameVariable: 'IMAGE_REGISTRY_USERNAME', passwordVariable: 'IMAGE_REGISTRY_PASSWORD')]) {
-                    sh 'docker login $IMAGE_REGISTRY --username $IMAGE_REGISTRY_USERNAME --password $IMAGE_REGISTRY_PASSWORD'
-                    docker.withRegistry(IMAGE_REGISTRY) {
-                        backendImage.push(tagVersion)
-                    }
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: "$IMAGE_CREDS_JENKINS_ID", usernameVariable: 'IMAGE_REGISTRY_USERNAME', passwordVariable: 'IMAGE_REGISTRY_PASSWORD')]) {
+                        sh 'docker login $IMAGE_REGISTRY --username $IMAGE_REGISTRY_USERNAME --password $IMAGE_REGISTRY_PASSWORD'
+                        docker.withRegistry(IMAGE_REGISTRY) {
+                            backendImage.push(tagVersion)
+                        }
 
+                    }
                 }
             }
         }
