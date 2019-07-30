@@ -8,6 +8,11 @@ pipeline {
     }
 
     environment {
+        RELEASE_TAG_REGEX = /^\d+\.\d+\.\d+$/
+        RC_TAG_REGEX = /^\d+\.\d+\.\d+-.+$/
+        GIT_COMMITER_EMAIL = 'digirati-ci@digirati.com'
+        GIT_COMMITER_USERNAME = 'digirati-ci'
+        GITHUB_REPO_PATH = 'digirati-co-uk/taxonomy-manager'
         IMAGE_CREDS_JENKINS_ID = 'aks-taxman'
         IMAGE_REGISTRY = 'taxman.azurecr.io'
         IMAGE_REPOSITORY = 'backend'
@@ -21,6 +26,27 @@ pipeline {
     }
 
     stages {
+        stage('abort if release candidate tag') {
+            when {
+                tag pattern: RC_TAG_REGEX, comparator: 'REGEXP'
+            }
+
+            steps {
+                script {
+                    echo 'Release candidate build detected, quietly aborting...'
+                    currentBuild.result = 'SUCCESS'
+                    return
+                }
+            }
+        }
+
+        stage('initialise git config') {
+            steps {
+                sh("git config user.email '${GIT_COMMITER_EMAIL}'")
+                sh("git config user.name '${GIT_COMMITER_USERNAME}'")
+            }
+        }
+
         stage('general linting') {
             steps {
                 sh 'pre-commit install'
@@ -106,44 +132,94 @@ pipeline {
             }
         }
 
+        stage('determine release candidate tag') {
+            when {
+                branch 'master'
+            }
+
+            steps {
+                script {
+                    def properties = readProperties(file: 'version.properties')
+                    tagVersion = "${properties.version}-${currentBuild.startTimeInMillis}.${currentBuild.number}"
+                }
+            }
+        }
+
+        stage('determine release tag') {
+            when {
+                tag pattern: RELEASE_TAG_REGEX, comparator: 'REGEXP'
+            }
+
+            steps {
+                script {
+                    tagVersion = sh (returnStdout: true, script: "git tag --points-at HEAD").trim()
+                }
+            }
+        }
+
+        stage('create github release') {
+            when {
+                anyOf {
+                    branch 'master'
+                    tag pattern: RELEASE_TAG_REGEX, comparator: 'REGEXP'
+                }
+            }
+
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'github-token', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                    script {
+                        def createReleaseResponse = sh (
+                                returnStdout: true,
+                                script:
+                                        """
+                            curl -u '${GIT_USERNAME}:${GIT_PASSWORD}' \
+                                 -H 'Content-Type:application/json' \
+                                 'https://api.github.com/repos/${GITHUB_REPO_PATH}/releases' \
+                                 -d '{
+                                         "tag_name": "${tagVersion}",
+                                         "target_commitish": "$GIT_COMMIT",
+                                         "name": "${tagVersion}",
+                                         "prerelease": ${tagVersion ==~ RC_TAG_REGEX}
+                                     }'
+                            """
+                        )
+                    }
+                }
+            }
+        }
+
         stage('push image') {
             when {
-                branch "master"
+                anyOf {
+                    branch 'master'
+                    tag pattern: RELEASE_TAG_REGEX, comparator: 'REGEXP'
+                }
             }
 
             steps {
                 withCredentials([usernamePassword(credentialsId: "$IMAGE_CREDS_JENKINS_ID", usernameVariable: 'IMAGE_REGISTRY_USERNAME', passwordVariable: 'IMAGE_REGISTRY_PASSWORD')]) {
                     sh 'docker login $IMAGE_REGISTRY --username $IMAGE_REGISTRY_USERNAME --password $IMAGE_REGISTRY_PASSWORD'
-                }
-
-                script {
-                    def properties = readProperties(file: 'version.properties')
-                    version = "${properties.version}-${currentBuild.startTimeInMillis}.${currentBuild.number}"
-                    def images = [
-                        "\$IMAGE_REGISTRY/\$IMAGE_REPOSITORY:$version",
-                        "\$IMAGE_REGISTRY/\$IMAGE_REPOSITORY:latest"
-                    ]
-
-                    for (String image : images) {
-                        sh "docker tag \$IMAGE_REPOSITORY:latest $image"
-                        sh "docker push $image"
-                    }
+                    sh "docker tag \$IMAGE_REPOSITORY:latest \$IMAGE_REGISTRY/\$IMAGE_REPOSITORY:${tagVersion}"
+                    sh "docker push \$IMAGE_REGISTRY/\$IMAGE_REPOSITORY:${tagVersion}"
                 }
             }
         }
 
         stage('deploy image') {
             when {
-                branch "master"
+                anyOf {
+                    branch 'master'
+                    tag pattern: RELEASE_TAG_REGEX, comparator: 'REGEXP'
+                }
             }
 
             steps {
-                build job: "$DEPLOYMENT_JOB",
-                      parameters:  [
-                          [$class: 'StringParameterValue', name: 'ENVIRONMENT', value: "$DEPLOYMENT_ENV"],
-                          [$class: 'StringParameterValue', name: 'BACKEND_IMAGE_TAG', value: "${version}"]
-                      ],
-                      propagate: true
+                build job: DEPLOYMENT_JOB,
+                    parameters:  [
+                        stringParam(name: 'ENVIRONMENT', value: DEPLOYMENT_ENV),
+                        stringParam(name: 'BACKEND_IMAGE_TAG', value: tagVersion)
+                    ],
+                    propagate: true
             }
         }
     }
