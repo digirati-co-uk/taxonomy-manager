@@ -23,6 +23,5 @@ services:
       - QUARKUS_DATASURCE_DRIVER=org.postgresql.Driver
       - QUARKUS_DATASOURCE_USERNAME=taxman
       - QUARKUS_DATASOURCE_PASSWORD=taxman
-      - QUARKUS_FLYWAY_MIGRATE_AT_START=true
       - MP_JWT_VERIFY_PUBLICKEY=
       - MP_JWT_VERIFY_ISSUER=localhost:5102
