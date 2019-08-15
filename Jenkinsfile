@@ -90,7 +90,7 @@ node {
     stage('push image') {
         withCredentials([usernamePassword(credentialsId: "aks-taxman", usernameVariable: 'registryUsername', passwordVariable: 'registryPassword')]) {
             buildImage.inside("-v /var/run/docker.sock:/var/run/docker.sock") {
-                pushImage(config.registryUrl, registryUsername, registryPassword, tagVersion)
+                pushImage(config.registryUrl, registryUsername, registryPassword, config.repositoryName, tagVersion)
             }
         }
     }
