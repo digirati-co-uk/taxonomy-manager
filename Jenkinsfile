@@ -165,7 +165,7 @@ def isMasterBuild() {
 
 def fetchTagVersion() {
     if (isMasterBuild()) {
-        def properties = readJSON file: 'package.json'
+        def properties = readProperties(file: 'version.properties')
         return "${properties.version}-${currentBuild.startTimeInMillis}.${currentBuild.number}"
     }
 
