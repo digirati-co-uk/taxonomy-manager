@@ -1,232 +1,201 @@
-pipeline {
-    agent {
-        dockerfile {
-            dir 'dockerfiles'
-            filename 'Dockerfile.build'
-            args '-v /var/run/docker.sock:/var/run/docker.sock'
+node {
+
+    def config = [
+        tagCommit: isMasterBuild(),
+        deployImage: isMasterBuild() || env.TAG_NAME,
+        registryUrl: "taxman.azurecr.io",
+        repositoryName: "backend",
+        deploymentJob: '../digirati-taxonomy-manager-infra/master',
+        deploymentEnv: 'dev'
+    ]
+
+    stage('checkout scm') {
+        checkoutScm()
+    }
+
+    def buildImage
+
+    stage('build build image') {
+        buildImage = buildBuildImage()
+    }
+
+    stage('general linting') {
+        buildImage.inside("-v /var/run/docker.sock:/var/run/docker.sock") {
+            generalLinting()
         }
     }
 
-    environment {
-        RELEASE_TAG_REGEX = /^\d+\.\d+\.\d+$/
-        RC_TAG_REGEX = /^\d+\.\d+\.\d+-.+$/
-        GIT_COMMITER_EMAIL = 'digirati-ci@digirati.com'
-        GIT_COMMITER_USERNAME = 'digirati-ci'
-        GITHUB_REPO_PATH = 'digirati-co-uk/taxonomy-manager'
-        IMAGE_CREDS_JENKINS_ID = 'aks-taxman'
-        IMAGE_REGISTRY = 'taxman.azurecr.io'
-        IMAGE_REPOSITORY = 'backend'
-        DEPLOYMENT_JOB = '../digirati-taxonomy-manager-infra/master'
-        DEPLOYMENT_ENV = 'dev'
+    stage('dockerfile linting') {
+        docker.image('hadolint/hadolint:latest-debian').inside {
+            dockerfileLinting()
+        }
     }
 
-    options {
-        ansiColor('xterm')
-        timestamps()
+    stage('build modules') {
+        buildImage.inside("-v /var/run/docker.sock:/var/run/docker.sock") {
+            buildModules()
+        }
     }
 
-    stages {
-        stage('abort if release candidate tag') {
-            when {
-                tag pattern: RC_TAG_REGEX, comparator: 'REGEXP'
-            }
-
-            steps {
-                script {
-                    echo 'Release candidate build detected, quietly aborting...'
-                    currentBuild.result = 'SUCCESS'
-                    return
-                }
-            }
+    stage('generic code analysis') {
+        buildImage.inside("-v /var/run/docker.sock:/var/run/docker.sock") {
+            genericCodeAnalysis()
         }
+    }
 
-        stage('initialise git config') {
-            steps {
-                sh("git config user.email '${GIT_COMMITER_EMAIL}'")
-                sh("git config user.name '${GIT_COMMITER_USERNAME}'")
-            }
-        }
-
-        stage('general linting') {
-            steps {
-                sh 'pre-commit install'
-                sh 'pre-commit run --all-files --verbose'
-            }
-        }
-
-        stage('dockerfile linting') {
-            agent {
-                docker {
-                    image 'hadolint/hadolint:latest-debian'
-                }
-            }
-            steps {
-                sh 'hadolint dockerfiles/* | tee -a hadolint_lint.txt'
-            }
-            post {
-                always {
-                    archiveArtifacts 'hadolint_lint.txt'
-                }
-            }
-        }
-
-        stage('build modules') {
-            steps {
-                script {
-                    def workspace = env.WORKSPACE
-                    sh "$workspace/gradlew -Pci=true clean generateTestKeyPair assemble check"
-                }
-            }
-        }
-
-        stage("generic code analysis") {
-            steps {
-                script {
-                    def spotbugs = scanForIssues tool: [$class: 'SpotBugs', pattern: '**/build/reports/spotbugs/*.xml']
-                    def checkstyle = scanForIssues tool: [$class: 'CheckStyle', pattern: '**/build/reports/checkstyle/*.xml']
-                    def javac = scanForIssues tool: [$class: 'Java']
-
-                    publishIssues issues: [javac]
-                    publishIssues issues: [spotbugs]
-                    publishIssues issues: [checkstyle]
-                }
-            }
-        }
-
+    if (env.CHANGE_ID != null) {
         stage('pull request code analysis') {
-            when {
-                expression { env.CHANGE_ID != null }
-            }
-
-            steps {
-                withSonarQubeEnv('default') {
-                    script {
-                        def branchName = env.GIT_BRANCH.replaceAll("origin/", "")
-                        def changeId = env.CHANGE_ID
-                        def workspace = env.WORKSPACE
-
-                        sh "$workspace/gradlew -Pci=true sonarqube -Dsonar.pullrequest.branch=$branchName -Dsonar.pullrequest.key=$changeId"
-                    }
+            withSonarQubeEnv('default') {
+                buildImage.inside("-v /var/run/docker.sock:/var/run/docker.sock") {
+                    pullRequestCodeAnalysis()
                 }
             }
         }
+    }
 
-        stage ('mainline code analysis') {
-            when {
-                branch "master"
-            }
-
-            steps {
-                withSonarQubeEnv('default') {
-                    script {
-                        def workspace = env.WORKSPACE
-                        sh "$workspace/gradlew -Pci=true sonarqube"
-                    }
+    if (isMasterBuild()) {
+        stage('mainline code analysis') {
+            withSonarQubeEnv('default') {
+                buildImage.inside("-v /var/run/docker.sock:/var/run/docker.sock") {
+                    mainlineCodeAnalysis()
                 }
             }
         }
+    }
 
-        stage('build image') {
-            steps {
-                sh 'docker build -t $IMAGE_REPOSITORY:latest -f dockerfiles/Dockerfile.jvm .'
+    stage('build backend image') {
+        buildImage.inside("-v /var/run/docker.sock:/var/run/docker.sock") {
+            buildBackendImage(config.repositoryName)
+        }
+    }
+
+    def tagVersion = fetchTagVersion()
+
+    if (config.tagCommit) {
+        stage('create git tag') {
+            buildImage.inside("-v /var/run/docker.sock:/var/run/docker.sock") {
+                createGitTag(tagVersion)
             }
         }
+    }
 
-        stage('determine release candidate tag') {
-            when {
-                branch 'master'
-            }
-
-            steps {
-                script {
-                    def properties = readProperties(file: 'version.properties')
-                    tagVersion = "${properties.version}-${currentBuild.startTimeInMillis}.${currentBuild.number}"
-                }
+    stage('push image') {
+        withCredentials([usernamePassword(credentialsId: "aks-taxman", usernameVariable: 'registryUsername', passwordVariable: 'registryPassword')]) {
+            buildImage.inside("-v /var/run/docker.sock:/var/run/docker.sock") {
+                pushImage(config.registryUrl, registryUsername, registryPassword, config.repositoryName, tagVersion)
             }
         }
+    }
 
-        stage('determine release tag') {
-            when {
-                tag pattern: RELEASE_TAG_REGEX, comparator: 'REGEXP'
-            }
-
-            steps {
-                script {
-                    tagVersion = sh (returnStdout: true, script: "git tag --points-at HEAD").trim()
-                }
-            }
-        }
-
-        stage('create github release') {
-            when {
-                anyOf {
-                    branch 'master'
-                    tag pattern: RELEASE_TAG_REGEX, comparator: 'REGEXP'
-                }
-            }
-
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'github-token', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
-                    script {
-                        def createReleaseResponse = sh (
-                                returnStdout: true,
-                                script:
-                                        """
-                            curl -u '${GIT_USERNAME}:${GIT_PASSWORD}' \
-                                 -H 'Content-Type:application/json' \
-                                 'https://api.github.com/repos/${GITHUB_REPO_PATH}/releases' \
-                                 -d '{
-                                         "tag_name": "${tagVersion}",
-                                         "target_commitish": "$GIT_COMMIT",
-                                         "name": "${tagVersion}",
-                                         "prerelease": ${tagVersion ==~ RC_TAG_REGEX}
-                                     }'
-                            """
-                        )
-                    }
-                }
-            }
-        }
-
-        stage('push image') {
-            when {
-                anyOf {
-                    branch 'master'
-                    tag pattern: RELEASE_TAG_REGEX, comparator: 'REGEXP'
-                }
-            }
-
-            steps {
-                withCredentials([usernamePassword(credentialsId: "$IMAGE_CREDS_JENKINS_ID", usernameVariable: 'IMAGE_REGISTRY_USERNAME', passwordVariable: 'IMAGE_REGISTRY_PASSWORD')]) {
-                    sh 'docker login $IMAGE_REGISTRY --username $IMAGE_REGISTRY_USERNAME --password $IMAGE_REGISTRY_PASSWORD'
-                    sh "docker tag \$IMAGE_REPOSITORY:latest \$IMAGE_REGISTRY/\$IMAGE_REPOSITORY:${tagVersion}"
-                    sh "docker push \$IMAGE_REGISTRY/\$IMAGE_REPOSITORY:${tagVersion}"
-                }
-            }
-        }
-
+    if (config.deployImage) {
         stage('deploy image') {
-            when {
-                anyOf {
-                    branch 'master'
-                    tag pattern: RELEASE_TAG_REGEX, comparator: 'REGEXP'
-                }
-            }
-
-            steps {
-                build job: DEPLOYMENT_JOB,
-                    parameters:  [
-                        stringParam(name: 'ENVIRONMENT', value: DEPLOYMENT_ENV),
-                        stringParam(name: 'BACKEND_IMAGE_TAG', value: tagVersion)
-                    ],
-                    propagate: true
+            buildImage.inside("-v /var/run/docker.sock:/var/run/docker.sock") {
+                deployImage(config.deploymentJob, config.deploymentEnv, tagVersion)
             }
         }
     }
+}
 
-    post {
-        always {
-            junit '**/build/test-results/test/*.xml'
-        }
+/*
+ * We can't use the Jenkins Docker DSL plugin (i.e. docker.build(), docker.push(), etc) in this pipeline, because the
+ * Dockerfile being built is multistage and a bug with the plugin causes the build to fail. See:
+ * https://stackoverflow.com/questions/51678535/how-to-resolve-cannot-retrieve-id-from-docker-when-building-docker-image-usin
+ * https://issues.jenkins-ci.org/browse/JENKINS-44789
+ * https://issues.jenkins-ci.org/browse/JENKINS-44609
+ * https://issues.jenkins-ci.org/browse/JENKINS-31507
+ */
+
+def checkoutScm() {
+    checkout scm
+}
+
+def buildBuildImage() {
+    return docker.build("taxonomy-manager-infra-build", "-f dockerfiles/Dockerfile.build .")
+}
+
+def generalLinting() {
+    sh 'pre-commit install'
+    sh 'pre-commit run --all-files --verbose'
+}
+
+def dockerfileLinting() {
+    try {
+        sh 'hadolint dockerfiles/* | tee -a hadolint_lint.txt'
     }
+    finally {
+        archiveArtifacts 'hadolint_lint.txt'
+    }
+}
+
+def buildModules() {
+    def workspace = env.WORKSPACE
+    sh "$workspace/gradlew -Pci=true clean generateTestKeyPair assemble check"
+}
+
+def genericCodeAnalysis() {
+    def spotbugs = scanForIssues tool: [$class: 'SpotBugs', pattern: '**/build/reports/spotbugs/*.xml']
+    def checkstyle = scanForIssues tool: [$class: 'CheckStyle', pattern: '**/build/reports/checkstyle/*.xml']
+    def javac = scanForIssues tool: [$class: 'Java']
+
+    publishIssues issues: [javac]
+    publishIssues issues: [spotbugs]
+    publishIssues issues: [checkstyle]
+}
+
+def pullRequestCodeAnalysis() {
+    def branchName = env.BRANCH_NAME
+    def changeId = env.CHANGE_ID
+    def workspace = env.WORKSPACE
+
+    sh "$workspace/gradlew -Pci=true sonarqube -Dsonar.pullrequest.branch=${branchName} -Dsonar.pullrequest.key=${changeId}"
+}
+
+def mainlineCodeAnalysis() {
+    def workspace = env.WORKSPACE
+    sh "$workspace/gradlew -Pci=true sonarqube"
+}
+
+def buildBackendImage(def repositoryName) {
+    sh "docker build -t \"${repositoryName}:latest\" -f \"dockerfiles/Dockerfile.jvm\" ."
+}
+
+def isMasterBuild() {
+    return env.BRANCH_NAME == 'master'
+}
+
+def fetchTagVersion() {
+    if (isMasterBuild()) {
+        def properties = readJSON file: 'package.json'
+        return "${properties.version}-${currentBuild.startTimeInMillis}.${currentBuild.number}"
+    }
+
+    if (env.TAG_NAME) {
+        return env.TAG_NAME
+    }
+
+    return sh(returnStdout: true, script: "echo ${env.BRANCH_NAME} | sed -e \"s/\\//-/g\"").trim()
+}
+
+def createGitTag(def tagVersion) {
+    sh "mkdir -p  ~/.ssh/ && ssh-keyscan github.com | tee -a ~/.ssh/known_hosts"
+    sshagent(['github-ssh']) {
+        sh "git tag -a ${tagVersion} -m 'Automatic RC tag ${tagVersion}'"
+        sh "git push origin ${tagVersion}"
+    }
+}
+
+def pushImage(def registryUrl, def registryUsername, def registryPassword, def repositoryName, def tagVersion) {
+    sh "docker login \"https://${registryUrl}\" --username \"${registryUsername}\" --password \"${registryPassword}\""
+    sh "docker tag \"${repositoryName}:latest\" \"${registryUrl}/${repositoryName}:${tagVersion}\""
+    sh "docker push \"${registryUrl}/${repositoryName}:${tagVersion}\""
+}
+
+def deployImage(def deploymentJob, def deploymentEnv, def tagVersion) {
+    build job: deploymentJob,
+        parameters:  [
+            booleanParam(name: 'DEPLOY', value: true),
+            stringParam(name: 'ENVIRONMENT', value: deploymentEnv),
+            stringParam(name: 'BACKEND_IMAGE_TAG', value: tagVersion)
+        ],
+        propagate: true
 }
