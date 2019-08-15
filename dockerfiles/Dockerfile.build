@@ -10,10 +10,10 @@ RUN apt-get update \
     && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - \
     && add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" \
     && apt-get update \
-    && apt-get install -y --no-install-recommends docker-ce=$DOCKER_CE_VERSION \
+    && apt-get install -y --no-install-recommends docker-ce \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
-    && pip3 install pre-commit==$PRE_COMMIT_VERSION \
+    && pip3 install pre-commit \
     && useradd -m -d /home/build -s /bin/bash -u 1010 build
 
 ENV JAVA_HOME="/usr/lib/jvm/java-11-openjdk-amd64"
