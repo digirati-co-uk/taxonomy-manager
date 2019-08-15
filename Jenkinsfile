@@ -156,11 +156,11 @@ def genericCodeAnalysis() {
 }
 
 def pullRequestCodeAnalysis() {
-    def branchName = env.GIT_BRANCH.replaceAll("origin/", "")
+    def branchName = env.BRANCH_NAME
     def changeId = env.CHANGE_ID
     def workspace = env.WORKSPACE
 
-    sh "$workspace/gradlew -Pci=true sonarqube -Dsonar.pullrequest.branch=$branchName -Dsonar.pullrequest.key=$changeId"
+    sh "$workspace/gradlew -Pci=true sonarqube -Dsonar.pullrequest.branch=${branchName} -Dsonar.pullrequest.key=${changeId}"
 }
 
 def mainlineCodeAnalysis() {
