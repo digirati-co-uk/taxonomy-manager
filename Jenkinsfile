@@ -71,11 +71,9 @@ node {
         }
     }
 
-    def backendImage
-
     stage('build backend image') {
         buildImage.inside("-v /var/run/docker.sock:/var/run/docker.sock") {
-            backendImage = buildBackendImage(config.repositoryName)
+            buildBackendImage(config.repositoryName)
         }
     }
 
@@ -92,7 +90,7 @@ node {
     stage('push image') {
         withCredentials([usernamePassword(credentialsId: "aks-taxman", usernameVariable: 'registryUsername', passwordVariable: 'registryPassword')]) {
             buildImage.inside("-v /var/run/docker.sock:/var/run/docker.sock") {
-                pushImage(config.registryUrl, registryUsername, registryPassword, backendImage, tagVersion)
+                pushImage(config.registryUrl, registryUsername, registryPassword, tagVersion)
             }
         }
     }
@@ -105,6 +103,15 @@ node {
         }
     }
 }
+
+/*
+ * We can't use the Jenkins Docker DSL plugin (i.e. docker.build(), docker.push(), etc) in this pipeline, because the
+ * Dockerfile being built is multistage and a bug with the plugin causes the build to fail. See:
+ * https://stackoverflow.com/questions/51678535/how-to-resolve-cannot-retrieve-id-from-docker-when-building-docker-image-usin
+ * https://issues.jenkins-ci.org/browse/JENKINS-44789
+ * https://issues.jenkins-ci.org/browse/JENKINS-44609
+ * https://issues.jenkins-ci.org/browse/JENKINS-31507
+ */
 
 def checkoutScm() {
     checkout scm
@@ -162,7 +169,7 @@ def mainlineCodeAnalysis() {
 }
 
 def buildBackendImage(def repositoryName) {
-    return docker.build(repositoryName, "-f dockerfiles/Dockerfile.jvm .")
+    sh "docker build -t \"${repositoryName}:latest\" -f \"dockerfiles/Dockerfile.jvm\" ."
 }
 
 def isMasterBuild() {
@@ -187,11 +194,10 @@ def createGitTag(def tagVersion) {
     sh "git push origin ${tagVersion}"
 }
 
-def pushImage(def registryUrl, def registryUsername, def registryPassword, def backendImage, def tagVersion) {
-    docker.withRegistry(registryUrl) {
-        sh "docker login \"${registryUrl}\" --username \"${registryUsername}\" --password \"${registryPassword}\""
-        backendImage.push(tagVersion)
-    }
+def pushImage(def registryUrl, def registryUsername, def registryPassword, def repositoryName, def tagVersion) {
+    sh "docker login \"${registryUrl}\" --username \"${registryUsername}\" --password \"${registryPassword}\""
+    sh "docker tag \"${repositoryName}:latest\" \"${registryUrl}/${repositoryName}:${tagVersion}\""
+    sh "docker push \"${registryUrl}/${repositoryName}:${tagVersion}\""
 }
 
 def deployImage(def deploymentJob, def deploymentEnv, def tagVersion) {
