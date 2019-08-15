@@ -3,8 +3,6 @@ node {
     def config = [
         tagCommit: isMasterBuild(),
         deployImage: isMasterBuild() || env.TAG_NAME,
-        gitCommiterEmail: 'digirati-ci@digirati.com',
-        gitCommiterUsername: 'digirati-ci',
         registryUrl: "taxman.azurecr.io",
         repositoryName: "backend",
         deploymentJob: '../digirati-taxonomy-manager-infra/master',
@@ -19,12 +17,6 @@ node {
 
     stage('build build image') {
         buildImage = buildBuildImage()
-    }
-
-    stage('initialise git config') {
-        buildImage.inside("-v /var/run/docker.sock:/var/run/docker.sock") {
-            initialiseGitConfig(config.gitCommiterEmail, config.gitCommiterUsername)
-        }
     }
 
     stage('general linting') {
@@ -121,11 +113,6 @@ def buildBuildImage() {
     return docker.build("taxonomy-manager-infra-build", "-f dockerfiles/Dockerfile.build .")
 }
 
-def initialiseGitConfig(def commiterEmail, def commiterUsername) {
-    sh "git config user.email '${commiterEmail}'"
-    sh "git config user.name '${commiterUsername}'"
-}
-
 def generalLinting() {
     sh 'pre-commit install'
     sh 'pre-commit run --all-files --verbose'
@@ -190,8 +177,11 @@ def fetchTagVersion() {
 }
 
 def createGitTag(def tagVersion) {
-    sh "git tag -a ${tagVersion} -m 'Automatic RC tag ${tagVersion}'"
-    sh "git push origin ${tagVersion}"
+    sh "mkdir -p  ~/.ssh/ && ssh-keyscan github.com | tee -a ~/.ssh/known_hosts"
+    sshagent(['github-ssh']) {
+        sh "git tag -a ${tagVersion} -m 'Automatic RC tag ${tagVersion}'"
+        sh "git push origin ${tagVersion}"
+    }
 }
 
 def pushImage(def registryUrl, def registryUsername, def registryPassword, def repositoryName, def tagVersion) {
