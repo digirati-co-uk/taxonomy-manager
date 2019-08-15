@@ -5,7 +5,7 @@ node {
         deployImage: isMasterBuild() || env.TAG_NAME,
         gitCommiterEmail: 'digirati-ci@digirati.com',
         gitCommiterUsername: 'digirati-ci',
-        registryUrl: "https://taxman.azurecr.io",
+        registryUrl: "taxman.azurecr.io",
         repositoryName: "backend",
         deploymentJob: '../digirati-taxonomy-manager-infra/master',
         deploymentEnv: 'dev'
@@ -195,7 +195,7 @@ def createGitTag(def tagVersion) {
 }
 
 def pushImage(def registryUrl, def registryUsername, def registryPassword, def repositoryName, def tagVersion) {
-    sh "docker login \"${registryUrl}\" --username \"${registryUsername}\" --password \"${registryPassword}\""
+    sh "docker login \"https://${registryUrl}\" --username \"${registryUsername}\" --password \"${registryPassword}\""
     sh "docker tag \"${repositoryName}:latest\" \"${registryUrl}/${repositoryName}:${tagVersion}\""
     sh "docker push \"${registryUrl}/${repositoryName}:${tagVersion}\""
 }
