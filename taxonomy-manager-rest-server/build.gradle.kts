@@ -1,12 +1,21 @@
 import io.quarkus.gradle.tasks.QuarkusDev
 
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("io.quarkus:quarkus-gradle-plugin:0.18.0")
+    }
+}
+
 plugins {
     java
     jacoco
     checkstyle
-    id("io.quarkus") version "0.18.0"
 }
 
+apply(plugin = "io.quarkus")
 
 repositories {
     mavenCentral()
@@ -44,6 +53,7 @@ dependencies {
     quarkusExtensions.forEach { ext ->
         implementation("io.quarkus:quarkus-$ext:0.18.0")
     }
+
     implementation("org.springframework", "spring-jdbc", "5.1.3.RELEASE")
     implementation("org.json", "json", "20180813")
 
@@ -52,6 +62,7 @@ dependencies {
     implementation(project(":taxonomy-manager-rest"))
     implementation("com.google.guava", "guava", "27.1-jre")
 
+    testImplementation("io.rest-assured:rest-assured:3.3.0")
     testImplementation("io.quarkus", "quarkus-junit5", "0.18.0")
     testImplementation("com.nimbusds", "nimbus-jose-jwt", "7.4")
 
@@ -67,6 +78,7 @@ dependencies {
 tasks {
     test {
         useJUnitPlatform()
+        setForkEvery(1)
     }
 }
 
