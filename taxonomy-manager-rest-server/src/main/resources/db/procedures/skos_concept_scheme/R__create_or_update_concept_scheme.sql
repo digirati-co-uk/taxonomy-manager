@@ -7,9 +7,9 @@ $$
 BEGIN
     LOOP
         -- First attempt to update an existing scheme by its UUID.
-        UPDATE skos_concept_scheme cs
-        SET cs.title = _title
-        WHERE cs.uuid = _uuid OR cs.source = _source;
+        UPDATE skos_concept_scheme
+        SET title = _title
+        WHERE uuid = _uuid OR source = _source;
 
         -- If a record was updated, we're done here.
         IF found THEN
