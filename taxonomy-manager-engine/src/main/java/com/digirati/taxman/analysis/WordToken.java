@@ -1,5 +1,6 @@
 package com.digirati.taxman.analysis;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 
@@ -81,5 +82,13 @@ public class WordToken {
      */
     public boolean like(WordToken token) {
         return !Collections.disjoint(candidates(), token.candidates());
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("offset", offset)
+                .add("lexemes", lexemes)
+                .toString();
     }
 }

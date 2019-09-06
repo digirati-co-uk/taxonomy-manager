@@ -74,7 +74,7 @@ public class SimpleTermIndex<IdT> implements TermIndex<IdT> {
 
             for (var candidate : candidateEntries) {
                 var candidateTokens = candidate.getTokens();
-                var currentTokenEndIndex = Math.min(tokenIndex + candidateTokens.size() + 1, tokens.size());
+                var currentTokenEndIndex = Math.min(tokenIndex + candidateTokens.size(), tokens.size());
                 var currentTokens = tokens.subList(tokenIndex, currentTokenEndIndex);
 
                 if (WordToken.like(candidateTokens, currentTokens)) {
