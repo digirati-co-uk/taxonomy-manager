@@ -34,7 +34,7 @@ public final class CoreNlpWordTokenizer implements WordTokenizer {
 
     @Override
     public List<WordToken> tokenize(String input) {
-        final Annotation phrase = nlp.process(input);
+        final Annotation phrase = nlp.process(input.trim());
 
         List<CoreLabel> labels = phrase.get(CoreAnnotations.TokensAnnotation.class);
         List<WordToken> tokens = new ArrayList<>(labels.size());
@@ -52,8 +52,8 @@ public final class CoreNlpWordTokenizer implements WordTokenizer {
             }
 
             var tokenAnnotations = Map.of(
-                    AnnotationType.LEMMA, lemma,
-                    AnnotationType.TOKEN, token
+                    AnnotationType.LEMMA, lemma.toLowerCase(),
+                    AnnotationType.TOKEN, token.toLowerCase()
             );
 
             tokens.add(new WordToken(offset, tokenAnnotations));
