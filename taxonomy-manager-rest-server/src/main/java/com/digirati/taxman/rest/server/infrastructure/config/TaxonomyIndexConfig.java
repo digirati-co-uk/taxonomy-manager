@@ -15,6 +15,7 @@ public class TaxonomyIndexConfig {
     String languageKey;
 
     @Produces
+    @ApplicationScoped
     TermIndex<UUID> termIndex() {
         return new SimpleTermIndex<>(CoreNlpWordTokenizer.create(languageKey));
     }

@@ -52,6 +52,7 @@ public class AppInitListener {
                 }
             });
 
+            logger.info("Found {} terms", terms.size());
             termIndex.addAll(terms);
         }
 
