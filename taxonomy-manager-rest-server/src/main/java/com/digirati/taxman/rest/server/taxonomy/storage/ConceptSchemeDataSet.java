@@ -30,7 +30,7 @@ public class ConceptSchemeDataSet {
         for (var relationship : topConcepts) {
             var recordJson = new JSONObject();
             recordJson.put("uuid", relationship.getId());
-            recordJson.put("source", relationship.getSource());
+            recordJson.put("source", relationship.getSource().orElse(null));
             array.put(recordJson);
         }
 

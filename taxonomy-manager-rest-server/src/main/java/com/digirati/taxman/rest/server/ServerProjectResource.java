@@ -1,7 +1,7 @@
 package com.digirati.taxman.rest.server;
 
 import com.digirati.taxman.common.taxonomy.ProjectModel;
-import com.digirati.taxman.rest.server.taxonomy.ProjectModelRepository;
+import com.digirati.taxman.rest.server.management.ProjectModelRepository;
 import com.digirati.taxman.rest.taxonomy.ProjectPath;
 import com.digirati.taxman.rest.taxonomy.ProjectResource;
 

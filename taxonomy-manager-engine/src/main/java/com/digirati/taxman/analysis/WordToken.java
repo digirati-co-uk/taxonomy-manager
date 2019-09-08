@@ -1,44 +1,33 @@
 package com.digirati.taxman.analysis;
 
+import com.digirati.taxman.analysis.nlp.AnnotationType;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
-import com.google.common.collect.ImmutableSet;
 
-import java.util.Collections;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 public class WordToken {
 
-    private final int offset;
     private final Map<AnnotationType, String> lexemes;
 
-    public WordToken(int offset, Map<AnnotationType, String> lexemes) {
-        this.offset = offset;
+    public WordToken(Map<AnnotationType, String> lexemes) {
         this.lexemes = lexemes;
     }
 
-    public static boolean like(List<WordToken> a, List<WordToken> b) {
+    public static boolean sharesCandidates(List<WordToken> a, List<WordToken> b) {
         if (a.isEmpty() || b.isEmpty()) {
             throw new IllegalArgumentException("Cannot compare empty lists of tokens");
+        } else if (a.size() != b.size()) {
+            return false;
         }
 
-        final List<WordToken> iterator;
-        final List<WordToken> cmp;
+        for (int index = 0; index < a.size(); index++) {
+            var source = a.get(index);
+            var other = b.get(index);
 
-        if (a.size() > b.size()) {
-            iterator = a;
-            cmp = b;
-        } else {
-            iterator = b;
-            cmp = a;
-        }
-
-        for (int index = 0; index < cmp.size(); index++) {
-            var source = iterator.get(index);
-            var other = cmp.get(index);
-
-            if (!source.like(other)) {
+            if (!source.sharesCandidates(other)) {
                 return false;
             }
         }
@@ -46,12 +35,8 @@ public class WordToken {
         return true;
     }
 
-    public ImmutableSet<String> candidates() {
-        return ImmutableSet.copyOf(lexemes.values());
-    }
-
-    public int offset() {
-        return offset;
+    public Collection<String> candidates() {
+        return lexemes.values();
     }
 
     @Override
@@ -65,13 +50,12 @@ public class WordToken {
         }
 
         WordToken wordToken = (WordToken) o;
-        return offset == wordToken.offset
-                && Objects.equal(lexemes, wordToken.lexemes);
+        return Objects.equal(lexemes, wordToken.lexemes);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(offset, lexemes);
+        return Objects.hashCode(lexemes);
     }
 
     /**
@@ -80,14 +64,21 @@ public class WordToken {
      * @param token The token to compare against.
      * @return {@code true} iff this token has any candidates in common with the other token.
      */
-    public boolean like(WordToken token) {
-        return !Collections.disjoint(candidates(), token.candidates());
+    public boolean sharesCandidates(WordToken token) {
+        Collection<String> candidates = candidates();
+
+        for (String candidate : token.candidates()) {
+            if (candidates.contains(candidate)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("offset", offset)
                 .add("lexemes", lexemes)
                 .toString();
     }

@@ -3,6 +3,7 @@ package com.digirati.taxman.rest.server.taxonomy.mapper;
 import com.digirati.taxman.common.rdf.RdfModelBuilder;
 import com.digirati.taxman.common.rdf.RdfModelException;
 import com.digirati.taxman.common.rdf.RdfModelFactory;
+import com.digirati.taxman.common.taxonomy.ConceptLabelExtractor;
 import com.digirati.taxman.common.taxonomy.ConceptModel;
 import com.digirati.taxman.common.taxonomy.ConceptRelationshipType;
 import com.digirati.taxman.rest.server.taxonomy.identity.ConceptIdResolver;

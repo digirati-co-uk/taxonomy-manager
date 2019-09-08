@@ -22,26 +22,22 @@ public interface ProjectResource {
     @GET
     @Produces({MediaTypes.APPLICATION_JSONLD_SKOS_VALUE, MediaTypes.APPLICATION_RDF_XML_VALUE})
     @JsonLdFrame(input = "jsonld/framing/collection.json")
-    @RolesAllowed(Roles.ADMIN)
     Response listProjects();
 
     @POST
     @Consumes({MediaTypes.APPLICATION_RDF_XML_VALUE, MediaTypes.APPLICATION_JSONLD_SKOS_VALUE})
     @Produces({MediaTypes.APPLICATION_RDF_XML_VALUE, MediaTypes.APPLICATION_JSONLD_SKOS_VALUE})
     @JsonLdFrame(input = "jsonld/framing/project.json")
-    @RolesAllowed(Roles.ADMIN)
     Response createProject(@Valid ProjectModel project);
 
     @GET
     @Path("/{project}")
     @Produces({MediaTypes.APPLICATION_JSONLD_SKOS_VALUE, MediaTypes.APPLICATION_RDF_XML_VALUE})
     @JsonLdFrame(input = "jsonld/framing/project.json")
-    @RolesAllowed(Roles.ADMIN)
     Response getProject(@BeanParam ProjectPath projectPath);
 
     @PUT
     @Path("/{project}")
     @Consumes({MediaTypes.APPLICATION_RDF_XML_VALUE, MediaTypes.APPLICATION_JSONLD_SKOS_VALUE})
-    @RolesAllowed(Roles.ADMIN)
     Response updateProject(@BeanParam ProjectPath projectPath, @Valid ProjectModel project);
 }

@@ -3,7 +3,6 @@ package com.digirati.taxman.rest.server;
 import com.digirati.taxman.common.taxonomy.ConceptSchemeModel;
 import com.digirati.taxman.rest.server.taxonomy.ConceptSchemeImporter;
 import com.digirati.taxman.rest.server.taxonomy.ConceptSchemeModelRepository;
-import com.digirati.taxman.rest.taxonomy.ConceptSchemeImportData;
 import com.digirati.taxman.rest.taxonomy.ConceptSchemePath;
 import com.digirati.taxman.rest.taxonomy.ConceptSchemeResource;
 

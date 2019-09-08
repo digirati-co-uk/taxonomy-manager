@@ -1,8 +1,8 @@
 package com.digirati.taxman.rest.server.infrastructure.config;
 
-import com.digirati.taxman.analysis.corenlp.CoreNlpWordTokenizer;
+import com.digirati.taxman.analysis.nlp.corenlp.CoreNlpWordTokenizer;
 import com.digirati.taxman.analysis.index.TermIndex;
-import com.digirati.taxman.analysis.index.simple.SimpleTermIndex;
+import com.digirati.taxman.analysis.search.NaiveSearchStrategy;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -17,6 +17,6 @@ public class TaxonomyIndexConfig {
     @Produces
     @ApplicationScoped
     TermIndex<UUID> termIndex() {
-        return new SimpleTermIndex<>(CoreNlpWordTokenizer.create(languageKey));
+        return new TermIndex<>(CoreNlpWordTokenizer.create(languageKey), new NaiveSearchStrategy<>());
     }
 }

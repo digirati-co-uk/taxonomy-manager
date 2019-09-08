@@ -4,7 +4,6 @@ import com.digirati.taxman.common.rdf.RdfModelException;
 import com.digirati.taxman.common.rdf.RdfModelFactory;
 import com.digirati.taxman.common.taxonomy.ConceptModel;
 import com.digirati.taxman.common.taxonomy.ConceptSchemeModel;
-import com.digirati.taxman.rest.server.taxonomy.ModelMappingContext;
 import com.digirati.taxman.rest.server.taxonomy.identity.ConceptIdResolver;
 import com.digirati.taxman.rest.server.taxonomy.identity.ConceptSchemeIdResolver;
 import com.digirati.taxman.rest.server.taxonomy.storage.ConceptSchemeDataSet;
@@ -15,9 +14,8 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.vocabulary.SKOS;
 
-import javax.ws.rs.WebApplicationException;
+import java.net.URI;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -56,12 +54,14 @@ public class ConceptSchemeMapper {
         }
 
         for (ConceptReference topConceptReference : dataset.getTopConcepts()) {
-            builder.addEmbeddedModel(
-                    SKOS.hasTopConcept,
-                    modelFactory.createBuilder(ConceptModel.class)
-                            .addPlainLiteral(DCTerms.source, topConceptReference.getPreferredLabel())
-                            .addPlainLiteral(SKOS.prefLabel, topConceptReference.getPreferredLabel())
-                            .setUri(conceptIdResolver.resolve(topConceptReference.getId())));
+            var embeddedModel = modelFactory.createBuilder(ConceptModel.class)
+                    .addPlainLiteral(SKOS.prefLabel, topConceptReference.getPreferredLabel())
+                    .setUri(conceptIdResolver.resolve(topConceptReference.getId()));
+
+            var source = topConceptReference.getSource();
+            source.ifPresent(uri -> embeddedModel.addEmbeddedModel(DCTerms.source, URI.create(uri)));
+
+            builder.addEmbeddedModel(SKOS.hasTopConcept, embeddedModel);
         }
 
         return builder.build();
@@ -82,7 +82,7 @@ public class ConceptSchemeMapper {
 
         var topConcepts = model.getTopConcepts()
                 .map(concept -> {
-                    UUID id = conceptIdResolver.resolve(concept.getUri()).orElse(null);
+                    UUID id = concept.getUuid();
                     Resource resource = concept.getResource();
 
                     var targetSourceResource = resource.getPropertyResourceValue(DCTerms.source);

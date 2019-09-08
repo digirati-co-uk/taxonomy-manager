@@ -1,15 +1,16 @@
-package com.digirati.taxman.analysis.index;
+package com.digirati.taxman.analysis;
 
-import com.digirati.taxman.analysis.WordToken;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
 import java.util.List;
 
-public class TermIndexEntry<IdT> {
+public class WordTokenSearchEntry<IdT> {
+
     private final IdT identity;
     private final List<WordToken> tokens;
 
-    public TermIndexEntry(IdT identity, List<WordToken> tokens) {
+    public WordTokenSearchEntry(IdT identity, List<WordToken> tokens) {
         this.identity = identity;
         this.tokens = tokens;
     }
@@ -40,7 +41,7 @@ public class TermIndexEntry<IdT> {
             return false;
         }
 
-        TermIndexEntry<?> that = (TermIndexEntry<?>) o;
+        WordTokenSearchEntry<?> that = (WordTokenSearchEntry) o;
         return Objects.equal(identity, that.identity)
                 && Objects.equal(tokens, that.tokens);
     }
@@ -48,5 +49,13 @@ public class TermIndexEntry<IdT> {
     @Override
     public int hashCode() {
         return Objects.hashCode(identity, tokens);
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("identity", identity)
+                .add("tokens", tokens)
+                .toString();
     }
 }

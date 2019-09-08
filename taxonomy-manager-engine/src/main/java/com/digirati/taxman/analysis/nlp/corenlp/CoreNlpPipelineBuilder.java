@@ -1,4 +1,4 @@
-package com.digirati.taxman.analysis.corenlp;
+package com.digirati.taxman.analysis.nlp.corenlp;
 
 import edu.stanford.nlp.pipeline.Annotator;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
@@ -9,30 +9,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-public class CoreNlpPipelineBuilder {
+class CoreNlpPipelineBuilder {
 
     private final Map<String, Class<? extends Annotator>> customAnnotators = new HashMap<>();
     private final List<String> annotators = new ArrayList<>();
 
     private String language = "en";
 
-    public CoreNlpPipelineBuilder addCustomAnnotator(Class<? extends Annotator> type, String name) {
+    CoreNlpPipelineBuilder addCustomAnnotator(Class<? extends Annotator> type, String name) {
         customAnnotators.put(name, type);
         annotators.add(name);
         return this;
     }
 
-    public CoreNlpPipelineBuilder addAnnotator(String name) {
+    CoreNlpPipelineBuilder addAnnotator(String name) {
         annotators.add(name);
         return this;
     }
 
-    public CoreNlpPipelineBuilder setLanguage(String language) {
+    CoreNlpPipelineBuilder setLanguage(String language) {
         this.language = language;
         return this;
     }
 
-    public StanfordCoreNLP build() {
+    StanfordCoreNLP build() {
         Properties props = new Properties();
         props.put("annotators", String.join(",", annotators));
 

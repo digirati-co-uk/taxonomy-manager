@@ -25,12 +25,12 @@ DELETE FROM skos_concept_scheme_concept USING skos_concept_scheme_concept csc
     INNER JOIN skos_concept_scheme cs
         ON cs.id = csc.concept_scheme_id
 
-    LEFT OUTER JOIN jsonb_array_elements(_concept_ids) cid
+    LEFT JOIN jsonb_array_elements(_concept_ids) cid
         ON (cid ->> 'uuid')::uuid = c.uuid OR
            (cid ->> 'source') = c.source
 WHERE skos_concept_scheme_concept.concept_scheme_id = csc.concept_scheme_id
   AND skos_concept_scheme_concept.concept_id = csc.concept_id
   AND skos_concept_scheme_concept.is_top_concept = true
-  AND (cid ->> 'uuid') IS NULL
+  AND cid IS NULL
   AND cs.uuid = _uuid;
 $$;

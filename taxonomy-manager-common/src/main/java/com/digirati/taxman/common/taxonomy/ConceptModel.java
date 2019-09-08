@@ -39,6 +39,7 @@ public final class ConceptModel implements RdfModel, PersistentModel, Concept {
         return uuid;
     }
 
+    // @TODO: derive this from the URI at mapping from Resource time
     public void setUuid(UUID uuid) {
         this.uuid = uuid;
     }

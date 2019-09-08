@@ -13,6 +13,7 @@ import org.apache.jena.vocabulary.RDFS;
 
 import java.net.URI;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -117,5 +118,9 @@ public interface RdfModel {
      */
     default URI getUri() {
         return URI.create(getResource().getURI());
+    }
+
+    default Optional<RdfModel> buildEmbeddedModel(RdfModelFactory factory) {
+        return Optional.empty();
     }
 }

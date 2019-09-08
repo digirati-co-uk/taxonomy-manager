@@ -1,11 +1,11 @@
 package com.digirati.taxman.rest.server.infrastructure.lifecycle;
 
+import com.digirati.taxman.analysis.index.TermIndex;
+import com.digirati.taxman.common.taxonomy.ConceptLabelExtractor;
 import com.digirati.taxman.rest.server.infrastructure.config.TaxonomyIndexConfig;
 import com.digirati.taxman.rest.server.taxonomy.storage.ConceptDao;
-import com.digirati.taxman.analysis.index.TermIndex;
 import io.quarkus.runtime.StartupEvent;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.flywaydb.core.Flyway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,30 +26,22 @@ public class AppInitListener {
     String defaultLanguageName;
 
     @Inject
-    Flyway flyway;
-
-    @Inject
     ConceptDao conceptDao;
 
     @Inject
     TermIndex<UUID> termIndex;
 
     void onStartup(@Observes StartupEvent event) {
-        // We need to run migrations first so `loadAllRecords()` doesn't attempt to race against flyway,
-        // potentially executing queries against a database that hasn't been setup yet.
-
-        flyway.baseline();
-        flyway.migrate();
-
         try (var conceptRecords = conceptDao.loadAllRecords()) {
             var terms = new HashMap<UUID, String>();
 
             conceptRecords.forEach(record -> {
                 var uuid = record.getUuid();
+                var labelExtractor = new ConceptLabelExtractor(record);
 
-                for (var label : record.getLabels(defaultLanguageKey)) {
-                    terms.put(uuid, label);
-                }
+                labelExtractor.extractTo((property, values) -> {
+                    terms.put(uuid, values.get(defaultLanguageKey));
+                });
             });
 
             logger.info("Found {} terms", terms.size());

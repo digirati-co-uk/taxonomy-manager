@@ -3,6 +3,7 @@ package com.digirati.taxman.rest.server.taxonomy.storage.record;
 import com.google.common.base.Objects;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 
@@ -51,7 +52,7 @@ public class ConceptReference {
         return Objects.hashCode(target);
     }
 
-    public String getSource() {
-        return targetSource;
+    public Optional<String> getSource() {
+        return Optional.ofNullable(targetSource);
     }
 }

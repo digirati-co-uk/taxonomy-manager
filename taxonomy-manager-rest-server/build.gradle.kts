@@ -5,7 +5,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("io.quarkus:quarkus-gradle-plugin:0.18.0")
+        classpath("io.quarkus:quarkus-gradle-plugin:0.21.2")
     }
 }
 
@@ -48,10 +48,10 @@ val integrationTestImplementation by configurations.getting { extendsFrom(config
 configurations["integrationTestRuntimeOnly"].extendsFrom(configurations.runtimeOnly.get())
 
 dependencies {
-    implementation(enforcedPlatform("io.quarkus:quarkus-bom:0.18.0"))
+    implementation(enforcedPlatform("io.quarkus:quarkus-bom:0.21.2"))
 
     quarkusExtensions.forEach { ext ->
-        implementation("io.quarkus:quarkus-$ext:0.18.0")
+        implementation("io.quarkus:quarkus-$ext:0.21.2")
     }
 
     implementation("org.springframework", "spring-jdbc", "5.1.3.RELEASE")
@@ -63,8 +63,9 @@ dependencies {
     implementation("com.google.guava", "guava", "27.1-jre")
 
     testImplementation("io.rest-assured:rest-assured:3.3.0")
-    testImplementation("io.quarkus", "quarkus-junit5", "0.18.0")
+    testImplementation("io.quarkus", "quarkus-junit5", "0.21.2")
     testImplementation("com.nimbusds", "nimbus-jose-jwt", "7.4")
+    testCompileOnly("org.jetbrains:annotations:17.0.0")
 
     integrationTestImplementation("org.junit.jupiter:junit-jupiter-api:5.4.2")
     integrationTestImplementation("org.junit.jupiter:junit-jupiter-params:5.4.2")

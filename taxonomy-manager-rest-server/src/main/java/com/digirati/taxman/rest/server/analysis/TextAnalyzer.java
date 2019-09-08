@@ -1,12 +1,12 @@
 package com.digirati.taxman.rest.server.analysis;
 
+import com.digirati.taxman.analysis.index.TermIndex;
 import com.digirati.taxman.common.rdf.RdfModelException;
 import com.digirati.taxman.common.rdf.RdfModelFactory;
 import com.digirati.taxman.common.taxonomy.CollectionModel;
 import com.digirati.taxman.common.taxonomy.ConceptModel;
 import com.digirati.taxman.rest.analysis.TextAnalysisInput;
 import com.digirati.taxman.rest.server.taxonomy.ConceptModelRepository;
-import com.digirati.taxman.analysis.index.TermIndex;
 import org.apache.jena.vocabulary.SKOS;
 import org.jboss.logging.Logger;
 
@@ -40,7 +40,7 @@ public class TextAnalyzer {
     public CollectionModel tagDocument(TextAnalysisInput input) {
         logger.debug(input.getText());
 
-        var matches = termIndex.search(input.getText());
+        var matches = termIndex.match(input.getText());
 
         try {
             var builder = modelFactory.createBuilder(CollectionModel.class);

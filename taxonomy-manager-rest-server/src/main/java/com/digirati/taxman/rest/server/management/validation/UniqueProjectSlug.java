@@ -1,6 +1,7 @@
-package com.digirati.taxman.rest.server.taxonomy.validation;
+package com.digirati.taxman.rest.server.management.validation;
 
-import com.digirati.taxman.rest.server.taxonomy.ConceptModelRepository;
+import com.digirati.taxman.common.taxonomy.ProjectModel;
+import com.digirati.taxman.rest.server.management.ProjectModelRepository;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -11,7 +12,6 @@ import javax.validation.Payload;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.Map;
 
 import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.CONSTRUCTOR;
@@ -22,12 +22,11 @@ import static java.lang.annotation.ElementType.TYPE_USE;
 
 @Target({METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER, TYPE_USE})
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = NonEmptyPlainLiteral.Validator.class)
+@Constraint(validatedBy = UniqueProjectSlug.Validator.class)
 @SuppressWarnings("checkstyle:JavadocMethod")
-public @interface NonEmptyPlainLiteral {
+public @interface UniqueProjectSlug {
 
-    String message() default
-            "{taxman.taxonomy.NonEmptyPlainLiteral.message}";
+    String message() default "{taxman.management.UniqueProjectSlug.message}";
 
     /**
      * {@inheritDoc}
@@ -40,11 +39,19 @@ public @interface NonEmptyPlainLiteral {
     Class<? extends Payload>[] payload() default {};
 
     @ApplicationScoped
-    class Validator implements ConstraintValidator<NonEmptyPlainLiteral, Map<String, String>> {
+    class Validator implements ConstraintValidator<UniqueProjectSlug, String> {
+
+        @Inject
+        ProjectModelRepository projects;
+
         @Override
-        public boolean isValid(Map<String, String> value, ConstraintValidatorContext context) {
-            return !value.isEmpty();
+        public boolean isValid(String value, ConstraintValidatorContext context) {
+            try {
+                projects.find(value);
+                return false;
+            } catch (Exception ex) {
+                return true;
+            }
         }
     }
-
 }

@@ -24,7 +24,6 @@ public interface ConceptSchemeResource {
     @Consumes({MediaTypes.APPLICATION_RDF_XML_VALUE, MediaTypes.APPLICATION_JSONLD_SKOS_VALUE})
     @Produces({MediaTypes.APPLICATION_RDF_XML_VALUE, MediaTypes.APPLICATION_JSONLD_SKOS_VALUE})
     @JsonLdFrame(input = "jsonld/framing/concept-scheme.json")
-    @RolesAllowed(Roles.ADMIN)
     Response createConceptScheme(@Valid ConceptSchemeModel model);
 
     @GET
@@ -32,12 +31,10 @@ public interface ConceptSchemeResource {
     @Consumes({MediaTypes.APPLICATION_JSONLD_SKOS_VALUE, MediaTypes.APPLICATION_RDF_XML_VALUE})
     @Produces({MediaTypes.APPLICATION_JSONLD_SKOS_VALUE, MediaTypes.APPLICATION_RDF_XML_VALUE})
     @JsonLdFrame(input = "jsonld/framing/concept-scheme.json")
-    @RolesAllowed(Roles.ADMIN)
     Response getConceptScheme(@BeanParam ConceptSchemePath params);
 
     @PUT
     @Path("/{scheme}")
     @Consumes({MediaTypes.APPLICATION_RDF_XML_VALUE, MediaTypes.APPLICATION_JSONLD_SKOS_VALUE})
-    @RolesAllowed(Roles.ADMIN)
     Response updateConceptScheme(@BeanParam ConceptSchemePath params, @Valid ConceptSchemeModel model);
 }

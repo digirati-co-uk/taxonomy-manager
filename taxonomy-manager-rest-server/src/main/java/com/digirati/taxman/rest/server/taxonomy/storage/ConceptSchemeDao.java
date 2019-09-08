@@ -68,10 +68,6 @@ public class ConceptSchemeDao {
 
         boolean changed = jdbcTemplate.update("CALL create_or_update_concept_scheme(?, ?, ?)", recordArgs, recordTypes) > 0;
 
-        UUID[] uuids = dataset.getTopConcepts()
-                .stream()
-                .map(ConceptReference::getId)
-                .toArray(UUID[]::new);
 
         JSONArray uuidArray = dataset.getTopConceptsJson();
         Object[] conceptArgs = {uuid, uuidArray};

@@ -1,8 +1,6 @@
 package com.digirati.taxman.rest.server.infrastructure.event;
 
 import com.digirati.taxman.analysis.index.TermIndex;
-import com.digirati.taxman.rest.server.infrastructure.config.TaxonomyIndexConfig;
-import com.google.common.eventbus.Subscribe;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;

@@ -1,6 +1,6 @@
-package com.digirati.taxman.analysis.corenlp;
+package com.digirati.taxman.analysis.nlp.corenlp;
 
-import com.digirati.taxman.analysis.AnnotationType;
+import com.digirati.taxman.analysis.nlp.AnnotationType;
 import com.digirati.taxman.analysis.WordToken;
 import com.digirati.taxman.analysis.WordTokenizer;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -56,7 +56,7 @@ public final class CoreNlpWordTokenizer implements WordTokenizer {
                     AnnotationType.TOKEN, token.toLowerCase()
             );
 
-            tokens.add(new WordToken(offset, tokenAnnotations));
+            tokens.add(new WordToken(tokenAnnotations));
         }
 
         return tokens;

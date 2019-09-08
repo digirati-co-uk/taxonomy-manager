@@ -1,17 +1,48 @@
 package com.digirati.taxman.analysis.index;
 
+import com.digirati.taxman.analysis.WordTokenSearchEntry;
+import com.digirati.taxman.analysis.WordTokenSearchStrategy;
+import com.digirati.taxman.analysis.WordTokenizer;
+
 import java.util.Map;
 import java.util.Set;
 
-public interface TermIndex<IdT> {
+/**
+ * A naive {@code O(N * M * 3)} string search algorithm that performs text normalization on stored terms
+ * and input queries.
+ */
+public class TermIndex<IdT>  {
 
-    default void addAll(Map<IdT, String> terms) {
+    private final WordTokenizer tokenizer;
+    private final WordTokenSearchStrategy<IdT> searchStrategy;
+
+    public TermIndex(WordTokenizer tokenizer, WordTokenSearchStrategy<IdT> searchStrategy) {
+        this.tokenizer = tokenizer;
+        this.searchStrategy = searchStrategy;
+    }
+
+    public void addAll(Map<IdT, String> terms) {
         terms.forEach(this::add);
     }
 
-    void add(IdT entry, String text);
+    public void add(IdT id, String text) {
+        var tokens = tokenizer.tokenize(text);
+        var entry = new WordTokenSearchEntry<>(id, tokens);
 
-    void remove(IdT entry);
+        searchStrategy.index(entry);
+    }
 
-    Set<IdT> search(String input);
+    public void remove(IdT id, String text) {
+        var tokens = tokenizer.tokenize(text);
+        var entry = new WordTokenSearchEntry<>(id, tokens);
+
+        searchStrategy.unindex(entry);
+    }
+
+    public Set<IdT> match(String input) {
+        var tokens = tokenizer.tokenize(input);
+        var matches = searchStrategy.match(tokens);
+
+        return matches;
+    }
 }

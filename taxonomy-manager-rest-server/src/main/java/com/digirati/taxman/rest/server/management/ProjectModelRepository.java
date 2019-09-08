@@ -1,4 +1,4 @@
-package com.digirati.taxman.rest.server.taxonomy;
+package com.digirati.taxman.rest.server.management;
 
 import com.digirati.taxman.common.taxonomy.CollectionModel;
 import com.digirati.taxman.common.taxonomy.ProjectModel;

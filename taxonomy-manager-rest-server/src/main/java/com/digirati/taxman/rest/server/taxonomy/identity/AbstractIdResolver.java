@@ -21,6 +21,11 @@ abstract class AbstractIdResolver {
     }
 
     public Optional<UUID> resolve(URI uri) {
+        // @TODO: Where are the callers passing in null?
+        if (uri.getPath() == null) {
+            return Optional.empty();
+        }
+
         var match = pattern.matcher(uri.getPath());
         if (!match.find()) {
             return Optional.empty();
