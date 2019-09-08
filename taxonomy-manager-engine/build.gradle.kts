@@ -1,5 +1,6 @@
 plugins {
     `java-library`
+    id("me.champeau.gradle.jmh") version "0.5.0-rc-2"
 }
 
 dependencies {
@@ -12,4 +13,6 @@ dependencies {
     testImplementation("org.junit.jupiter", "junit-jupiter", "5.4.2")
 }
 
+jmh {
+    duplicateClassesStrategy = DuplicatesStrategy.WARN
 }
