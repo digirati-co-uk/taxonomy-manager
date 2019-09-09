@@ -45,7 +45,7 @@ public class NaiveSearchStrategy<IdT> implements WordTokenSearchStrategy<IdT> {
 
                 if (WordToken.sharesCandidates(candidateTokens, currentTokens)) {
                     matches.add(candidate.getIdentity());
-                    tokenIndex = currentTokenEndIndex;
+                    tokenIndex = currentTokenEndIndex - 1;
 
                     break;
                 }

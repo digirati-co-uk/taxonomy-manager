@@ -45,7 +45,7 @@ public class AppInitListener {
                     String value = values.get(defaultLanguageKey);
 
                     if (value != null) {
-                        terms.put(uuid, value);
+                        termIndex.add(uuid, value);
                     }
                 });
             });
