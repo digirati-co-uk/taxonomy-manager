@@ -30,7 +30,7 @@ RUN microdnf install \
     && mkdir -p /srv/taxman/bin
 
 COPY dockerfiles/config/srv/taxman/entrypoint.sh /srv/taxman/bin
-COPY --from=build /build/taxonomy-manager-rest-server/build/taxonomy-manager-rest-server-runner.jar /srv/taxman/
+COPY --from=build /build/taxonomy-manager-rest-server/build/taxonomy-manager-rest-server-unspecified-runner.jar /srv/taxman/
 COPY --from=build /build/taxonomy-manager-rest-server/build/lib /srv/taxman/lib/
 
 WORKDIR /srv/taxman/
@@ -39,4 +39,4 @@ ENV JAVA_OPTIONS="-Dquarkus.http.host=0.0.0.0 -Dquarkus.log.level=DEBUG"
 ENV JAVA_HOME="/usr/lib/jvm/java"
 
 ENTRYPOINT ["/srv/taxman/bin/entrypoint.sh"]
-CMD ["java", "-jar", "/srv/taxman/taxonomy-manager-rest-server-runner.jar"]
+CMD ["java", "-jar", "/srv/taxman/taxonomy-manager-rest-server-unspecified-runner.jar"]
