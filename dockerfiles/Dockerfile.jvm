@@ -20,7 +20,7 @@ COPY taxonomy-manager-rest-server ./taxonomy-manager-rest-server/
 COPY taxonomy-manager-common ./taxonomy-manager-common/
 COPY taxonomy-manager-engine ./taxonomy-manager-engine/
 
-RUN ./gradlew assemble && rm -Rf "$HOME/.gradle"
+RUN ./gradlew clean assemble && rm -Rf "$HOME/.gradle"
 
 FROM registry.access.redhat.com/ubi8/ubi-minimal:8.0 AS runtime
 
