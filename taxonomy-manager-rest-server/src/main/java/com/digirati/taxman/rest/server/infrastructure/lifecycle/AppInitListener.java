@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -32,6 +33,7 @@ public class AppInitListener {
     TermIndex<UUID> termIndex;
 
     void onStartup(@Observes StartupEvent event) {
+        logger.info("Searching for terms");
         try (var conceptRecords = conceptDao.loadAllRecords()) {
             var terms = new HashMap<UUID, String>();
 
@@ -40,7 +42,11 @@ public class AppInitListener {
                 var labelExtractor = new ConceptLabelExtractor(record);
 
                 labelExtractor.extractTo((property, values) -> {
-                    terms.put(uuid, values.get(defaultLanguageKey));
+                    String value = values.get(defaultLanguageKey);
+
+                    if (value != null) {
+                        terms.put(uuid, value);
+                    }
                 });
             });
 

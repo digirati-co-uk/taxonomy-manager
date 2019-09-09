@@ -7,6 +7,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
+import javax.inject.Singleton;
 import java.util.UUID;
 
 @ApplicationScoped
@@ -15,8 +16,8 @@ public class TaxonomyIndexConfig {
     String languageKey;
 
     @Produces
-    @ApplicationScoped
-    TermIndex<UUID> termIndex() {
+    @Singleton
+    public TermIndex<UUID> termIndex() {
         return new TermIndex<>(CoreNlpWordTokenizer.create(languageKey), new NaiveSearchStrategy<>());
     }
 }

@@ -12,6 +12,7 @@ import org.jboss.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.ws.rs.WebApplicationException;
 import java.net.URI;
 import java.util.UUID;

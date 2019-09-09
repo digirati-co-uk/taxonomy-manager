@@ -20,6 +20,5 @@ public interface TextAnalysisResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaTypes.APPLICATION_RDF_XML_VALUE, MediaTypes.APPLICATION_JSONLD_SKOS_VALUE})
     @JsonLdFrame(input = "jsonld/framing/collection.json")
-    @RolesAllowed(Roles.ADMIN)
     Response analyze(@Valid TextAnalysisInput input);
 }
