@@ -129,7 +129,7 @@ def dockerfileLinting() {
 
 def buildModules() {
     def workspace = env.WORKSPACE
-    sh "$workspace/gradlew -Pci=true clean generateTestKeyPair assemble check"
+    sh "$workspace/gradlew -Pci=true clean generateTestKeyPair assemble"
 }
 
 def genericCodeAnalysis() {
