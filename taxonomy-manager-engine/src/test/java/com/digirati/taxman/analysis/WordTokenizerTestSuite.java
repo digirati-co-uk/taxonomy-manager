@@ -22,8 +22,8 @@ public abstract class WordTokenizerTestSuite {
             var tokens = tokenize("was good");
 
             assertEquals(2, tokens.size());
-            assertEquals(Set.of("was", "be"), tokens.get(0).candidates());
-            assertEquals(Set.of("good"), tokens.get(1).candidates());
+            assertEquals(Set.of("was", "be"), Set.copyOf(tokens.get(0).candidates()));
+            assertEquals(Set.of("good"), Set.copyOf(tokens.get(1).candidates()));
         }
 
         @Test
@@ -31,8 +31,8 @@ public abstract class WordTokenizerTestSuite {
             var tokens = tokenize("metal welding");
 
             assertEquals(2, tokens.size());
-            assertEquals(Set.of("metal"), tokens.get(0).candidates());
-            assertEquals(Set.of("welding"), tokens.get(1).candidates());
+            assertEquals(Set.of("metal"), Set.copyOf(tokens.get(0).candidates()));
+            assertEquals(Set.of("welding"), Set.copyOf(tokens.get(1).candidates()));
         }
 
         @Test
@@ -40,8 +40,8 @@ public abstract class WordTokenizerTestSuite {
             var tokens = tokenize("metal-welding");
 
             assertEquals(2, tokens.size());
-            assertEquals(Set.of("metal"), tokens.get(0).candidates());
-            assertEquals(Set.of("welding"), tokens.get(1).candidates());
+            assertEquals(Set.of("metal"), Set.copyOf(tokens.get(0).candidates()));
+            assertEquals(Set.of("welding"), Set.copyOf(tokens.get(1).candidates()));
         }
     }
 }
