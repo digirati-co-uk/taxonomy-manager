@@ -1,5 +1,9 @@
 package com.digirati.taxman.rest.server.taxonomy.storage;
 
+import com.google.common.collect.Multimap;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import javax.sql.DataSource;
 import java.sql.Array;
 import java.sql.SQLException;
@@ -26,5 +30,15 @@ final class DaoUtils {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    static JSONObject createRdfPlainLiteral(Multimap<String, String> value) {
+        var object = new JSONObject();
+
+        value.asMap().forEach((language, labels) -> {
+            object.put(language, new JSONArray(labels));
+        });
+
+        return object;
     }
 }

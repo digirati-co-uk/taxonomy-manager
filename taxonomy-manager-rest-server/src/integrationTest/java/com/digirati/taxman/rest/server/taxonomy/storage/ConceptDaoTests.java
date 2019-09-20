@@ -5,6 +5,7 @@ import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRecord;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRelationshipRecord;
 import com.digirati.taxman.rest.server.testing.DatabaseTestExtension;
 import com.digirati.taxman.rest.server.testing.annotation.TestDataSource;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
@@ -53,9 +54,10 @@ public class ConceptDaoTests {
         var uuid = UUID.fromString("3828f4e5-ad0d-402c-978a-e2b9939332c7");
 
         var record = new ConceptRecord(uuid);
-        var expectedLabels = Map.of("en", "value");
+        var expectedLabels = ArrayListMultimap.<String, String>create();
+        expectedLabels.put("en", "value");
 
-//        setter.setLabels(record, expectedLabels);
+        setter.setLabels(record, expectedLabels);
         dao.storeDataSet(new ConceptDataSet(record));
 
         var storedRecord = dao.loadDataSet(uuid).getRecord();
@@ -70,12 +72,17 @@ public class ConceptDaoTests {
         var dao = new ConceptDao(dataSource);
         var uuid = UUID.fromString("3828f4e5-ad0d-402c-978a-e2b9939332c7");
         var record = new ConceptRecord(uuid);
-//        setter.setLabels(record, Map.of("en", "value"));
+        var label = ArrayListMultimap.<String, String>create();
+        label.put("en", "value");
+
+        setter.setLabels(record, label);
 
         dao.storeDataSet(new ConceptDataSet(record));
 
-        var expectedLabels = Map.of("en", "value", "fr", "value");
-//        setter.setLabels(record, expectedLabels);
+        var expectedLabels = ArrayListMultimap.<String, String>create();
+        expectedLabels.put("en", "value");
+        expectedLabels.put("fr", "valeur");
+        setter.setLabels(record, expectedLabels);
 
         dao.storeDataSet(new ConceptDataSet(record));
 
@@ -86,7 +93,7 @@ public class ConceptDaoTests {
     }
 
     @Test
-    public void shouldStoreRelationships() {
+    public void storeDataSet_shouldStoreRelationships() {
         var dao = new ConceptDao(dataSource);
 
         var uuidA = UUID.fromString("3828f4e5-ad0d-402c-978a-e2b9939332c7");
@@ -100,7 +107,7 @@ public class ConceptDaoTests {
     }
 
     @Test
-    public void shouldRetrieveConceptsByPartialLabel() {
+    public void search_ShouldRetrieveConceptsByPartialLabel() {
         var one = new ConceptRecord(UUID.randomUUID());
         one.getPreferredLabel().put("en", "one");
         one.getPreferredLabel().put("fr", "un");

@@ -63,11 +63,10 @@ public class ConceptSchemeDao {
     public boolean storeDataSet(ConceptSchemeDataSet dataset) {
         ConceptSchemeRecord record = dataset.getRecord();
         UUID uuid = record.getUuid();
-        Object[] recordArgs = {uuid, record.getSource(), new JSONObject(record.getTitle())};
+        Object[] recordArgs = {uuid, record.getSource(), DaoUtils.createRdfPlainLiteral(record.getTitle())};
         int[] recordTypes = {Types.OTHER, Types.VARCHAR, Types.OTHER};
 
         boolean changed = jdbcTemplate.update("CALL create_or_update_concept_scheme(?, ?, ?)", recordArgs, recordTypes) > 0;
-
 
         JSONArray uuidArray = dataset.getTopConceptsJson();
         Object[] conceptArgs = {uuid, uuidArray};

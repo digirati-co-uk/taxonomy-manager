@@ -2,6 +2,7 @@ package com.digirati.taxman.rest.server.management.validation;
 
 import com.digirati.taxman.common.taxonomy.ProjectModel;
 import com.digirati.taxman.rest.server.management.ProjectModelRepository;
+import com.digirati.taxman.rest.server.management.validation.group.CreatingProject;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -31,7 +32,7 @@ public @interface UniqueProjectSlug {
     /**
      * {@inheritDoc}
      */
-    Class<?>[] groups() default {};
+    Class<?>[] groups() default {CreatingProject.class};
 
     /**
      * {@inheritDoc}

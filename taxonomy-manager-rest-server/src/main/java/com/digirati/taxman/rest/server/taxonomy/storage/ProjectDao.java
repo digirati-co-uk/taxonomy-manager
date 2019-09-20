@@ -77,9 +77,11 @@ public class ProjectDao {
      * @return true if any changes to existing records have occurred, false otherwise
      */
     public boolean storeDataSet(ProjectDataSet dataSet) {
-        String slug = dataSet.getProject().getSlug();
-        JSONObject title = new JSONObject(dataSet.getProject().getTitle());
-        Object[] projectArgs = {slug, title};
+        var project = dataSet.getProject();
+        var slug = project.getSlug();
+        var title = project.getTitle();
+
+        Object[] projectArgs = {slug, DaoUtils.createRdfPlainLiteral(title)};
         int[] projectArgTypes = {Types.VARCHAR, Types.OTHER};
 
         int projectChanges = jdbcTemplate.update("CALL create_or_update_project(?, ?)", projectArgs, projectArgTypes);

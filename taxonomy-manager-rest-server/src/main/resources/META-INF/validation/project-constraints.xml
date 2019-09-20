@@ -9,7 +9,11 @@
     <default-package>com.digirati.taxman.rest.server.management.validation</default-package>
     <bean class="com.digirati.taxman.common.taxonomy.ProjectModel">
         <getter name="slug">
-            <constraint annotation="com.digirati.taxman.rest.server.management.validation.UniqueProjectSlug"/>
+            <constraint annotation="com.digirati.taxman.rest.server.management.validation.UniqueProjectSlug">
+                <groups>
+                    <value>com.digirati.taxman.rest.server.management.validation.group.CreatingProject</value>
+                </groups>
+            </constraint>
         </getter>
 
     </bean>

@@ -4,6 +4,8 @@ import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptReference;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptSchemeRecord;
 import com.digirati.taxman.rest.server.testing.DatabaseTestExtension;
 import com.digirati.taxman.rest.server.testing.annotation.TestDataSource;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.MultimapBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -28,8 +30,10 @@ public class ConceptSchemeDaoTests {
         var dao = new ConceptSchemeDao(dataSource);
 
         var record = new ConceptSchemeRecord(DUMMY_SCHEME_ID);
-        var expectedTitle = Map.of("en", "test");
+        var expectedTitle = ArrayListMultimap.<String, String>create();
+        expectedTitle.put("en", "test");
         record.setTitle(expectedTitle);
+
         var dataset = new ConceptSchemeDataSet(record, List.of());
 
         dao.storeDataSet(dataset);
@@ -44,7 +48,7 @@ public class ConceptSchemeDaoTests {
 
         var dao = new ConceptSchemeDao(dataSource);
         var record = new ConceptSchemeRecord(DUMMY_SCHEME_ID);
-        var expectedTopConcepts = List.of(new ConceptReference(conceptId, null, Map.of()));
+        var expectedTopConcepts = List.of(new ConceptReference(conceptId, null, ArrayListMultimap.create()));
 
         dao.storeDataSet(new ConceptSchemeDataSet(record, expectedTopConcepts));
 
@@ -54,9 +58,9 @@ public class ConceptSchemeDaoTests {
 
     @Test
     public void shouldRemoveTopConcepts() throws Exception {
-        var conceptA = new ConceptReference(createDummyConcept(), null, new HashMap<>());
-        var conceptB = new ConceptReference(createDummyConcept(), null, new HashMap<>());
-        var conceptC = new ConceptReference(createDummyConcept(), null, new HashMap<>());
+        var conceptA = new ConceptReference(createDummyConcept(), null, ArrayListMultimap.create());
+        var conceptB = new ConceptReference(createDummyConcept(), null, ArrayListMultimap.create());
+        var conceptC = new ConceptReference(createDummyConcept(), null, ArrayListMultimap.create());
 
         var dao = new ConceptSchemeDao(dataSource);
         var record = new ConceptSchemeRecord(DUMMY_SCHEME_ID);

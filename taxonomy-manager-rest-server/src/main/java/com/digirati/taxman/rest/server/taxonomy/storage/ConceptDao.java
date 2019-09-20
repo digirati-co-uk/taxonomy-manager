@@ -4,9 +4,6 @@ import com.digirati.taxman.common.taxonomy.ConceptRelationshipType;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRecord;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.mapper.ConceptRecordMapper;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.mapper.ConceptRelationshipRecordMapper;
-import com.google.common.collect.Multimap;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
@@ -116,15 +113,15 @@ public class ConceptDao {
         Object[] recordArgs = {
             record.getUuid(),
             record.getSource(),
-            fromPlainLiteral(record.getPreferredLabel()),
-            fromPlainLiteral(record.getAltLabel()),
-            fromPlainLiteral(record.getHiddenLabel()),
-            fromPlainLiteral(record.getNote()),
-            fromPlainLiteral(record.getChangeNote()),
-            fromPlainLiteral(record.getEditorialNote()),
-            fromPlainLiteral(record.getExample()),
-            fromPlainLiteral(record.getHistoryNote()),
-            fromPlainLiteral(record.getScopeNote())
+            DaoUtils.createRdfPlainLiteral(record.getPreferredLabel()),
+            DaoUtils.createRdfPlainLiteral(record.getAltLabel()),
+            DaoUtils.createRdfPlainLiteral(record.getHiddenLabel()),
+            DaoUtils.createRdfPlainLiteral(record.getNote()),
+            DaoUtils.createRdfPlainLiteral(record.getChangeNote()),
+            DaoUtils.createRdfPlainLiteral(record.getEditorialNote()),
+            DaoUtils.createRdfPlainLiteral(record.getExample()),
+            DaoUtils.createRdfPlainLiteral(record.getHistoryNote()),
+            DaoUtils.createRdfPlainLiteral(record.getScopeNote())
         };
 
         int[] recordTypes = new int[recordArgs.length];
@@ -138,13 +135,4 @@ public class ConceptDao {
         jdbcTemplate.update("CALL update_concept_semantic_relations(?, ?, ?)", relationArgs, relationTypes);
     }
 
-    private static JSONObject fromPlainLiteral(Multimap<String, String> value) {
-        var object = new JSONObject();
-
-        value.asMap().forEach((language, labels) -> {
-            object.put(language, new JSONArray(labels));
-        });
-
-        return object;
-    }
 }
