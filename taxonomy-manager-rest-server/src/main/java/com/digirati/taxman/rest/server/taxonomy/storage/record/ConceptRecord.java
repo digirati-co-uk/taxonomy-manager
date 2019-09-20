@@ -3,9 +3,10 @@ package com.digirati.taxman.rest.server.taxonomy.storage.record;
 import com.digirati.taxman.common.taxonomy.Concept;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -15,15 +16,15 @@ public class ConceptRecord implements Concept {
     private final UUID uuid;
 
     private String source;
-    private Map<String, String> preferredLabel = new HashMap<>();
-    private Map<String, String> altLabel = new HashMap<>();
-    private Map<String, String> hiddenLabel = new HashMap<>();
-    private Map<String, String> note = new HashMap<>();
-    private Map<String, String> changeNote = new HashMap<>();
-    private Map<String, String> editorialNote = new HashMap<>();
-    private Map<String, String> example = new HashMap<>();
-    private Map<String, String> historyNote = new HashMap<>();
-    private Map<String, String> scopeNote = new HashMap<>();
+    private Multimap<String, String> preferredLabel = ArrayListMultimap.create();
+    private Multimap<String, String> altLabel = ArrayListMultimap.create();
+    private Multimap<String, String> hiddenLabel = ArrayListMultimap.create();
+    private Multimap<String, String> note = ArrayListMultimap.create();
+    private Multimap<String, String> changeNote = ArrayListMultimap.create();
+    private Multimap<String, String> editorialNote = ArrayListMultimap.create();
+    private Multimap<String, String> example = ArrayListMultimap.create();
+    private Multimap<String, String> historyNote = ArrayListMultimap.create();
+    private Multimap<String, String> scopeNote = ArrayListMultimap.create();
 
     public ConceptRecord(UUID uuid) {
         this.uuid = uuid;
@@ -44,83 +45,83 @@ public class ConceptRecord implements Concept {
     }
 
     @Override
-    public Map<String, String> getPreferredLabel() {
+    public Multimap<String, String> getPreferredLabel() {
         return preferredLabel;
     }
 
-    public void setPreferredLabel(Map<String, String> preferredLabel) {
+    public void setPreferredLabel(Multimap<String, String> preferredLabel) {
         this.preferredLabel = preferredLabel;
     }
 
     @Override
-    public Map<String, String> getAltLabel() {
+    public Multimap<String, String> getAltLabel() {
         return altLabel;
     }
 
-    public void setAltLabel(Map<String, String> altLabel) {
+    public void setAltLabel(Multimap<String, String> altLabel) {
         this.altLabel = altLabel;
     }
 
     @Override
-    public Map<String, String> getHiddenLabel() {
+    public Multimap<String, String> getHiddenLabel() {
         return hiddenLabel;
     }
 
-    public void setHiddenLabel(Map<String, String> hiddenLabel) {
+    public void setHiddenLabel(Multimap<String, String> hiddenLabel) {
         this.hiddenLabel = hiddenLabel;
     }
 
     @Override
-    public Map<String, String> getNote() {
+    public Multimap<String, String> getNote() {
         return note;
     }
 
-    public void setNote(Map<String, String> note) {
+    public void setNote(Multimap<String, String> note) {
         this.note = note;
     }
 
     @Override
-    public Map<String, String> getChangeNote() {
+    public Multimap<String, String> getChangeNote() {
         return changeNote;
     }
 
-    public void setChangeNote(Map<String, String> changeNote) {
+    public void setChangeNote(Multimap<String, String> changeNote) {
         this.changeNote = changeNote;
     }
 
     @Override
-    public Map<String, String> getEditorialNote() {
+    public Multimap<String, String> getEditorialNote() {
         return editorialNote;
     }
 
-    public void setEditorialNote(Map<String, String> editorialNote) {
+    public void setEditorialNote(Multimap<String, String> editorialNote) {
         this.editorialNote = editorialNote;
     }
 
     @Override
-    public Map<String, String> getExample() {
+    public Multimap<String, String> getExample() {
         return example;
     }
 
-    public void setExample(Map<String, String> example) {
+    public void setExample(Multimap<String, String> example) {
         this.example = example;
     }
 
     @Override
-    public Map<String, String> getHistoryNote() {
+    public Multimap<String, String> getHistoryNote() {
         return historyNote;
     }
 
-    public void setHistoryNote(Map<String, String> historyNote) {
+    public void setHistoryNote(Multimap<String, String> historyNote) {
         this.historyNote = historyNote;
     }
 
     @Override
-    public Map<String, String> getScopeNote() {
+    public Multimap<String, String> getScopeNote() {
         return scopeNote;
     }
 
-    public void setScopeNote(Map<String, String> scopeNote) {
+    public void setScopeNote(Multimap<String, String> scopeNote) {
         this.scopeNote = scopeNote;
     }
 

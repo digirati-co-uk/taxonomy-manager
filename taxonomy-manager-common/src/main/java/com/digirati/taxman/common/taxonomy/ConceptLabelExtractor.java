@@ -21,7 +21,7 @@ public final class ConceptLabelExtractor {
         extractTo(builder::addPlainLiteral);
     }
 
-    public void extractTo(BiConsumer<Property, Map<String, String>> consumer) {
+    public void extractTo(BiConsumer<Property, Multimap<String, String>> consumer) {
         consumer.accept(SKOS.prefLabel, concept.getPreferredLabel());
         consumer.accept(SKOS.altLabel, concept.getAltLabel());
         consumer.accept(SKOS.hiddenLabel, concept.getHiddenLabel());

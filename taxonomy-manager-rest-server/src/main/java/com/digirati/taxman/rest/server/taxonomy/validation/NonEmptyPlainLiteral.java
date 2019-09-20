@@ -1,6 +1,7 @@
 package com.digirati.taxman.rest.server.taxonomy.validation;
 
 import com.digirati.taxman.rest.server.taxonomy.ConceptModelRepository;
+import com.google.common.collect.Multimap;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -40,9 +41,9 @@ public @interface NonEmptyPlainLiteral {
     Class<? extends Payload>[] payload() default {};
 
     @ApplicationScoped
-    class Validator implements ConstraintValidator<NonEmptyPlainLiteral, Map<String, String>> {
+    class Validator implements ConstraintValidator<NonEmptyPlainLiteral, Multimap<String, String>> {
         @Override
-        public boolean isValid(Map<String, String> value, ConstraintValidatorContext context) {
+        public boolean isValid(Multimap<String, String> value, ConstraintValidatorContext context) {
             return !value.isEmpty();
         }
     }

@@ -1,5 +1,8 @@
 package com.digirati.taxman.rest.server.taxonomy.storage.record;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -7,7 +10,7 @@ import java.util.UUID;
 
 public class ConceptSchemeRecord {
     private final UUID uuid;
-    private Map<String, String> title = new HashMap<>();
+    private Multimap<String, String> title = ArrayListMultimap.create();
     private String source;
 
     public ConceptSchemeRecord(UUID uuid) {
@@ -18,11 +21,11 @@ public class ConceptSchemeRecord {
         return uuid;
     }
 
-    public Map<String, String> getTitle() {
+    public Multimap<String, String> getTitle() {
         return title;
     }
 
-    public void setTitle(Map<String, String> title) {
+    public void setTitle(Multimap<String, String> title) {
         this.title = title;
     }
 

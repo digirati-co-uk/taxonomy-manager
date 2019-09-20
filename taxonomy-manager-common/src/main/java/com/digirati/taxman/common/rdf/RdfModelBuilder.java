@@ -35,6 +35,15 @@ public class RdfModelBuilder<T extends RdfModel> {
         this.metadata = metadata;
     }
 
+    public RdfModelBuilder<T> addPlainLiteral(Property property, Map<String, String> values) {
+        values.forEach((language, value) -> {
+            Literal literal = model.createLiteral(value, language);
+            properties.put(property, new PendingPropertyValue(literal));
+        });
+
+        return this;
+    }
+
     /**
      * Add a new plain literal property to the underlying resource.
      *
@@ -42,14 +51,11 @@ public class RdfModelBuilder<T extends RdfModel> {
      * @param values   A map representing the plain literal, where keys are languages and
      *                 the values are the literal strings.
      */
-    public RdfModelBuilder<T> addPlainLiteral(Property property, Map<String, String> values) {
-        for (var entry : values.entrySet()) {
-            String language = entry.getKey();
-            String value = entry.getValue();
+    public RdfModelBuilder<T> addPlainLiteral(Property property, Multimap<String, String> values) {
+        values.forEach((language, value) -> {
             Literal literal = model.createLiteral(value, language);
-
             properties.put(property, new PendingPropertyValue(literal));
-        }
+        });
 
         return this;
     }

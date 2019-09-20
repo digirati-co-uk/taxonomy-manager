@@ -6,6 +6,7 @@ import com.digirati.taxman.common.rdf.RdfModelContext;
 import com.digirati.taxman.common.rdf.annotation.RdfConstructor;
 import com.digirati.taxman.common.rdf.annotation.RdfContext;
 import com.digirati.taxman.common.rdf.annotation.RdfType;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Streams;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
@@ -56,47 +57,47 @@ public final class ConceptModel implements RdfModel, PersistentModel, Concept {
     }
 
     @Override
-    public Map<String, String> getPreferredLabel() {
+    public Multimap<String, String> getPreferredLabel() {
         return getPlainLiteral(SKOS.prefLabel);
     }
 
     @Override
-    public Map<String, String> getAltLabel() {
+    public Multimap<String, String> getAltLabel() {
         return getPlainLiteral(SKOS.altLabel);
     }
 
     @Override
-    public Map<String, String> getHiddenLabel() {
+    public Multimap<String, String> getHiddenLabel() {
         return getPlainLiteral(SKOS.hiddenLabel);
     }
 
     @Override
-    public Map<String, String> getNote() {
+    public Multimap<String, String> getNote() {
         return getPlainLiteral(SKOS.note);
     }
 
     @Override
-    public Map<String, String> getChangeNote() {
+    public Multimap<String, String> getChangeNote() {
         return getPlainLiteral(SKOS.changeNote);
     }
 
     @Override
-    public Map<String, String> getEditorialNote() {
+    public Multimap<String, String> getEditorialNote() {
         return getPlainLiteral(SKOS.editorialNote);
     }
 
     @Override
-    public Map<String, String> getExample() {
+    public Multimap<String, String> getExample() {
         return getPlainLiteral(SKOS.example);
     }
 
     @Override
-    public Map<String, String> getHistoryNote() {
+    public Multimap<String, String> getHistoryNote() {
         return getPlainLiteral(SKOS.historyNote);
     }
 
     @Override
-    public Map<String, String> getScopeNote() {
+    public Multimap<String, String> getScopeNote() {
         return getPlainLiteral(SKOS.scopeNote);
     }
 

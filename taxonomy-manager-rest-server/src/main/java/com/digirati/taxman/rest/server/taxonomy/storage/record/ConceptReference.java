@@ -1,6 +1,7 @@
 package com.digirati.taxman.rest.server.taxonomy.storage.record;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.Multimap;
 
 import java.util.Map;
 import java.util.Optional;
@@ -14,9 +15,9 @@ import java.util.UUID;
 public class ConceptReference {
     private final UUID target;
     private final String targetSource;
-    private final Map<String, String> preferredLabel;
+    private final Multimap<String, String> preferredLabel;
 
-    public ConceptReference(UUID target, String source, Map<String, String> preferredLabel) {
+    public ConceptReference(UUID target, String source, Multimap<String, String> preferredLabel) {
         this.target = target;
         this.targetSource = source;
         this.preferredLabel = preferredLabel;
@@ -31,7 +32,7 @@ public class ConceptReference {
         return target;
     }
 
-    public Map<String, String> getPreferredLabel() {
+    public Multimap<String, String> getPreferredLabel() {
         return preferredLabel;
     }
 

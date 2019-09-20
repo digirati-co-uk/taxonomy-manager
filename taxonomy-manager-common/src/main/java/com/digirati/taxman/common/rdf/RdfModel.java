@@ -1,12 +1,18 @@
 package com.digirati.taxman.common.rdf;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Streams;
+import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFList;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.ResIterator;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.DC;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
@@ -85,6 +91,12 @@ public interface RdfModel {
                 });
     }
 
+    default Map<String, String> getLiteral(Property property) {
+        return Streams.stream(getResource().listProperties(property))
+                .collect(Collectors.toMap(Statement::getLanguage, Statement::getString, (l, r) -> {
+                    throw new RuntimeException("Attempted to fetch single-valued plain literal with multiple values");
+                }));
+    }
     /**
      * Get a map of {@code language} to {@code value} from a given RDF {@link Property} that represents
      * an {@code rdf:PlainLiteral}.
@@ -92,11 +104,21 @@ public interface RdfModel {
      * @param property The plain literal lookup.
      * @return a map of localized literals.
      */
-    default Map<String, String> getPlainLiteral(Property property) {
-        return Streams.stream(getResource().listProperties(property))
-                .collect(
-                        Collectors.toMap(
-                                Statement::getLanguage, Statement::getString, (l, r) -> l));
+    default Multimap<String, String> getPlainLiteral(Property property) {
+        Multimap<String, String> values = ArrayListMultimap.create();
+        StmtIterator iterator = getResource().listProperties(property);
+
+        while (iterator.hasNext()) {
+            Statement stmt = iterator.nextStatement();
+            RDFNode target = stmt.getObject();
+
+            if (target instanceof Literal) {
+                Literal literal = (Literal) target;
+                values.put(literal.getLanguage(), literal.getLexicalForm());
+            }
+        }
+
+        return values;
     }
 
     /**

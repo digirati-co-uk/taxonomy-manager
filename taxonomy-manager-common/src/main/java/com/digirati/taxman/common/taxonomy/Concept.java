@@ -1,7 +1,8 @@
 package com.digirati.taxman.common.taxonomy;
 
+import com.google.common.collect.Multimap;
+
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -14,23 +15,23 @@ public interface Concept {
 
     String getSource();
 
-    Map<String, String> getPreferredLabel();
+    Multimap<String, String> getPreferredLabel();
 
-    Map<String, String> getAltLabel();
+    Multimap<String, String> getAltLabel();
 
-    Map<String, String> getHiddenLabel();
+    Multimap<String, String> getHiddenLabel();
 
-    Map<String, String> getNote();
+    Multimap<String, String> getNote();
 
-    Map<String, String> getChangeNote();
+    Multimap<String, String> getChangeNote();
 
-    Map<String, String> getEditorialNote();
+    Multimap<String, String> getEditorialNote();
 
-    Map<String, String> getExample();
+    Multimap<String, String> getExample();
 
-    Map<String, String> getHistoryNote();
+    Multimap<String, String> getHistoryNote();
 
-    Map<String, String> getScopeNote();
+    Multimap<String, String> getScopeNote();
 
     /**
      * Gets all labels for this concept for a given language key.
@@ -41,13 +42,13 @@ public interface Concept {
     default Set<String> getLabels(String languageKey) {
         Set<String> labels = new HashSet<>();
         if (getPreferredLabel().containsKey(languageKey)) {
-            labels.add(getPreferredLabel().get(languageKey));
+            labels.addAll(getPreferredLabel().get(languageKey));
         }
         if (getAltLabel().containsKey(languageKey)) {
-            labels.add(getAltLabel().get(languageKey));
+            labels.addAll(getAltLabel().get(languageKey));
         }
         if (getHiddenLabel().containsKey(languageKey)) {
-            labels.add(getHiddenLabel().get(languageKey));
+            labels.addAll(getHiddenLabel().get(languageKey));
         }
         return labels;
     }

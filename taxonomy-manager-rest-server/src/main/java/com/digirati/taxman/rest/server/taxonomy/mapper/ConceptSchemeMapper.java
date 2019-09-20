@@ -9,6 +9,7 @@ import com.digirati.taxman.rest.server.taxonomy.identity.ConceptSchemeIdResolver
 import com.digirati.taxman.rest.server.taxonomy.storage.ConceptSchemeDataSet;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptReference;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptSchemeRecord;
+import com.google.common.collect.ArrayListMultimap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.DCTerms;
@@ -92,7 +93,7 @@ public class ConceptSchemeMapper {
                         targetSourceResourceUri = targetSourceResource.getURI();
                     }
 
-                    return new ConceptReference(id, targetSourceResourceUri, Map.of());
+                    return new ConceptReference(id, targetSourceResourceUri, ArrayListMultimap.create());
                 })
                 .collect(Collectors.toList());
 

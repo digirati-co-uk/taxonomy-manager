@@ -5,6 +5,7 @@ import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRecord;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRelationshipRecord;
 import com.digirati.taxman.rest.server.testing.DatabaseTestExtension;
 import com.digirati.taxman.rest.server.testing.annotation.TestDataSource;
+import com.google.common.collect.Multimap;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -54,7 +55,7 @@ public class ConceptDaoTests {
         var record = new ConceptRecord(uuid);
         var expectedLabels = Map.of("en", "value");
 
-        setter.setLabels(record, expectedLabels);
+//        setter.setLabels(record, expectedLabels);
         dao.storeDataSet(new ConceptDataSet(record));
 
         var storedRecord = dao.loadDataSet(uuid).getRecord();
@@ -69,12 +70,12 @@ public class ConceptDaoTests {
         var dao = new ConceptDao(dataSource);
         var uuid = UUID.fromString("3828f4e5-ad0d-402c-978a-e2b9939332c7");
         var record = new ConceptRecord(uuid);
-        setter.setLabels(record, Map.of("en", "value"));
+//        setter.setLabels(record, Map.of("en", "value"));
 
         dao.storeDataSet(new ConceptDataSet(record));
 
         var expectedLabels = Map.of("en", "value", "fr", "value");
-        setter.setLabels(record, expectedLabels);
+//        setter.setLabels(record, expectedLabels);
 
         dao.storeDataSet(new ConceptDataSet(record));
 
@@ -129,11 +130,11 @@ public class ConceptDaoTests {
 
     @FunctionalInterface
     private interface LabelGetter {
-        Map<String, String> getLabels(ConceptRecord record);
+        Multimap<String, String> getLabels(ConceptRecord record);
     }
 
     @FunctionalInterface
     private interface LabelSetter {
-        void setLabels(ConceptRecord record, Map<String, String> labels);
+        void setLabels(ConceptRecord record, Multimap<String, String> labels);
     }
 }

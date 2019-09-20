@@ -4,6 +4,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 final class ResultSetUtils {
@@ -18,18 +22,25 @@ final class ResultSetUtils {
      *
      * @throws SQLException if the column had the wrong type or was not present in the {@code ResultSet}.
      */
-    public static Map<String, String> getPlainLiteralMap(ResultSet rs, String column) throws SQLException {
-        Map<String, String> map = new HashMap<>();
-        String value = rs.getString(column);
+    public static Multimap<String, String> getPlainLiteralMap(ResultSet rs, String column) throws SQLException {
+        Multimap<String, String> map = ArrayListMultimap.create();
+        String json = rs.getString(column);
 
-        if (value == null) {
+        if (json == null) {
             return map;
         }
 
-        JSONObject jsonValue = new JSONObject(value);
+        JSONObject jsonValue = new JSONObject(json);
 
         for (String key : jsonValue.keySet()) {
-            map.put(key, jsonValue.getString(key));
+            Object value = jsonValue.get(key);
+
+            if (value instanceof JSONArray) {
+                JSONArray valueArray = (JSONArray) value;
+                valueArray.forEach(label -> map.put(key, (String) label));
+            } else if (value instanceof String) {
+                map.put(key, (String) value);
+            }
         }
 
         return map;

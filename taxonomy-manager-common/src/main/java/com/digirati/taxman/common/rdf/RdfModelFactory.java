@@ -75,6 +75,7 @@ public class RdfModelFactory {
             resources.add(create(type, resource));
         }
 
+
         return resources;
     }
 }

@@ -19,15 +19,15 @@ BEGIN
     LOOP
         UPDATE skos_concept c
         SET source          = _source,
-            preferred_label = c.preferred_label || _preferred_label,
-            alt_label       = c.alt_label || _alt_label,
-            hidden_label    = c.hidden_label || _hidden_label,
-            note            = c.note || _note,
-            change_note     = c.change_note || _change_note,
-            editorial_note  = c.editorial_note || _editorial_note,
-            example         = c.example || _example,
-            history_note    = c.history_note || _history_note,
-            scope_note      = c.scope_note || _scope_note
+            preferred_label = _preferred_label,
+            alt_label       = _alt_label,
+            hidden_label    = _hidden_label,
+            note            = _note,
+            change_note     = _change_note,
+            editorial_note  = _editorial_note,
+            example         = _example,
+            history_note    = _history_note,
+            scope_note      = _scope_note
         WHERE source = _source
           AND uuid = _uuid;
         IF found THEN
@@ -65,15 +65,15 @@ BEGIN
                    _scope_note)
             ON CONFLICT (source) DO UPDATE
                 SET source          = _source,
-                    preferred_label = c.preferred_label || _preferred_label,
-                    alt_label       = c.alt_label || _alt_label,
-                    hidden_label    = c.hidden_label || _hidden_label,
-                    note            = c.note || _note,
-                    change_note     = c.change_note || _change_note,
-                    editorial_note  = c.editorial_note || _editorial_note,
-                    example         = c.example || _example,
-                    history_note    = c.history_note || _history_note,
-                    scope_note      = c.scope_note || _scope_note;
+                    preferred_label = _preferred_label,
+                    alt_label       = _alt_label,
+                    hidden_label    = _hidden_label,
+                    note            = _note,
+                    change_note     = _change_note,
+                    editorial_note  = _editorial_note,
+                    example         = _example,
+                    history_note    = _history_note,
+                    scope_note      = _scope_note;
             RETURN;
         EXCEPTION
             WHEN unique_violation THEN
@@ -104,15 +104,15 @@ BEGIN
                            _scope_note)
                     ON CONFLICT (uuid) DO UPDATE
                         SET source          = _source,
-                            preferred_label = c.preferred_label || _preferred_label,
-                            alt_label       = c.alt_label || _alt_label,
-                            hidden_label    = c.hidden_label || _hidden_label,
-                            note            = c.note || _note,
-                            change_note     = c.change_note || _change_note,
-                            editorial_note  = c.editorial_note || _editorial_note,
-                            example         = c.example || _example,
-                            history_note    = c.history_note || _history_note,
-                            scope_note      = c.scope_note || _scope_note;
+                            preferred_label = _preferred_label,
+                            alt_label       = _alt_label,
+                            hidden_label    = _hidden_label,
+                            note            = _note,
+                            change_note     = _change_note,
+                            editorial_note  = _editorial_note,
+                            example         = _example,
+                            history_note    = _history_note,
+                            scope_note      = _scope_note;
                     RETURN;
                 EXCEPTION
                     WHEN unique_violation THEN

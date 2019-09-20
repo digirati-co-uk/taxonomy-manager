@@ -13,7 +13,9 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 @ApplicationScoped
@@ -41,12 +43,9 @@ public class AppInitListener {
                 var uuid = record.getUuid();
                 var labelExtractor = new ConceptLabelExtractor(record);
 
-                labelExtractor.extractTo((property, values) -> {
-                    String value = values.get(defaultLanguageKey);
-
-                    if (value != null) {
-                        termIndex.add(uuid, value);
-                    }
+                labelExtractor.extractTo((property, literal) -> {
+                    Collection<String> values = literal.get(defaultLanguageKey);
+                    values.forEach(value -> termIndex.add(uuid, value));
                 });
             });
 

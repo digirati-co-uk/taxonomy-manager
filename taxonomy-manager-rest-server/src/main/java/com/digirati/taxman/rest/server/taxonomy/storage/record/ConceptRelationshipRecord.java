@@ -2,6 +2,8 @@ package com.digirati.taxman.rest.server.taxonomy.storage.record;
 
 import com.digirati.taxman.common.taxonomy.ConceptRelationshipType;
 import com.google.common.base.Objects;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 
 import java.util.Map;
 import java.util.UUID;
@@ -19,7 +21,7 @@ public class ConceptRelationshipRecord {
     private final ConceptRelationshipType type;
     private final boolean transitive;
 
-    private final Map<String, String> targetPreferredLabel;
+    private final Multimap<String, String> targetPreferredLabel;
 
     /**
      * Create a new {@link ConceptRelationshipRecord} without a preferred label.
@@ -31,7 +33,7 @@ public class ConceptRelationshipRecord {
      */
     public ConceptRelationshipRecord(
             UUID source, UUID target, String targetSource, ConceptRelationshipType type, boolean transitive) {
-        this(source, target, targetSource, type, transitive, Map.of());
+        this(source, target, targetSource, type, transitive, ArrayListMultimap.create());
     }
 
     public ConceptRelationshipRecord(
@@ -39,7 +41,7 @@ public class ConceptRelationshipRecord {
             UUID target,
             String targetSource, ConceptRelationshipType type,
             boolean transitive,
-            Map<String, String> targetPrefLabel) {
+            Multimap<String, String> targetPrefLabel) {
         this.source = source;
         this.target = target;
         this.targetSource = targetSource;
@@ -90,7 +92,7 @@ public class ConceptRelationshipRecord {
      *
      * @return A plain literal representing the preferred label of the target concept.
      */
-    public Map<String, String> getTargetPreferredLabel() {
+    public Multimap<String, String> getTargetPreferredLabel() {
         return targetPreferredLabel;
     }
 
