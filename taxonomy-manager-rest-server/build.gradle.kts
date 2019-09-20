@@ -4,6 +4,7 @@ buildscript {
     repositories {
         mavenCentral()
     }
+
     dependencies {
         classpath("io.quarkus:quarkus-gradle-plugin:0.21.2")
     }

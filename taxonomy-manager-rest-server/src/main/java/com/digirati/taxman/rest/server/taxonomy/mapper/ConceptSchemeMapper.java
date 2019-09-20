@@ -86,6 +86,10 @@ public class ConceptSchemeMapper {
                     UUID id = concept.getUuid();
                     Resource resource = concept.getResource();
 
+                    if (id == null) {
+                        id = conceptIdResolver.resolve(concept.getUri()).orElse(null);
+                    }
+
                     var targetSourceResource = resource.getPropertyResourceValue(DCTerms.source);
 
                     String targetSourceResourceUri = null;
