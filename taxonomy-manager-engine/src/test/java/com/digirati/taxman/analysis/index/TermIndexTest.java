@@ -14,6 +14,15 @@ public class TermIndexTest {
     }
 
     @Test
+    public void search_ShouldFindSlashDelimitedConcepts() {
+        var index = create();
+        index.add("id1", "Ammonium Nitrate");
+        index.add("id2", "CAN");
+
+        assertEquals(Set.of("id1", "id2"), index.match("Ammonium Nitrate/CAN"));
+    }
+
+    @Test
     public void search_SupportsDuplicateValues() {
         var index = create();
         index.add("id1", "finished steel");
