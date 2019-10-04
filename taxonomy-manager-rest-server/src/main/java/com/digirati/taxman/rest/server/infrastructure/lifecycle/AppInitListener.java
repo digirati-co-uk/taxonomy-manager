@@ -6,6 +6,7 @@ import com.digirati.taxman.rest.server.infrastructure.config.TaxonomyIndexConfig
 import com.digirati.taxman.rest.server.taxonomy.storage.ConceptDao;
 import io.quarkus.runtime.StartupEvent;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.flywaydb.core.Flyway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +35,13 @@ public class AppInitListener {
     @Inject
     TermIndex<UUID> termIndex;
 
+    @Inject
+    Flyway flyway;
+
     void onStartup(@Observes StartupEvent event) {
+        flyway.baseline();
+        flyway.migrate();
+
         logger.info("Searching for terms");
         try (var conceptRecords = conceptDao.loadAllRecords()) {
             var terms = new HashMap<UUID, String>();
