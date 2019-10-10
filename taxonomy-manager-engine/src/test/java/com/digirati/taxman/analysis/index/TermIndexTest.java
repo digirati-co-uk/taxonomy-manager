@@ -14,6 +14,22 @@ public class TermIndexTest {
     }
 
     @Test
+    public void search_ShouldNotIdentifyAcronymsWithDifferentCase() {
+        var index = create();
+        index.add("id1", "CAN");
+
+        assertEquals(Set.of(), index.match("I can confirm the topic of today"));
+    }
+
+    @Test
+    public void search_ShouldIdentifyAcronyms() {
+        var index = create();
+        index.add("id1", "CAN");
+
+        assertEquals(Set.of("id1"), index.match("The topic of today is CAN"));
+    }
+
+    @Test
     public void search_ShouldFindSlashDelimitedConcepts() {
         var index = create();
         index.add("id1", "Ammonium Nitrate");

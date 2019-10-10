@@ -18,6 +18,14 @@ public abstract class WordTokenizerTestSuite {
         }
 
         @Test
+        public void tokenize_AcronymsPreserveCase() {
+            var tokens = tokenize("CAN is an organization that we can not detect");
+            var token = tokens.get(0);
+
+            assertEquals(Set.of("CAN"), Set.copyOf(token.candidates()));
+        }
+
+        @Test
         public void tokenize_WordsWithLemmas() {
             var tokens = tokenize("was good");
 

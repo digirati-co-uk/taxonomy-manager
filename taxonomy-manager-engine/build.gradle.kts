@@ -16,3 +16,8 @@ dependencies {
 jmh {
     duplicateClassesStrategy = DuplicatesStrategy.WARN
 }
+
+tasks.withType<Test> {
+    minHeapSize = "128m"
+    maxHeapSize = "4g"
+}
