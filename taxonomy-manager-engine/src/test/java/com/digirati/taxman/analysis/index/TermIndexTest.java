@@ -30,6 +30,14 @@ public class TermIndexTest {
     }
 
     @Test
+    public void search_ShouldFindHyphenDelimitedTokens() {
+        var index = create();
+        index.add("id1", "UAN-30");
+
+        assertEquals(Set.of("id1"), index.match("UAN 30%"));
+    }
+
+    @Test
     public void search_ShouldFindSlashDelimitedConcepts() {
         var index = create();
         index.add("id1", "Ammonium Nitrate");

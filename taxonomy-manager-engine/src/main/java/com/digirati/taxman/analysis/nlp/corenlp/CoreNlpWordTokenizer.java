@@ -59,10 +59,11 @@ public final class CoreNlpWordTokenizer implements WordTokenizer {
 
         for (var label : labels) {
             var pos = new CoreNlpPartOfSpeechTag(label.tag());
+            var token = label.originalText();
 
             // Skip punctuation tags, which are denoted by symbols in the Penn Treebank tag dictionary,
             // but keep sentence delimiters (periods, question/exclamation marks, EOL).
-            if (pos.isPunctuation()) {
+            if (pos.isPunctuation() || token.matches("[^.a-zA-Z]+")) {
                 continue;
             }
 
