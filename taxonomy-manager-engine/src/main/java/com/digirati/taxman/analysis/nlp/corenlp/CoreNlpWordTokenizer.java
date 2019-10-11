@@ -63,7 +63,7 @@ public final class CoreNlpWordTokenizer implements WordTokenizer {
 
             // Skip punctuation tags, which are denoted by symbols in the Penn Treebank tag dictionary,
             // but keep sentence delimiters (periods, question/exclamation marks, EOL).
-            if (pos.isPunctuation() || token.matches("[^.a-zA-Z]+")) {
+            if (pos.isPunctuation() || token.matches("[^.a-zA-Z0-9]+")) {
                 continue;
             }
 
