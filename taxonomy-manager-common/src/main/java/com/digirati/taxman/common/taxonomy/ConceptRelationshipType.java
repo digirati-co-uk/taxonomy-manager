@@ -59,7 +59,7 @@ public enum ConceptRelationshipType {
             case RELATED:
                 return RELATED;
             default:
-                return null; // Or throw...
+                throw new IllegalStateException(String.format("ConceptRelationshipType of type '%s' cannot be inverted.", this.name()));
         }
     }
 }

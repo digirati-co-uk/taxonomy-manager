@@ -1,5 +1,6 @@
 DROP PROCEDURE IF EXISTS update_concept_semantic_relations;
-create procedure update_concept_semantic_relations(_uuid uuid, _source character varying, _relations skos_semantic_relation_data)
+create procedure update_concept_semantic_relations(_uuid uuid, _source character varying,
+                                                   _relations skos_semantic_relation_data)
     language sql
 as
 $$
@@ -25,7 +26,9 @@ FROM skos_concept_semantic_relation scsr
                  LEFT JOIN skos_concept_semantic_relation r1
                            ON r1.source_id = src.id
                  LEFT JOIN (
-            SELECT tc.id target_id, (data ->> 'relation')::skos_semantic_relation_type relation, (data ->> 'transitive')::boolean transitive
+            SELECT tc.id                                              target_id,
+                   (data ->> 'relation')::skos_semantic_relation_type relation,
+                   (data ->> 'transitive')::boolean                   transitive
             FROM jsonb_array_elements(_relations) data
                      LEFT JOIN skos_concept tc
                                ON tc.uuid = (data ->> 'target_id')::uuid
