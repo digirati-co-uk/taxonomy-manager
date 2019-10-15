@@ -50,7 +50,7 @@ public class ConceptMapper {
             extractor.extractTo(builder);
 
             if (StringUtils.isNotBlank(record.getSource())) {
-                builder.addStringProperty(DCTerms.source, record.getSource());
+                builder.addEmbeddedModel(DCTerms.source, URI.create(record.getSource()));
             }
 
             for (ConceptRelationshipRecord relationship : dataset.getRelationshipRecords()) {
