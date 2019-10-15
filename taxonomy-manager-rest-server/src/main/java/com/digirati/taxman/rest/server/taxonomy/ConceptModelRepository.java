@@ -6,8 +6,8 @@ import com.digirati.taxman.common.taxonomy.ConceptRelationshipType;
 import com.digirati.taxman.rest.server.infrastructure.event.ConceptEvent;
 import com.digirati.taxman.rest.server.infrastructure.event.EventService;
 import com.digirati.taxman.rest.server.taxonomy.identity.ConceptIdResolver;
-import com.digirati.taxman.rest.server.taxonomy.mapper.SearchResultsMapper;
 import com.digirati.taxman.rest.server.taxonomy.mapper.ConceptMapper;
+import com.digirati.taxman.rest.server.taxonomy.mapper.SearchResultsMapper;
 import com.digirati.taxman.rest.server.taxonomy.storage.ConceptDao;
 import com.digirati.taxman.rest.server.taxonomy.storage.ConceptDataSet;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRecord;
@@ -19,8 +19,9 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import java.util.*;
-import java.util.function.*;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * A repository that manages storage of {@link ConceptModel}s.
@@ -98,50 +99,14 @@ public class ConceptModelRepository {
         eventService.send(ConceptEvent.updated(model));
     }
 
-    /**
-     * Analyze the changes between relationships and create symmetric relations if needed
-     * @param model new model
-     */
-    private void applySymmetricRelationChanges(ConceptModel model) {
+    private static final boolean USE_TRANSITIVE_RELATIONSHIPS = false;
 
-        final boolean transitive = false;
-
-        BiFunction<ConceptModel, ConceptRelationshipType, Set<UUID>> getRelationshipsOrEmpty
-                = (conceptModel, conceptRelationshipType) ->
-                    conceptModel
-                        .getRelationships(conceptRelationshipType,transitive)
-                        .map(relatedConceptModel -> idResolver.resolve(relatedConceptModel.getUri()))
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
-                        .collect(Collectors.toSet());
-
-        BiConsumer<UUID,ConceptRelationshipType> createRelationshipToModel = (relatedUuid, relationshipType)->
-        {
-            ConceptDataSet conceptDataSet = conceptDao.loadDataSet(relatedUuid);
-            conceptDataSet.addRelationshipRecord(
-                    new ConceptRelationshipRecord(
-                            relatedUuid,
-                            model.getUuid(),
-                            model.getSource(),
-                            relationshipType,
-                            transitive
-                    )
-            );
-
-            conceptDao.storeDataSet(conceptDataSet);
-            eventService.send(ConceptEvent.updated(conceptMapper.map(conceptDataSet)));
-        };
-
-        // For each broader, create a narrower relationship to this
-        getRelationshipsOrEmpty.apply(model, ConceptRelationshipType.BROADER)
-            .forEach(relatedUuid
-                -> createRelationshipToModel.accept(relatedUuid,ConceptRelationshipType.NARROWER));
-
-        // For each narrower, create a broader relationship to this
-        getRelationshipsOrEmpty.apply(model, ConceptRelationshipType.NARROWER)
-            .forEach(relatedUuid
-                -> createRelationshipToModel.accept(relatedUuid,ConceptRelationshipType.BROADER));
-
+    private Stream<UUID> getRelationshipsOrEmpty(ConceptModel conceptModel, ConceptRelationshipType conceptRelationshipType) {
+        return conceptModel
+                .getRelationships(conceptRelationshipType, USE_TRANSITIVE_RELATIONSHIPS)
+                .map(relatedConceptModel -> idResolver.resolve(relatedConceptModel.getUri()))
+                .flatMap(Optional::stream)
+                .distinct();
     }
 
     /**
@@ -168,5 +133,39 @@ public class ConceptModelRepository {
         eventService.send(ConceptEvent.created(model));
 
         return find(uuid);
+    }
+
+    /**
+     * Analyze the changes between relationships and create symmetric relations if needed
+     * @param model new model
+     */
+    private void applySymmetricRelationChanges(ConceptModel model) {
+
+
+
+        BiConsumer<UUID,ConceptRelationshipType> createRelationshipToModel = (relatedUuid, relationshipType)->
+        {
+            ConceptDataSet conceptDataSet = conceptDao.loadDataSet(relatedUuid);
+            conceptDataSet.addRelationshipRecord(
+                    new ConceptRelationshipRecord(
+                            relatedUuid,
+                            model.getUuid(),
+                            model.getSource(),
+                            relationshipType,
+                            USE_TRANSITIVE_RELATIONSHIPS
+                    )
+            );
+
+            conceptDao.storeDataSet(conceptDataSet);
+            eventService.send(ConceptEvent.updated(conceptMapper.map(conceptDataSet)));
+        };
+
+        // For each broader, create a narrower relationship to this
+        // For each narrower, create a broader relationship to this
+        for (var type : Set.of(ConceptRelationshipType.BROADER, ConceptRelationshipType.NARROWER)) {
+            getRelationshipsOrEmpty(model, type)
+                    .forEach(relatedUuid
+                            -> createRelationshipToModel.accept(relatedUuid, type.inverse()));
+        }
     }
 }

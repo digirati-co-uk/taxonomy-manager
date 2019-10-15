@@ -49,4 +49,17 @@ public enum ConceptRelationshipType {
 
         return transitive ? transitiveRelationshipProperty : relationshipProperty;
     }
+
+    public ConceptRelationshipType inverse() {
+        switch (this) {
+            case BROADER:
+                return NARROWER;
+            case NARROWER:
+                return BROADER;
+            case RELATED:
+                return RELATED;
+            default:
+                return null; // Or throw...
+        }
+    }
 }
