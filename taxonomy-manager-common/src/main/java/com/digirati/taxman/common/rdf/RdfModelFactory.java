@@ -38,7 +38,7 @@ public class RdfModelFactory {
 
         try {
             var uri = resource.getURI();
-            if (uri != null) {
+            if (!resource.hasProperty(DCTerms.source) && uri != null) {
                 resource.addProperty(DCTerms.source, resource);
             }
 
