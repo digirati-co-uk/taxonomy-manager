@@ -5,6 +5,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.ResIterator;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.vocabulary.RDF;
 
@@ -38,7 +39,10 @@ public class RdfModelFactory {
 
         try {
             var uri = resource.getURI();
-            if (!resource.hasProperty(DCTerms.source) && uri != null) {
+
+            StmtIterator stmts = resource.listProperties();
+
+            if (!resource.hasProperty(DCTerms.source) && uri != null && stmts.hasNext()) {
                 resource.addProperty(DCTerms.source, resource);
             }
 
