@@ -49,4 +49,17 @@ public enum ConceptRelationshipType {
 
         return transitive ? transitiveRelationshipProperty : relationshipProperty;
     }
+
+    public ConceptRelationshipType inverse() {
+        switch (this) {
+            case BROADER:
+                return NARROWER;
+            case NARROWER:
+                return BROADER;
+            case RELATED:
+                return RELATED;
+            default:
+                throw new IllegalStateException(String.format("ConceptRelationshipType of type '%s' cannot be inverted.", this.name()));
+        }
+    }
 }
