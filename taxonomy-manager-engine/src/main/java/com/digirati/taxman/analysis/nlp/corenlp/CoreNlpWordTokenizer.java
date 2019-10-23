@@ -1,10 +1,10 @@
 package com.digirati.taxman.analysis.nlp.corenlp;
 
-import com.digirati.taxman.analysis.nlp.AnnotationType;
 import com.digirati.taxman.analysis.WordToken;
 import com.digirati.taxman.analysis.WordTokenizer;
 import com.digirati.taxman.analysis.nlp.corenlp.normalizer.CoreNlpAcronymWordNormalizer;
 import com.digirati.taxman.analysis.nlp.corenlp.normalizer.CoreNlpDefaultWordNormalizer;
+import com.digirati.taxman.analysis.nlp.corenlp.normalizer.CoreNlpNumericalNormalizer;
 import com.digirati.taxman.analysis.nlp.corenlp.normalizer.CoreNlpStopwordNormalizer;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -14,11 +14,11 @@ import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 public final class CoreNlpWordTokenizer implements WordTokenizer {
     private static final List<CoreNlpWordNormalizer> DEFAULT_NORMALIZERS = List.of(
             new CoreNlpStopwordNormalizer(),
+            new CoreNlpNumericalNormalizer(),
             new CoreNlpAcronymWordNormalizer(),
             new CoreNlpDefaultWordNormalizer()
     );
@@ -63,7 +63,7 @@ public final class CoreNlpWordTokenizer implements WordTokenizer {
 
             // Skip punctuation tags, which are denoted by symbols in the Penn Treebank tag dictionary,
             // but keep sentence delimiters (periods, question/exclamation marks, EOL).
-            if (pos.isPunctuation() || token.matches("[^.a-zA-Z0-9]+")) {
+            if (pos.isPunctuation() || token.matches("^[^&-.a-zA-Z0-9]+$")) {
                 continue;
             }
 
