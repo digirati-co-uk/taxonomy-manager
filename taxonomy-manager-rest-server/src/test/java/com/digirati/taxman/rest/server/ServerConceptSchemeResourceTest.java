@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 
 import javax.transaction.Transactional;
 
+import java.util.Collections;
+
 import static com.digirati.taxman.rest.server.testing.util.RestAssuredUtils.givenJsonLdRequest;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -15,7 +17,7 @@ public class ServerConceptSchemeResourceTest {
     @Test
     public void createConceptScheme_WithTopConcept() {
         // @formatter:off
-        givenJsonLdRequest(getClass(), "concept-scheme--create-with-top-concept.json")
+        givenJsonLdRequest(getClass(), "concept-scheme--create-with-top-concept.json", Collections.emptyMap())
                 .when()
                     .post("/v0.1/concept-scheme")
                 .then()
