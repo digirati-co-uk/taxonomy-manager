@@ -1,4 +1,5 @@
 import io.quarkus.gradle.tasks.QuarkusDev
+import org.testcontainers.containers.PostgreSQLContainer
 
 buildscript {
     repositories {
@@ -6,7 +7,10 @@ buildscript {
     }
 
     dependencies {
-        classpath("io.quarkus:quarkus-gradle-plugin:0.21.2")
+        classpath("io.quarkus:quarkus-gradle-plugin:0.26.1")
+        classpath("org.testcontainers:testcontainers:1.11.3")
+        classpath("org.testcontainers:postgresql:1.11.3")
+        classpath("org.postgresql:postgresql:42.2.5")
     }
 }
 
@@ -49,10 +53,10 @@ val integrationTestImplementation by configurations.getting { extendsFrom(config
 configurations["integrationTestRuntimeOnly"].extendsFrom(configurations.runtimeOnly.get())
 
 dependencies {
-    implementation(enforcedPlatform("io.quarkus:quarkus-bom:0.21.2"))
+    implementation(enforcedPlatform("io.quarkus:quarkus-bom:0.26.1"))
 
     quarkusExtensions.forEach { ext ->
-        implementation("io.quarkus:quarkus-$ext:0.21.2")
+        implementation("io.quarkus:quarkus-$ext:0.26.1")
     }
 
     implementation("org.springframework", "spring-jdbc", "5.1.3.RELEASE")
@@ -64,7 +68,7 @@ dependencies {
     implementation("com.google.guava", "guava", "27.1-jre")
 
     testImplementation("io.rest-assured:rest-assured:3.3.0")
-    testImplementation("io.quarkus", "quarkus-junit5", "0.21.2")
+    testImplementation("io.quarkus", "quarkus-junit5", "0.26.1")
     testImplementation("com.nimbusds", "nimbus-jose-jwt", "7.4")
     testCompileOnly("org.jetbrains:annotations:17.0.0")
 
@@ -77,10 +81,26 @@ dependencies {
     integrationTestRuntimeOnly("org.postgresql:postgresql:42.2.5")
 }
 
+// Kotlin doesn't support initialization of types with self-referential generics,
+// so we resort to reflection
+var testDatabaseContainer = PostgreSQLContainer::class.java.getDeclaredConstructor(String::class.java).newInstance("postgres:11")
+
 tasks {
     test {
         useJUnitPlatform()
         setForkEvery(1)
+
+        doFirst {
+            testDatabaseContainer.start()
+
+            systemProperty("quarkus.datasource.url", testDatabaseContainer.jdbcUrl)
+            systemProperty("quarkus.datasource.username", testDatabaseContainer.username)
+            systemProperty("quarkus.datasource.password", testDatabaseContainer.password)
+        }
+
+        doLast {
+            testDatabaseContainer.stop()
+        }
     }
 }
 

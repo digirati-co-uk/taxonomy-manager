@@ -27,7 +27,7 @@ public class ConceptSchemeImporter {
         var conceptModels = model.getAllResources(ConceptModel.class);
         conceptModels.forEach(concept -> {
             concept.setUuid(UUID.randomUUID());
-            conceptRepository.update(concept);
+            conceptRepository.create(concept);
         });
 
         return conceptSchemeRepository.create(model);
