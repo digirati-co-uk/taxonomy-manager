@@ -86,6 +86,14 @@ dependencies {
 var testDatabaseContainer = PostgreSQLContainer::class.java.getDeclaredConstructor(String::class.java).newInstance("postgres:11")
 
 tasks {
+    getByName("testNative") {
+        enabled = false
+    }
+
+    getByName("buildNative") {
+        enabled = false
+    }
+
     test {
         useJUnitPlatform()
         setForkEvery(1)
