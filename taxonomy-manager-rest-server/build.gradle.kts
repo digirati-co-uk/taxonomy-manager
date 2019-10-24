@@ -81,10 +81,6 @@ dependencies {
     integrationTestRuntimeOnly("org.postgresql:postgresql:42.2.5")
 }
 
-// Kotlin doesn't support initialization of types with self-referential generics,
-// so we resort to reflection
-var testDatabaseContainer = PostgreSQLContainer::class.java.getDeclaredConstructor(String::class.java).newInstance("postgres:11")
-
 tasks {
     getByName("testNative") {
         enabled = false
@@ -99,15 +95,17 @@ tasks {
         setForkEvery(1)
 
         doFirst {
+            // Kotlin doesn't support initialization of types with self-referential generics,
+            // so we resort to reflection
+            var testDatabaseContainer = PostgreSQLContainer::class.java
+                    .getDeclaredConstructor(String::class.java)
+                    .newInstance("postgres:11")
+
             testDatabaseContainer.start()
 
             systemProperty("quarkus.datasource.url", testDatabaseContainer.jdbcUrl)
             systemProperty("quarkus.datasource.username", testDatabaseContainer.username)
             systemProperty("quarkus.datasource.password", testDatabaseContainer.password)
-        }
-
-        doLast {
-            testDatabaseContainer.stop()
         }
     }
 }
