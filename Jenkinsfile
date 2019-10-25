@@ -6,7 +6,9 @@ node {
         registryUrl: "taxman.azurecr.io",
         repositoryName: "backend",
         deploymentJob: '../digirati-taxonomy-manager-infra/master',
-        deploymentEnv: 'dev'
+        deploymentEnv: 'dev',
+        gitCommiterEmail: "digirati-ci@digirati.com",
+        gitCommiterUsername: "digirati-ci",
     ]
 
     stage('checkout scm') {
@@ -17,6 +19,12 @@ node {
 
     stage('build build image') {
         buildImage = buildBuildImage()
+    }
+
+    stage("initialise git config") {
+        buildImage.inside("-v /var/run/docker.sock:/var/run/docker.sock") {
+          initialiseGitConfig(config.gitCommiterEmail, config.gitCommiterUsername)
+        }
     }
 
     stage('general linting') {
@@ -96,14 +104,10 @@ node {
     }
 }
 
-/*
- * We can't use the Jenkins Docker DSL plugin (i.e. docker.build(), docker.push(), etc) in this pipeline, because the
- * Dockerfile being built is multistage and a bug with the plugin causes the build to fail. See:
- * https://stackoverflow.com/questions/51678535/how-to-resolve-cannot-retrieve-id-from-docker-when-building-docker-image-usin
- * https://issues.jenkins-ci.org/browse/JENKINS-44789
- * https://issues.jenkins-ci.org/browse/JENKINS-44609
- * https://issues.jenkins-ci.org/browse/JENKINS-31507
- */
+def initialiseGitConfig(def commiterEmail, def commiterUsername) {
+  sh "git config --global user.email ${commiterEmail}"
+  sh "git config --global user.name ${commiterUsername}"
+}
 
 def checkoutScm() {
     checkout scm
