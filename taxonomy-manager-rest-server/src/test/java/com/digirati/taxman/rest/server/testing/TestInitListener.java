@@ -9,6 +9,7 @@ import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
+import javax.sql.DataSource;
 import java.sql.SQLException;
 
 @ApplicationScoped
@@ -20,8 +21,11 @@ public class TestInitListener {
     @Inject
     Flyway flyway;
 
+    @Inject
+    DataSource ds;
+
     void onStartup(@Observes StartupEvent event) throws SQLException {
-        try (var conn = flyway.getDataSource().getConnection(); var stmt = conn.createStatement()) {
+        try (var conn = ds.getConnection(); var stmt = conn.createStatement()) {
             stmt.execute("DROP SCHEMA public CASCADE");
             stmt.execute("CREATE SCHEMA public");
         }
