@@ -23,8 +23,8 @@ build {
 
   stage('Analysis') {
     def spotbugs = scanForIssues tool: spotBugs(pattern: '**/build/reports/spotbugs/*.xml')
-    def checkstyle = scanForIssues tool: checkstyle(pattern: '**/build/reports/checkstyle/*.xml')
-    def javac = scanForIssues tool: [$class: 'Java']
+    def checkstyle = scanForIssues tool: checkStyle(pattern: '**/build/reports/checkstyle/*.xml')
+    def javac = scanForIssues tool: java()
 
     publishIssues issues: [javac, spotbugs, checkstyle]
   }
