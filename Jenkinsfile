@@ -105,8 +105,8 @@ node {
 }
 
 def initialiseGitConfig(def commiterEmail, def commiterUsername) {
-  sh "git config --global user.email ${commiterEmail}"
-  sh "git config --global user.name ${commiterUsername}"
+  sh "git config user.email ${commiterEmail}"
+  sh "git config user.name ${commiterUsername}"
 }
 
 def checkoutScm() {
