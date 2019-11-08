@@ -19,9 +19,9 @@ BEGIN
                relation.relation,
                relation.transitive
         FROM skos_concept_semantic_relation relation
-            INNER JOIN skos_concept sc
+            INNER JOIN skos_concept_ex sc
                 ON relation.source_id = sc.id
-            INNER JOIN skos_concept tc
+            INNER JOIN skos_concept_ex tc
                 ON relation.target_id = tc.id
         WHERE sc.uuid = _source_uuid;
 END;

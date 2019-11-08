@@ -12,8 +12,8 @@ BEGIN
     RETURN QUERY
         SELECT c.uuid, c.source, c.preferred_label
         FROM skos_concept_scheme_concept sc_entry
-                 INNER JOIN skos_concept_scheme cs ON cs.id = sc_entry.concept_scheme_id
-                 INNER JOIN skos_concept c ON c.id = sc_entry.concept_id
+                 INNER JOIN skos_concept_scheme_ex cs ON cs.id = sc_entry.concept_scheme_id
+                 INNER JOIN skos_concept_ex c ON c.id = sc_entry.concept_id
         WHERE cs.uuid = uniqid;
 END;
 $$ LANGUAGE plpgsql;

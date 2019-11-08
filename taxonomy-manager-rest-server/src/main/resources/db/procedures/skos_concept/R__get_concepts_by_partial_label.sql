@@ -1,10 +1,10 @@
 DROP FUNCTION IF EXISTS get_concepts_by_partial_label;
-CREATE OR REPLACE FUNCTION get_concepts_by_partial_label(_label text, _language text) RETURNS SETOF skos_concept AS
+CREATE OR REPLACE FUNCTION get_concepts_by_partial_label(_label text, _language text) RETURNS SETOF skos_concept_ex AS
 $$
 BEGIN
     RETURN QUERY
         SELECT concept.*
-        FROM skos_concept concept
+        FROM skos_concept_ex concept
         WHERE contains_label_prefix(concept.preferred_label, _label, _language)
         OR contains_label_prefix(concept.alt_label, _label, _language)
         OR contains_label_prefix(concept.hidden_label, _label, _language);

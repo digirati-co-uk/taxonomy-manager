@@ -1,6 +1,6 @@
 DROP FUNCTION IF EXISTS get_concept_semantic_relations_recursive;
 CREATE OR REPLACE FUNCTION get_concept_semantic_relations_recursive(_uuid uuid, _type skos_semantic_relation_type, _depth int)
-RETURNS SETOF skos_concept
+RETURNS SETOF skos_concept_ex
 AS
 $$
 BEGIN
@@ -16,7 +16,7 @@ BEGIN
                                       ARRAY [sr.source_id] AS visited_ids,
                                       FALSE                AS is_cycle
                                FROM skos_concept_semantic_relation sr
-                                        INNER JOIN skos_concept sc
+                                        INNER JOIN skos_concept_ex sc
                                                    ON sc.id = sr.source_id
                                WHERE sr.relation = _type
                                  AND sc.uuid = _uuid
@@ -36,9 +36,9 @@ BEGIN
                                  AND rsr.depth <= _depth)
         SELECT sct.*
         FROM relationships r
-                 inner join skos_concept scs
+                 inner join skos_concept_ex scs
                             ON scs.id = r.source_id
-                 inner join skos_concept sct
+                 inner join skos_concept_ex sct
                             ON sct.id = r.target_id;
 END;
 $$ LANGUAGE plpgsql;
