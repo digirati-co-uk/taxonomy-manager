@@ -75,4 +75,8 @@ public class ProjectModelRepository {
         ProjectDataSet dataSet = projectMapper.map(slug, project);
         return projectDao.storeDataSet(dataSet);
     }
+
+    public void delete(String projectSlug) {
+        projectDao.deleteDataSet(projectSlug);
+    }
 }

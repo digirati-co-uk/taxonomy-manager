@@ -42,4 +42,11 @@ public class ServerConceptSchemeResource implements ConceptSchemeResource {
 
         return Response.noContent().build();
     }
+
+    @Override
+    public Response deleteConceptScheme(ConceptSchemePath params) {
+        conceptSchemes.delete(params.getUuid());
+
+        return Response.noContent().build();
+    }
 }

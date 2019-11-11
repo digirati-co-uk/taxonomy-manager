@@ -4,7 +4,6 @@ import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptSchemeReco
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ProjectRecord;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.mapper.ConceptSchemeRecordMapper;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.mapper.ProjectRecordMapper;
-import org.json.JSONObject;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -97,5 +96,12 @@ public class ProjectDao {
         int schemeChanges = jdbcTemplate.update("CALL update_project_concept_schemes(?, ?)", schemeArgs, schemeArgTypes);
 
         return (projectChanges | schemeChanges) > 0;
+    }
+
+    public void deleteDataSet(String slug) {
+        Object[] projectArgs = {slug};
+        int[] projectArgTypes = {Types.VARCHAR};
+
+        jdbcTemplate.update("CALL delete_project(?)", projectArgs, projectArgTypes);
     }
 }

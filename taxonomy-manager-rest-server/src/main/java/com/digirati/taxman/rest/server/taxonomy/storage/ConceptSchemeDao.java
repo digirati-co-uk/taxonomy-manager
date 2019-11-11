@@ -6,11 +6,9 @@ import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptSchemeReco
 import com.digirati.taxman.rest.server.taxonomy.storage.record.mapper.ConceptReferenceMapper;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.mapper.ConceptSchemeRecordMapper;
 import org.json.JSONArray;
-import org.json.JSONObject;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
-import java.sql.Array;
 import java.sql.Types;
 import java.util.UUID;
 
@@ -74,5 +72,12 @@ public class ConceptSchemeDao {
 
         changed |= jdbcTemplate.update("CALL update_concept_scheme_top_concepts(?, ?)", conceptArgs, conceptTypes) > 0;
         return changed;
+    }
+
+    public void deleteDataSet(UUID uuid) {
+        Object[] recordArgs = {uuid};
+        int[] recordTypes = {Types.OTHER};
+
+        jdbcTemplate.update("CALL delete_concept_scheme(?)", recordArgs, recordTypes);
     }
 }

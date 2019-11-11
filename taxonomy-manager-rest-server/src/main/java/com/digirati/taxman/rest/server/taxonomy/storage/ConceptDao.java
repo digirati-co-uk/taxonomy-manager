@@ -135,4 +135,10 @@ public class ConceptDao {
         jdbcTemplate.update("CALL update_concept_semantic_relations(?, ?, ?)", relationArgs, relationTypes);
     }
 
+    public void deleteDataSet(UUID uuid) {
+        Object[] recordArgs = {uuid};
+        int[] recordTypes = {Types.OTHER};
+
+        jdbcTemplate.update("CALL delete_concept(?)", recordArgs, recordTypes);
+    }
 }

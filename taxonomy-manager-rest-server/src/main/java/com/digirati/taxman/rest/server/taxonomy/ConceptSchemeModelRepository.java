@@ -74,4 +74,8 @@ public class ConceptSchemeModelRepository {
 
         return conceptSchemeDao.storeDataSet(dataset);
     }
+
+    public void delete(UUID uuid) {
+        conceptSchemeDao.deleteDataSet(uuid);
+    }
 }

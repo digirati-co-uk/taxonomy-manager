@@ -196,4 +196,11 @@ public class ConceptModelRepository {
                             -> createRelationshipToModel.accept(relatedUuid, type.inverse()));
         }
     }
+
+    public void delete(UUID uuid) {
+        ConceptModel concept = find(uuid);
+        conceptDao.deleteDataSet(uuid);
+
+        eventService.send(ConceptEvent.deleted(concept));
+    }
 }

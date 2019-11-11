@@ -36,4 +36,11 @@ public class ServerProjectResource implements ProjectResource {
         projectModelRepository.update(projectPath.getProjectSlug(), project);
         return Response.noContent().build();
     }
+
+    @Override
+    public Response deleteProject(ProjectPath projectPath) {
+        projectModelRepository.delete(projectPath.getProjectSlug());
+
+        return Response.noContent().build();
+    }
 }

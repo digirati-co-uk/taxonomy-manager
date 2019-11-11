@@ -7,9 +7,8 @@ import com.digirati.taxman.common.taxonomy.ConceptModel;
  */
 public class ConceptEvent {
 
-    private enum Type {
-        CREATED,
-        UPDATED
+    public static ConceptEvent deleted(ConceptModel concept) {
+        return new ConceptEvent(Type.DELETED, concept);
     }
 
     private final Type type;
@@ -22,6 +21,10 @@ public class ConceptEvent {
 
     public static ConceptEvent updated(ConceptModel concept) {
         return new ConceptEvent(Type.UPDATED, concept);
+    }
+
+    public Type getType() {
+        return type;
     }
 
     private ConceptEvent(Type type, ConceptModel concept) {
