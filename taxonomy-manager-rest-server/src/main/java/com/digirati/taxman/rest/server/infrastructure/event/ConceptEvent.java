@@ -7,42 +7,49 @@ import com.digirati.taxman.common.taxonomy.ConceptModel;
  */
 public class ConceptEvent {
 
-    public static ConceptEvent deleted(ConceptModel concept) {
-        return new ConceptEvent(Type.DELETED, concept);
-    }
-
     private final Type type;
-
+    private final ConceptModel previous;
     private final ConceptModel concept;
 
-    public static ConceptEvent created(ConceptModel concept) {
-        return new ConceptEvent(Type.CREATED, concept);
+    private ConceptEvent(Type type, ConceptModel concept, ConceptModel previous) {
+        this.type = type;
+        this.concept = concept;
+        this.previous = previous;
     }
 
-    public static ConceptEvent updated(ConceptModel concept) {
-        return new ConceptEvent(Type.UPDATED, concept);
+    public static ConceptEvent deleted(ConceptModel concept) {
+        return new ConceptEvent(Type.DELETED, null, concept);
+    }
+
+    public static ConceptEvent created(ConceptModel concept) {
+        return new ConceptEvent(Type.CREATED, concept, null);
+    }
+
+    public static ConceptEvent updated(ConceptModel concept, ConceptModel existing) {
+        return new ConceptEvent(
+                existing == null ? Type.CREATED : Type.UPDATED,
+                concept, existing);
     }
 
     public Type getType() {
         return type;
     }
 
-    private ConceptEvent(Type type, ConceptModel concept) {
-        this.type = type;
-        this.concept = concept;
-    }
-
     public ConceptModel getConcept() {
         return concept;
+    }
+
+    public ConceptModel getPrevious() {
+        return previous;
+    }
+
+    public boolean isNew() {
+        return Type.CREATED == type;
     }
 
     public enum Type {
         CREATED,
         UPDATED,
         DELETED
-    }
-
-    public boolean isNew() {
-        return Type.CREATED == type;
     }
 }

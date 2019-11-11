@@ -99,7 +99,7 @@ public class ConceptModelRepository {
         applySymmetricRelationChanges(model, existing);
 
         conceptDao.storeDataSet(conceptMapper.map(model));
-        eventService.send(ConceptEvent.updated(model));
+        eventService.send(ConceptEvent.updated(model, existing));
     }
 
     /**
@@ -185,7 +185,7 @@ public class ConceptModelRepository {
             );
 
             conceptDao.storeDataSet(conceptDataSet);
-            eventService.send(ConceptEvent.updated(conceptMapper.map(conceptDataSet)));
+            eventService.send(ConceptEvent.updated(conceptMapper.map(conceptDataSet), existing));
         };
 
         // For each broader, create a narrower relationship to this

@@ -2,6 +2,7 @@ package com.digirati.taxman.rest.server.infrastructure.event;
 
 import com.digirati.taxman.analysis.index.TermIndex;
 import com.digirati.taxman.common.taxonomy.ConceptLabelExtractor;
+import com.digirati.taxman.common.taxonomy.ConceptModel;
 import com.google.common.eventbus.Subscribe;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -25,31 +26,27 @@ public class ConceptEventListener {
 
     @Subscribe
     public void ConceptChangeEvent(ConceptEvent conceptEvent) {
-        UUID uuid = conceptEvent.getConcept().getUuid();
+        if (conceptEvent.getPrevious() != null)
+            Remove(conceptEvent.getPrevious());
 
-        BiConsumer<UUID, String> consumer = null;
-        switch (conceptEvent.getType()) {
+        if (conceptEvent.getConcept() != null)
+            Add(conceptEvent.getConcept());
+    }
 
-            case CREATED:
-                //consumer = index::add;
-                break;
-            case UPDATED:
-                // ???
-                break;
-            case DELETED:
-                consumer = index::remove;
-                break;
-            default:
-                throw new IllegalStateException("Unexpected value: " + conceptEvent.getType());
-        }
+    private void Add(ConceptModel concept) {
+        ConsumeLabels(concept, index::add);
+    }
 
-        if (consumer == null) return;
-        final BiConsumer<UUID, String> finalConsumer = consumer;
+    private void Remove(ConceptModel previous) {
+        ConsumeLabels(previous, index::remove);
+    }
 
-        var labelExtractor = new ConceptLabelExtractor(conceptEvent.getConcept());
+    private void ConsumeLabels(ConceptModel concept, BiConsumer<UUID, String> consumer) {
+        var labelExtractor = new ConceptLabelExtractor(concept);
+
         labelExtractor.extractTo((property, literal) -> {
             Collection<String> values = literal.get(defaultLanguageKey);
-            values.forEach(value -> finalConsumer.accept(uuid, value));
+            values.forEach(value -> consumer.accept(concept.getUuid(), value));
         });
     }
 }
