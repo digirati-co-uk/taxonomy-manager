@@ -6,6 +6,6 @@ CREATE OR REPLACE PROCEDURE delete_concept(_uuid uuid)
 AS
 $$
 BEGIN
-    UPDATE skos_concept concept SET deleted = true WHERE concept.uuid = uuid;
+    UPDATE skos_concept concept SET deleted = true WHERE concept.uuid = _uuid;
 END;
 $$;
