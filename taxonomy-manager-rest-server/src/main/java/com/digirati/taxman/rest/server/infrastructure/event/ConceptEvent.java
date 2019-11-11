@@ -36,6 +36,12 @@ public class ConceptEvent {
         return concept;
     }
 
+    public enum Type {
+        CREATED,
+        UPDATED,
+        DELETED
+    }
+
     public boolean isNew() {
         return Type.CREATED == type;
     }
