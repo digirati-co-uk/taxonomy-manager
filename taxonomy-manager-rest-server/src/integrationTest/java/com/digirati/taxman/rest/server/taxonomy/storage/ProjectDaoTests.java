@@ -11,10 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.Assert.*;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -36,10 +33,11 @@ class ProjectDaoTests {
 
         // When
         dao.storeDataSet(new ProjectDataSet(record, new ArrayList<>()));
-        ProjectDataSet retrieved = dao.loadDataSet("test-project");
+        Optional<ProjectDataSet> retrieved = dao.loadDataSet("test-project");
 
         // Then
-        assertEquals(title, retrieved.getProject().getTitle());
+        assertTrue(retrieved.isPresent());
+        assertEquals(title, retrieved.get().getProject().getTitle());
     }
 
     @Test
@@ -60,10 +58,11 @@ class ProjectDaoTests {
 
         // When
         dao.storeDataSet(project);
-        ProjectDataSet retrieved = dao.loadDataSet("test-project");
+        Optional<ProjectDataSet> retrieved = dao.loadDataSet("test-project");
 
         // Then
-        assertEquals(schemes, retrieved.getConceptSchemes());
+        assertTrue(retrieved.isPresent());
+        assertEquals(schemes, retrieved.get().getConceptSchemes());
     }
 
     @Test
@@ -88,10 +87,11 @@ class ProjectDaoTests {
 
         // When
         dao.storeDataSet(updateProject);
-        ProjectDataSet retrieved = dao.loadDataSet("test-project");
+        Optional<ProjectDataSet> retrieved = dao.loadDataSet("test-project");
 
         // Then
-        assertEquals(updatedSchemeList, retrieved.getConceptSchemes());
+        assertTrue(retrieved.isPresent());
+        assertEquals(updatedSchemeList, retrieved.get().getConceptSchemes());
     }
 
     @Test

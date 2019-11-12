@@ -12,6 +12,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.ws.rs.WebApplicationException;
+import java.util.Optional;
 import java.util.UUID;
 
 @ApplicationScoped
@@ -30,11 +31,14 @@ public class ConceptSchemeModelRepository {
      * @return the RDF model of the concept requested.
      */
     @Transactional(Transactional.TxType.REQUIRED)
-    public ConceptSchemeModel find(UUID uuid) {
-        ConceptSchemeDataSet dataset = conceptSchemeDao.loadDataSet(uuid);
+    public Optional<ConceptSchemeModel> find(UUID uuid) {
+        var dataset = conceptSchemeDao.loadDataSet(uuid);
+        if (dataset.isEmpty()) {
+            return Optional.empty();
+        }
 
         try {
-            return dataMapper.map(dataset);
+            return Optional.of(dataMapper.map(dataset.get()));
         } catch (RdfModelException e) {
             throw new WebApplicationException("Internal error occurred creating RDF model from dataset", e);
         }
@@ -48,28 +52,30 @@ public class ConceptSchemeModelRepository {
      * @return the stored {@link com.digirati.taxman.common.taxonomy.ConceptSchemeModel}.
      */
     public ConceptSchemeModel create(ConceptSchemeModel model) {
+        // If the Concept comes with an existing URI, then store it as a dcterms:source
         String originalUri = model.getResource().getURI();
         if (StringUtils.isNotBlank(originalUri)) {
             model.getResource().addProperty(DCTerms.source, originalUri);
         }
-        var uuid = UUID.randomUUID();
-        model.setUuid(uuid);
 
-        var dataset = dataMapper.map(model);
-        conceptSchemeDao.storeDataSet(dataset);
+        // If the model comes without an UUID, create a new one
+        if (model.getUuid() == null) {
+            model.setUuid(UUID.randomUUID());
+        }
 
-        return find(uuid);
+        var uuid = update(model);
+
+        return find(uuid).orElseThrow();
     }
 
     /**
      * Perform an idempotent update of an existing {@link ConceptSchemeModel}, updating all stored properties
      * as well as top concept relationships.
      *
-     * @return {@code true} iff the operation updated any records, {@code false} if no change occurred.
+     * @return UUID of the record updated
      */
     @Transactional(Transactional.TxType.REQUIRED)
-    public boolean update(ConceptSchemeModel conceptScheme) {
-        conceptSchemeDao.loadDataSet(conceptScheme.getUuid());
+    public UUID update(ConceptSchemeModel conceptScheme) {
         ConceptSchemeDataSet dataset = dataMapper.map(conceptScheme);
 
         return conceptSchemeDao.storeDataSet(dataset);

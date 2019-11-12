@@ -3,6 +3,9 @@
 alter table skos_concept
     add deleted boolean default false not null;
 
+create unique index skos_concept__uniq_uuid_source_coalesce
+    on skos_concept(uuid, COALESCE(source,''));
+
 create or replace view skos_concept_ex as
     select * from skos_concept where deleted = false;
 
@@ -39,6 +42,9 @@ create index project_pkey_not_deleted
 
 alter table skos_concept_scheme
     add deleted boolean default false not null;
+
+create unique index skos_concept_scheme__uniq_uuid_source_coalesce
+    on skos_concept_scheme(uuid, COALESCE(source,''));
 
 create or replace view skos_concept_scheme_ex as
     select * from skos_concept_scheme where deleted = false;

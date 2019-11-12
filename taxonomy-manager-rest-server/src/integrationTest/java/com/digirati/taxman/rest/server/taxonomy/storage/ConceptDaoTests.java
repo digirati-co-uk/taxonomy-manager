@@ -60,7 +60,7 @@ public class ConceptDaoTests {
         setter.setLabels(record, expectedLabels);
         dao.storeDataSet(new ConceptDataSet(record));
 
-        var storedRecord = dao.loadDataSet(uuid).getRecord();
+        var storedRecord = dao.loadDataSet(uuid).orElseThrow().getRecord();
         var storedLabels = getter.getLabels(storedRecord);
 
         Assertions.assertEquals(expectedLabels, storedLabels);
@@ -86,7 +86,7 @@ public class ConceptDaoTests {
 
         dao.storeDataSet(new ConceptDataSet(record));
 
-        var storedRecord = dao.loadDataSet(uuid).getRecord();
+        var storedRecord = dao.loadDataSet(uuid).orElseThrow().getRecord();
         var storedLabels = getter.getLabels(storedRecord);
 
         Assertions.assertEquals(expectedLabels, storedLabels);
@@ -103,7 +103,7 @@ public class ConceptDaoTests {
         dao.storeDataSet(new ConceptDataSet(new ConceptRecord(uuidB)));
         dao.storeDataSet(new ConceptDataSet(new ConceptRecord(uuidA), relationships));
 
-        Assertions.assertEquals(relationships, dao.loadDataSet(uuidA).getRelationshipRecords());
+        Assertions.assertEquals(relationships, dao.loadDataSet(uuidA).orElseThrow().getRelationshipRecords());
     }
 
     @Test

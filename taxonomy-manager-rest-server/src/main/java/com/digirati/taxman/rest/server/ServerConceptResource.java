@@ -35,7 +35,11 @@ public class ServerConceptResource implements ConceptResource {
     public Response getConcept(@BeanParam ConceptPath params) {
         var model = concepts.find(params.getUuid());
 
-        return Response.ok(model).build();
+        if (model.isPresent()) {
+            return Response.ok(model.get()).build();
+        } else {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
     }
 
     @Override

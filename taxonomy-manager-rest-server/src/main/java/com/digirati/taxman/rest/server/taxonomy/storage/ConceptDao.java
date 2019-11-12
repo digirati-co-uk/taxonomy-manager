@@ -4,16 +4,12 @@ import com.digirati.taxman.common.taxonomy.ConceptRelationshipType;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRecord;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.mapper.ConceptRecordMapper;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.mapper.ConceptRelationshipRecordMapper;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
 import java.sql.Array;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -21,12 +17,12 @@ import java.util.stream.Stream;
  * PostgreSQL database.
  */
 public class ConceptDao {
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateEx jdbcTemplate;
     private final ConceptRecordMapper recordMapper = new ConceptRecordMapper();
     private final ConceptRelationshipRecordMapper relationshipRecordMapper = new ConceptRelationshipRecordMapper();
 
     public ConceptDao(DataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateEx(dataSource);
     }
 
     public Stream<ConceptRecord> loadAllRecords() {
@@ -87,18 +83,21 @@ public class ConceptDao {
      * @param uuid The identity of the concept to be looked up.
      * @return A complete {@link ConceptDataSet}.
      */
-    public ConceptDataSet loadDataSet(UUID uuid) {
+    public Optional<ConceptDataSet> loadDataSet(UUID uuid) {
         Object[] recordArgs = {uuid};
         int[] recordTypes = {Types.OTHER};
 
-        var record = jdbcTemplate.queryForObject("SELECT * FROM get_concept(?)", recordArgs, recordTypes, recordMapper);
+        var record = jdbcTemplate.queryForOptional("SELECT * FROM get_concept(?)", recordArgs, recordTypes, recordMapper);
+        if (record.isEmpty()) {
+            return Optional.empty();
+        }
         var relationshipRecords = jdbcTemplate.query(
                 "SELECT * FROM get_concept_relationships(?)",
                 recordArgs,
                 recordTypes,
                 relationshipRecordMapper);
 
-        return new ConceptDataSet(record, relationshipRecords);
+        return Optional.of(new ConceptDataSet(record.get(), relationshipRecords));
     }
 
     /**

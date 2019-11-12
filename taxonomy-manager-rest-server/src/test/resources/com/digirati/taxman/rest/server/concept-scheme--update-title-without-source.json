@@ -1,0 +1,17 @@
+{
+  "@context": {
+    "skos": "http://www.w3.org/2004/02/skos/core#",
+    "dcterms": "http://purl.org/dc/terms/"
+  },
+  "@type": "skos:ConceptScheme",
+  "dcterms:title": [
+    {
+      "@language": "en",
+      "@value": "Test-F1"
+    },
+    {
+      "@language": "es",
+      "@value": "Test-F1-es"
+    }
+  ]
+}

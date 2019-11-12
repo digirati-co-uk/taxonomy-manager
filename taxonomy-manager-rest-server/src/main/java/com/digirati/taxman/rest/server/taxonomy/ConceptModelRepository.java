@@ -52,10 +52,10 @@ public class ConceptModelRepository {
      * @return the RDF model of the concept requested.
      */
     @Transactional(Transactional.TxType.REQUIRED)
-    public ConceptModel find(UUID uuid) {
-        ConceptDataSet dataset = conceptDao.loadDataSet(uuid);
+    public Optional<ConceptModel> find(UUID uuid) {
+        var dataset = conceptDao.loadDataSet(uuid);
 
-        return conceptMapper.map(dataset);
+        return dataset.isEmpty() ? Optional.empty() : Optional.of(conceptMapper.map(dataset.get()));
     }
 
     /**
@@ -93,7 +93,10 @@ public class ConceptModelRepository {
         if (model.getUuid() == null) {
             model.setUuid(UUID.randomUUID());
         } else {
-            existing = conceptMapper.map(conceptDao.loadDataSet(model.getUuid()));
+            var dataSet = conceptDao.loadDataSet(model.getUuid());
+            if (dataSet.isPresent()) {
+                existing = conceptMapper.map(dataSet.get());
+            }
         }
 
         applySymmetricRelationChanges(model, existing);
@@ -160,7 +163,7 @@ public class ConceptModelRepository {
         conceptDao.storeDataSet(dataset);
         eventService.send(ConceptEvent.created(model));
 
-        return find(uuid);
+        return find(uuid).orElseThrow();
     }
 
     /**
@@ -173,7 +176,12 @@ public class ConceptModelRepository {
 
         BiConsumer<UUID, ConceptRelationshipType> createRelationshipToModel = (relatedUuid, relationshipType) ->
         {
-            ConceptDataSet conceptDataSet = conceptDao.loadDataSet(relatedUuid);
+            var conceptDataSetOptional = conceptDao.loadDataSet(relatedUuid);
+            if (conceptDataSetOptional.isEmpty()) {
+                // Can't do anything for a non-existent item
+                return;
+            }
+            ConceptDataSet conceptDataSet = conceptDataSetOptional.get();
             conceptDataSet.addRelationshipRecord(
                     new ConceptRelationshipRecord(
                             relatedUuid,
@@ -198,9 +206,14 @@ public class ConceptModelRepository {
     }
 
     public void delete(UUID uuid) {
-        ConceptModel concept = find(uuid);
+        var concept = find(uuid);
+        if (concept.isEmpty()) {
+            // Perfect.
+            return;
+        }
+
         conceptDao.deleteDataSet(uuid);
 
-        eventService.send(ConceptEvent.deleted(concept));
+        eventService.send(ConceptEvent.deleted(concept.get()));
     }
 }

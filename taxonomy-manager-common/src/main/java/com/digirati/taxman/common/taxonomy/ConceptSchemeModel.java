@@ -18,8 +18,8 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 @RdfType("http://www.w3.org/2004/02/skos/core#ConceptScheme")
-@RdfContext({"skos=" + SKOS.uri, "dcterms=" + DCTerms.NS})
-public class ConceptSchemeModel implements RdfModel, PersistentModel {
+@RdfContext(value = {"skos=" + SKOS.uri, "dcterms=" + DCTerms.NS}, template = "/v0.1/concept-scheme/:id:")
+public final class ConceptSchemeModel implements RdfModel, PersistentModel {
 
     private final RdfModelContext context;
     private UUID uuid;
@@ -40,9 +40,6 @@ public class ConceptSchemeModel implements RdfModel, PersistentModel {
 
     @Override
     public UUID getUuid() {
-        if (uuid == null) {
-            throw new IllegalStateException("Concept schemes must have a UUID.");
-        }
         return uuid;
     }
 

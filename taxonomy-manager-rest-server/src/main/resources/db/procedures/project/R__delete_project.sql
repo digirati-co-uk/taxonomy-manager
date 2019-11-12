@@ -4,4 +4,3 @@ create or replace procedure delete_project(_slug character varying)
 $$
 UPDATE project SET deleted = true WHERE project.slug = _slug;
 $$;
-

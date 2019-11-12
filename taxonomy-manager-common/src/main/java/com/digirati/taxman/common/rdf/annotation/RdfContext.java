@@ -22,4 +22,6 @@ public @interface RdfContext {
      * qualified XML namespace that the prefix resolves to.
      */
     String[] value() default {};
+
+    String template() default "";
 }

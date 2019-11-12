@@ -1,15 +1,16 @@
 package com.digirati.taxman.rest.server.taxonomy.storage;
 
+import com.digirati.taxman.common.rdf.RdfModelException;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRecord;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptReference;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptSchemeRecord;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.mapper.ConceptReferenceMapper;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.mapper.ConceptSchemeRecordMapper;
 import org.json.JSONArray;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
 import java.sql.Types;
+import java.util.Optional;
 import java.util.UUID;
 
 public class ConceptSchemeDao {
@@ -17,11 +18,11 @@ public class ConceptSchemeDao {
     private final ConceptSchemeRecordMapper recordMapper = new ConceptSchemeRecordMapper();
     private final ConceptReferenceMapper referenceMapper = new ConceptReferenceMapper();
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateEx jdbcTemplate;
     private final DataSource dataSource;
 
     public ConceptSchemeDao(DataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateEx(dataSource);
         this.dataSource = dataSource;
     }
 
@@ -33,14 +34,18 @@ public class ConceptSchemeDao {
      * @return A complete {@link ConceptSchemeDataSet} containing a {@link ConceptRecord}
      *     and collection of {@link ConceptReference}s representing top-level concepts.
      */
-    public ConceptSchemeDataSet loadDataSet(UUID uuid) {
+    public Optional<ConceptSchemeDataSet> loadDataSet(UUID uuid) {
         Object[] recordArgs = {uuid};
         int[] recordTypes = {Types.OTHER};
 
-        var record = jdbcTemplate.queryForObject("SELECT * FROM get_concept_scheme(?)",
+        var record = jdbcTemplate.queryForOptional("SELECT * FROM get_concept_scheme(?)",
                 recordArgs,
                 recordTypes,
                 recordMapper);
+
+        if (record.isEmpty()) {
+            return Optional.empty();
+        }
 
         var relationshipRecords = jdbcTemplate.query(
                 "SELECT * FROM get_concept_scheme_top_concepts(?)",
@@ -48,7 +53,7 @@ public class ConceptSchemeDao {
                 recordTypes,
                 referenceMapper);
 
-        return new ConceptSchemeDataSet(record, relationshipRecords);
+        return Optional.of(new ConceptSchemeDataSet(record.get(), relationshipRecords));
     }
 
     /**
@@ -58,20 +63,25 @@ public class ConceptSchemeDao {
      * @param dataset The {@code ConceptSchemeDataSet} to store.
      * @return {@code true} if storing the dataset caused changes in the datastore, {@code false} otherwise.
      */
-    public boolean storeDataSet(ConceptSchemeDataSet dataset) {
+    public UUID storeDataSet(ConceptSchemeDataSet dataset) {
         ConceptSchemeRecord record = dataset.getRecord();
-        UUID uuid = record.getUuid();
-        Object[] recordArgs = {uuid, record.getSource(), DaoUtils.createRdfPlainLiteral(record.getTitle())};
+
+        Object[] recordArgs = {record.getUuid(), record.getSource(), DaoUtils.createRdfPlainLiteral(record.getTitle())};
         int[] recordTypes = {Types.OTHER, Types.VARCHAR, Types.OTHER};
 
-        boolean changed = jdbcTemplate.update("CALL create_or_update_concept_scheme(?, ?, ?)", recordArgs, recordTypes) > 0;
+        record = jdbcTemplate.queryForObject("SELECT * FROM create_or_update_concept_scheme(?, ?, ?)",
+                recordArgs,
+                recordTypes,
+                recordMapper);
+
+        UUID uuid = record.getUuid();
 
         JSONArray uuidArray = dataset.getTopConceptsJson();
         Object[] conceptArgs = {uuid, uuidArray};
         int[] conceptTypes = {Types.OTHER, Types.OTHER};
 
-        changed |= jdbcTemplate.update("CALL update_concept_scheme_top_concepts(?, ?)", conceptArgs, conceptTypes) > 0;
-        return changed;
+        jdbcTemplate.update("CALL update_concept_scheme_top_concepts(?, ?)", conceptArgs, conceptTypes);
+        return uuid;
     }
 
     public void deleteDataSet(UUID uuid) {

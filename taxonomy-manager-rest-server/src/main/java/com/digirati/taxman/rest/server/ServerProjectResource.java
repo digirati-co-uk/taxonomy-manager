@@ -28,7 +28,12 @@ public class ServerProjectResource implements ProjectResource {
 
     @Override
     public Response getProject(ProjectPath projectPath) {
-        return Response.ok(projectModelRepository.find(projectPath.getProjectSlug())).build();
+        var model = projectModelRepository.find(projectPath.getProjectSlug());
+        if (model.isPresent()) {
+            return Response.ok(model.get()).build();
+        } else {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
     }
 
     @Override

@@ -8,4 +8,3 @@ begin
         select project.* from project_ex project where project.slug = _slug;
 end
 $$;
-
