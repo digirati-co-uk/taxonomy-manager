@@ -9,5 +9,3 @@ begin
 end
 $$;
 
-alter function get_project(varchar) owner to taxman;
-
