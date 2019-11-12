@@ -25,23 +25,25 @@ public class ConceptEventListener {
     TermIndex<UUID> index;
 
     @Subscribe
-    public void ConceptChangeEvent(ConceptEvent conceptEvent) {
-        if (conceptEvent.getPrevious() != null)
-            Remove(conceptEvent.getPrevious());
+    public void conceptChangeEvent(ConceptEvent conceptEvent) {
+        if (conceptEvent.getPrevious() != null) {
+            remove(conceptEvent.getPrevious());
+        }
 
-        if (conceptEvent.getConcept() != null)
-            Add(conceptEvent.getConcept());
+        if (conceptEvent.getConcept() != null) {
+            add(conceptEvent.getConcept());
+        }
     }
 
-    private void Add(ConceptModel concept) {
-        ConsumeLabels(concept, index::add);
+    private void add(ConceptModel concept) {
+        consumeLabels(concept, index::add);
     }
 
-    private void Remove(ConceptModel previous) {
-        ConsumeLabels(previous, index::remove);
+    private void remove(ConceptModel previous) {
+        consumeLabels(previous, index::remove);
     }
 
-    private void ConsumeLabels(ConceptModel concept, BiConsumer<UUID, String> consumer) {
+    private void consumeLabels(ConceptModel concept, BiConsumer<UUID, String> consumer) {
         var labelExtractor = new ConceptLabelExtractor(concept);
 
         labelExtractor.extractTo((property, literal) -> {
