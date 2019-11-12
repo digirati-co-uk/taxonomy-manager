@@ -3,10 +3,6 @@
 alter table skos_concept
     add deleted boolean default false not null;
 
-create index skos_concept_note_deleted
-    on skos_concept (deleted)
-    where deleted = false;
-
 create or replace view skos_concept_ex as
     select * from skos_concept where deleted = false;
 
@@ -28,10 +24,6 @@ create index skos_concept_pkey_not_deleted
 alter table project
     add deleted boolean default false not null;
 
-create index project_note_deleted
-    on project (deleted)
-    where deleted = false;
-
 create or replace view project_ex as
     select * from project where deleted = false;
 
@@ -47,10 +39,6 @@ create index project_pkey_not_deleted
 
 alter table skos_concept_scheme
     add deleted boolean default false not null;
-
-create index skos_concept_scheme_note_deleted
-    on skos_concept_scheme (deleted)
-    where deleted = false;
 
 create or replace view skos_concept_scheme_ex as
     select * from skos_concept_scheme where deleted = false;
