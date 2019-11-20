@@ -50,4 +50,26 @@ public class ServerConceptSchemeResourceTest {
         // @formatter:on
     }
 
+    @Test
+    public void updateConceptScheme_reject_empty_title() throws Exception {
+        // @formatter:off
+        String location = givenJsonLdRequest(getClass(), "concept-scheme--test-empty-title.json", Collections.emptyMap())
+                .when()
+                .post("/v0.1/concept-scheme")
+                .then()
+                .statusCode(201)
+                .and()
+                .extract()
+                .header("Location");
+
+
+        givenJsonLdRequest(getClass(), "concept-scheme--test-empty-title-2.json", Collections.emptyMap())
+                .when()
+                .put(location)
+                .then()
+                .statusCode(422);
+
+        // @formatter:on
+    }
+
 }
