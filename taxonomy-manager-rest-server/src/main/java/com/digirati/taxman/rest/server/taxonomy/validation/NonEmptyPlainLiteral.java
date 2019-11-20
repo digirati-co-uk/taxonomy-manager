@@ -13,6 +13,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.CONSTRUCTOR;
@@ -44,7 +45,9 @@ public @interface NonEmptyPlainLiteral {
     class Validator implements ConstraintValidator<NonEmptyPlainLiteral, Multimap<String, String>> {
         @Override
         public boolean isValid(Multimap<String, String> value, ConstraintValidatorContext context) {
-            return !value.isEmpty();
+            return !value.isEmpty()
+                    && value.keys().stream().allMatch(s -> s != null && s.length() > 0)
+                    && value.values().stream().allMatch(s -> s != null && s.length() > 0);
         }
     }
 

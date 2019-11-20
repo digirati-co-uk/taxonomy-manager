@@ -5,5 +5,6 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     <constraint-mapping>META-INF/validation/concept-constraints.xml</constraint-mapping>
+    <constraint-mapping>META-INF/validation/concept-scheme-constraints.xml</constraint-mapping>
     <constraint-mapping>META-INF/validation/project-constraints.xml</constraint-mapping>
 </validation-config>
