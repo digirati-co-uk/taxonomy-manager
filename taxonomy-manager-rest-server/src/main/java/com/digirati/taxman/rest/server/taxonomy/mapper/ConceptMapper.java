@@ -7,9 +7,11 @@ import com.digirati.taxman.common.taxonomy.ConceptLabelExtractor;
 import com.digirati.taxman.common.taxonomy.ConceptModel;
 import com.digirati.taxman.common.taxonomy.ConceptRelationshipType;
 import com.digirati.taxman.rest.server.taxonomy.identity.ConceptIdResolver;
+import com.digirati.taxman.rest.server.taxonomy.identity.ProjectIdResolver;
 import com.digirati.taxman.rest.server.taxonomy.storage.ConceptDataSet;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRecord;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRelationshipRecord;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexBatchParser;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.vocabulary.SKOS;
@@ -28,8 +30,10 @@ public class ConceptMapper {
 
     private final ConceptIdResolver idResolver;
     private final RdfModelFactory factory;
+    private final ProjectIdResolver projectResolver;
 
-    public ConceptMapper(ConceptIdResolver idResolver, RdfModelFactory modelFactory) {
+    public ConceptMapper(ProjectIdResolver projectResolver, ConceptIdResolver idResolver, RdfModelFactory modelFactory) {
+        this.projectResolver = projectResolver;
         this.idResolver = idResolver;
         this.factory = modelFactory;
     }
@@ -68,6 +72,9 @@ public class ConceptMapper {
 
                 builder.addEmbeddedModel(property, embeddedModel);
             }
+
+            String ownerId = dataset.getProjectId();
+            builder.addEmbeddedModel(DCTerms.isPartOf, projectResolver.resolve(ownerId));
 
             ConceptModel concept = builder.build();
             concept.setUuid(dataset.getRecord().getUuid());
@@ -108,7 +115,7 @@ public class ConceptMapper {
 
             BiConsumer<ConceptModel, Boolean> relationshipMapper = (resource, transitive) -> {
                 var targetUri = resource.getUri();
-                var targetUuid = idResolver.resolve(targetUri).orElse(UUID.randomUUID());
+                var targetUuid = idResolver.resolve(targetUri).map(UUID::fromString).orElse(UUID.randomUUID());
                 var targetSource = resource.getSource();
 
                 var relationshipRecord = new ConceptRelationshipRecord(uuid, targetUuid, targetSource, type, transitive);
@@ -119,7 +126,9 @@ public class ConceptMapper {
             transitiveRelationships.forEach(tr -> relationshipMapper.accept(tr, true));
         }
 
-        return new ConceptDataSet(record, relationshipRecords);
+        var ownerSlug = model.getProject().getSlug();
+
+        return new ConceptDataSet(record, relationshipRecords, ownerSlug);
     }
 
 }

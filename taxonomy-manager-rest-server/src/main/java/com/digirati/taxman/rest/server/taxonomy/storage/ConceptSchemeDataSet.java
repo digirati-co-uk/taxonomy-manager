@@ -10,10 +10,12 @@ import java.util.List;
 public class ConceptSchemeDataSet {
     private final ConceptSchemeRecord record;
     private final List<ConceptReference> topConcepts;
+    private final String ownerSlug;
 
-    public ConceptSchemeDataSet(ConceptSchemeRecord record, List<ConceptReference> topConcepts) {
+    public ConceptSchemeDataSet(ConceptSchemeRecord record, List<ConceptReference> topConcepts, String ownerSlug) {
         this.record = record;
         this.topConcepts = topConcepts;
+        this.ownerSlug = ownerSlug;
     }
 
     public ConceptSchemeRecord getRecord() {
@@ -35,5 +37,9 @@ public class ConceptSchemeDataSet {
         }
 
         return array;
+    }
+
+    public String getOwnerSlug() {
+        return ownerSlug;
     }
 }

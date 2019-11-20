@@ -6,6 +6,7 @@ import com.digirati.taxman.common.rdf.RdfModelContext;
 import com.digirati.taxman.common.rdf.annotation.RdfConstructor;
 import com.digirati.taxman.common.rdf.annotation.RdfContext;
 import com.digirati.taxman.common.rdf.annotation.RdfType;
+import com.digirati.taxman.common.rdf.model.ProjectScopedResource;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Streams;
 import org.apache.jena.rdf.model.Resource;

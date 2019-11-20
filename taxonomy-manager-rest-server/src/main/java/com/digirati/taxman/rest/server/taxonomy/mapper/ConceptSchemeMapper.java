@@ -6,6 +6,7 @@ import com.digirati.taxman.common.taxonomy.ConceptModel;
 import com.digirati.taxman.common.taxonomy.ConceptSchemeModel;
 import com.digirati.taxman.rest.server.taxonomy.identity.ConceptIdResolver;
 import com.digirati.taxman.rest.server.taxonomy.identity.ConceptSchemeIdResolver;
+import com.digirati.taxman.rest.server.taxonomy.identity.ProjectIdResolver;
 import com.digirati.taxman.rest.server.taxonomy.storage.ConceptSchemeDataSet;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptReference;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptSchemeRecord;
@@ -16,7 +17,6 @@ import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.vocabulary.SKOS;
 
 import java.net.URI;
-import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -29,11 +29,13 @@ public class ConceptSchemeMapper {
     private final ConceptIdResolver conceptIdResolver;
     private final ConceptSchemeIdResolver schemeIdResolver;
     private final RdfModelFactory modelFactory;
+    private final ProjectIdResolver projectIdResolver;
 
-    public ConceptSchemeMapper(ConceptSchemeIdResolver schemeIdResolver, ConceptIdResolver conceptIdResolver, RdfModelFactory modelFactory) {
+    public ConceptSchemeMapper(ConceptSchemeIdResolver schemeIdResolver, ConceptIdResolver conceptIdResolver, RdfModelFactory modelFactory, ProjectIdResolver projectIdResolver) {
         this.schemeIdResolver = schemeIdResolver;
         this.conceptIdResolver = conceptIdResolver;
         this.modelFactory = modelFactory;
+        this.projectIdResolver = projectIdResolver;
     }
 
     /**
@@ -65,6 +67,8 @@ public class ConceptSchemeMapper {
             builder.addEmbeddedModel(SKOS.hasTopConcept, embeddedModel);
         }
 
+        builder.addEmbeddedModel(DCTerms.isPartOf, projectIdResolver.resolve(dataset.getOwnerSlug()));
+
         return builder.build();
     }
 
@@ -87,7 +91,7 @@ public class ConceptSchemeMapper {
                     Resource resource = concept.getResource();
 
                     if (id == null) {
-                        id = conceptIdResolver.resolve(concept.getUri()).orElse(null);
+                        id = conceptIdResolver.resolve(concept.getUri()).map(UUID::fromString).orElse(null);
                     }
 
                     var targetSourceResource = resource.getPropertyResourceValue(DCTerms.source);
@@ -101,7 +105,9 @@ public class ConceptSchemeMapper {
                 })
                 .collect(Collectors.toList());
 
-        return new ConceptSchemeDataSet(record, topConcepts);
+        var ownerSlug = model.getProject().getSlug();
+
+        return new ConceptSchemeDataSet(record, topConcepts, ownerSlug);
     }
 
 }
