@@ -6,8 +6,6 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
 import javax.transaction.Transactional;
-import java.net.URI;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Random;
 
@@ -18,16 +16,17 @@ import static org.hamcrest.core.IsEqual.equalTo;
 @QuarkusTest
 @Transactional
 public class ServerProjectResourceTest {
+
     private static final Random RANDOM = new Random();
     @Test
     public void createProject() {
         // @formatter:off
         givenJsonLdRequest(getClass(), "project--create.json", Map.of("dcterms:identifier", "test-project-" + RANDOM.nextInt()))
                 .when()
-                .post("/v0.1/project")
+                    .post("/v0.1/project")
                 .then()
-                .statusCode(200)
-                .body("'dcterms:title'.'@value'", equalTo("Test Project"));
+                    .statusCode(200)
+                    .body("'dcterms:title'.'@value'", equalTo("Test Project"));
         // @formatter:on
     }
 
@@ -38,19 +37,19 @@ public class ServerProjectResourceTest {
         String identifier =
                 givenJsonLdRequest(getClass(), "project--create.json", Map.of("dcterms:identifier", "test-project-" + RANDOM.nextInt()))
                         .when()
-                        .post("/v0.1/project")
+                            .post("/v0.1/project")
                         .then()
-                        .extract()
-                        .body()
-                        .jsonPath()
-                        .getString("'dcterms:identifier'");
+                            .extract()
+                            .body()
+                            .jsonPath()
+                            .getString("'dcterms:identifier'");
 
 
         given()
                 .when()
-                .delete("/v0.1/project/" + identifier)
+                    .delete("/v0.1/project/" + identifier)
                 .then()
-                .statusCode(HttpStatus.SC_NO_CONTENT);
+                    .statusCode(HttpStatus.SC_NO_CONTENT);
 
         // @formatter:on
     }
@@ -62,28 +61,28 @@ public class ServerProjectResourceTest {
         String identifier =
                 givenJsonLdRequest(getClass(), "project--create.json", Map.of("dcterms:identifier", "test-project-" + RANDOM.nextInt()))
                         .when()
-                        .post("/v0.1/project")
+                            .post("/v0.1/project")
                         .then()
-                        .extract()
-                        .body()
-                        .jsonPath()
-                        .getString("'dcterms:identifier'");
+                            .extract()
+                            .body()
+                            .jsonPath()
+                            .getString("'dcterms:identifier'");
 
 
         given()
                 .when()
-                .delete("/v0.1/project/" + identifier)
+                    .delete("/v0.1/project/" + identifier)
                 .then()
-                .statusCode(HttpStatus.SC_NO_CONTENT);
+                    .statusCode(HttpStatus.SC_NO_CONTENT);
 
 
         given()
                 .contentType("application/ld+json")
                 .accept("application/ld+json")
                 .when()
-                .get("/v0.1/project/" + identifier)
+                    .get("/v0.1/project/" + identifier)
                 .then()
-                .statusCode(Matchers.not(HttpStatus.SC_OK));
+                    .statusCode(Matchers.not(HttpStatus.SC_OK));
 
         // TODO: When proper responses are implemented, check for 410 gone or such
 
