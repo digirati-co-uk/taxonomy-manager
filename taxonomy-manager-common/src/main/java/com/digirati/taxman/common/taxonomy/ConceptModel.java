@@ -6,20 +6,18 @@ import com.digirati.taxman.common.rdf.RdfModelContext;
 import com.digirati.taxman.common.rdf.annotation.RdfConstructor;
 import com.digirati.taxman.common.rdf.annotation.RdfContext;
 import com.digirati.taxman.common.rdf.annotation.RdfType;
+import com.digirati.taxman.common.rdf.model.ProjectScopedResource;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Streams;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.vocabulary.SKOS;
 
-import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
 @RdfType("http://www.w3.org/2004/02/skos/core#Concept")
 @RdfContext({"skos=" + SKOS.uri, "dcterms=" + DCTerms.NS})
-public final class ConceptModel implements RdfModel, PersistentModel, Concept {
+public final class ConceptModel implements RdfModel, PersistentModel, Concept, ProjectScopedResource {
 
     private final RdfModelContext context;
     private UUID uuid;
@@ -114,5 +112,16 @@ public final class ConceptModel implements RdfModel, PersistentModel, Concept {
 
         return getResources(ConceptModel.class, skosProperty);
 
+    }
+
+    /**
+     * Get a reference to the {@link ProjectModel} this concept belongs to.
+     *
+     * @return
+     */
+    public ProjectModel getProject() {
+        return getResources(ProjectModel.class, DCTerms.isPartOf)
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("A Concept or ConceptScheme without a Project is valid"));
     }
 }

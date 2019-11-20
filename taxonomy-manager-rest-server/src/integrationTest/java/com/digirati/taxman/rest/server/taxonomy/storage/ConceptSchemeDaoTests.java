@@ -5,16 +5,13 @@ import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptSchemeReco
 import com.digirati.taxman.rest.server.testing.DatabaseTestExtension;
 import com.digirati.taxman.rest.server.testing.annotation.TestDataSource;
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.MultimapBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
@@ -34,7 +31,7 @@ public class ConceptSchemeDaoTests {
         expectedTitle.put("en", "test");
         record.setTitle(expectedTitle);
 
-        var dataset = new ConceptSchemeDataSet(record, List.of());
+        var dataset = new ConceptSchemeDataSet(record, List.of(), "owner-slug");
 
         dao.storeDataSet(dataset);
 
@@ -50,7 +47,7 @@ public class ConceptSchemeDaoTests {
         var record = new ConceptSchemeRecord(DUMMY_SCHEME_ID);
         var expectedTopConcepts = List.of(new ConceptReference(conceptId, null, ArrayListMultimap.create()));
 
-        dao.storeDataSet(new ConceptSchemeDataSet(record, expectedTopConcepts));
+        dao.storeDataSet(new ConceptSchemeDataSet(record, expectedTopConcepts, "owner-slug"));
 
         var storedDataset = dao.loadDataSet(DUMMY_SCHEME_ID);
         assertEquals(expectedTopConcepts, storedDataset.getTopConcepts());
@@ -65,8 +62,8 @@ public class ConceptSchemeDaoTests {
         var dao = new ConceptSchemeDao(dataSource);
         var record = new ConceptSchemeRecord(DUMMY_SCHEME_ID);
 
-        dao.storeDataSet(new ConceptSchemeDataSet(record, List.of(conceptA, conceptB)));
-        dao.storeDataSet(new ConceptSchemeDataSet(record, List.of(conceptB, conceptC)));
+        dao.storeDataSet(new ConceptSchemeDataSet(record, List.of(conceptA, conceptB), "owner-slug"));
+        dao.storeDataSet(new ConceptSchemeDataSet(record, List.of(conceptB, conceptC), "owner-slug"));
 
         var updatedDataset = dao.loadDataSet(DUMMY_SCHEME_ID);
 

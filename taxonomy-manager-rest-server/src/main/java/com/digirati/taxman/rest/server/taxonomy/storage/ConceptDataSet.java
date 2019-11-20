@@ -15,14 +15,22 @@ import java.util.List;
 public class ConceptDataSet {
     private final ConceptRecord record;
     private final List<ConceptRelationshipRecord> relationships;
+    private final String projectId;
 
+    @Deprecated
     public ConceptDataSet(ConceptRecord record) {
         this(record, new ArrayList<>());
     }
 
+    @Deprecated
     public ConceptDataSet(ConceptRecord record, List<ConceptRelationshipRecord> relationshipRecords) {
+        this(record, relationshipRecords, null);
+    }
+
+    public ConceptDataSet(ConceptRecord record, List<ConceptRelationshipRecord> relationshipRecords, String projectId) {
         this.record = record;
         this.relationships = relationshipRecords;
+        this.projectId = projectId;
     }
 
     public void addRelationshipRecord(ConceptRelationshipRecord record) {
@@ -45,6 +53,15 @@ public class ConceptDataSet {
      */
     public ConceptRecord getRecord() {
         return record;
+    }
+
+    /**
+     * Get the unique slug of the project this concept belongs to.
+     *
+     * @return The unique identifier of the owning project.
+     */
+    public String getProjectId() {
+        return projectId;
     }
 
     /**
