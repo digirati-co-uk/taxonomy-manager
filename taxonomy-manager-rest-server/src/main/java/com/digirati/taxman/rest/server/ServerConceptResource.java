@@ -2,7 +2,6 @@ package com.digirati.taxman.rest.server;
 
 import com.digirati.taxman.common.taxonomy.CollectionModel;
 import com.digirati.taxman.common.taxonomy.ConceptModel;
-import com.digirati.taxman.common.taxonomy.ConceptRelationshipType;
 import com.digirati.taxman.rest.server.taxonomy.ConceptCollectionModelRepository;
 import com.digirati.taxman.rest.server.taxonomy.ConceptModelRepository;
 import com.digirati.taxman.rest.taxonomy.ConceptPath;
@@ -36,7 +35,11 @@ public class ServerConceptResource implements ConceptResource {
     public Response getConcept(@BeanParam ConceptPath params) {
         var model = concepts.find(params.getUuid());
 
-        return Response.ok(model).build();
+        if (model.isPresent()) {
+            return Response.ok(model.get()).build();
+        } else {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
     }
 
     @Override
@@ -61,6 +64,13 @@ public class ServerConceptResource implements ConceptResource {
     public Response updateConcept(@BeanParam ConceptPath params, @Valid ConceptModel model) {
         model.setUuid(params.getUuid());
         concepts.update(model);
+
+        return Response.noContent().build();
+    }
+
+    @Override
+    public Response deleteConcept(ConceptPath params) {
+        concepts.delete(params.getUuid());
 
         return Response.noContent().build();
     }

@@ -1,5 +1,6 @@
 package com.digirati.taxman.common.rdf;
 
+import com.digirati.taxman.common.rdf.identity.IdResolver;
 import com.google.common.collect.Iterables;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -9,6 +10,8 @@ import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.vocabulary.RDF;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +20,7 @@ import java.util.Map;
  * A factory that produces {@link RdfModel}s and {@link RdfModelBuilder}s.
  */
 public class RdfModelFactory {
+
     /**
      * Create a new {@link RdfModelBuilder} for models of the given {@code type}.
      *
@@ -40,9 +44,16 @@ public class RdfModelFactory {
         try {
             var uri = resource.getURI();
 
+            // We don't want to set source, if the URI is our URI
+            // Therefore, check for the UUID using our classes patterns
+            var uuid = IdResolver.resolve(uri, metadata.pattern);
+            var setSource = !uuid.isPresent();
+
+
+
             StmtIterator stmts = resource.listProperties();
 
-            if (!resource.hasProperty(DCTerms.source) && uri != null && stmts.hasNext()) {
+            if (setSource && !resource.hasProperty(DCTerms.source) && uri != null && stmts.hasNext()) {
                 resource.addProperty(DCTerms.source, resource);
             }
 

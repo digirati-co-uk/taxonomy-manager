@@ -18,7 +18,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 @RdfType("http://www.w3.org/2004/02/skos/core#Concept")
-@RdfContext({"skos=" + SKOS.uri, "dcterms=" + DCTerms.NS})
+@RdfContext(value = {"skos=" + SKOS.uri, "dcterms=" + DCTerms.NS}, template = "/v0.1/concept/:id:")
 public final class ConceptModel implements RdfModel, PersistentModel, Concept {
 
     private final RdfModelContext context;

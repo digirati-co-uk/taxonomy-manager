@@ -5,10 +5,10 @@ create procedure update_concept_semantic_relations(_uuid uuid, _source character
 as
 $$
 -- If there are any relations that we don't have database records for yet, create them.
-INSERT INTO skos_concept (uuid, source)
+INSERT INTO skos_concept_ex (uuid, source)
 SELECT (data ->> 'target_id')::uuid, (data ->> 'target_source')::varchar
 FROM jsonb_array_elements(_relations) data
-         LEFT JOIN skos_concept sc ON sc.uuid = (data ->> 'target_id')::uuid
+         LEFT JOIN skos_concept_ex sc ON sc.uuid = (data ->> 'target_id')::uuid
     OR sc.source = (data ->> 'target_source')
 WHERE sc.uuid IS NULL
 ON CONFLICT DO NOTHING;
@@ -19,7 +19,7 @@ FROM skos_concept_semantic_relation scsr
     USING (
         SELECT r1.source_id, r1.target_id, r1.relation, r1.transitive
         FROM (SELECT c.id, c.uuid, c.source
-              FROM skos_concept c
+              FROM skos_concept_ex c
               WHERE c.uuid = _uuid
                  OR c.source = _source
              ) src
@@ -30,7 +30,7 @@ FROM skos_concept_semantic_relation scsr
                    (data ->> 'relation')::skos_semantic_relation_type relation,
                    (data ->> 'transitive')::boolean                   transitive
             FROM jsonb_array_elements(_relations) data
-                     LEFT JOIN skos_concept tc
+                     LEFT JOIN skos_concept_ex tc
                                ON tc.uuid = (data ->> 'target_id')::uuid
                                    OR tc.source = (data ->> 'target_source')
             WHERE tc.id IS NOT NULL
@@ -50,9 +50,9 @@ SELECT (data ->> 'relation')::skos_semantic_relation_type,
        sc.id,
        tc.id
 FROM jsonb_array_elements(_relations) data
-         LEFT JOIN skos_concept sc
+         LEFT JOIN skos_concept_ex sc
                    ON sc.uuid = _uuid OR sc.source = _source
-         LEFT JOIN skos_concept tc
+         LEFT JOIN skos_concept_ex tc
                    ON tc.uuid = (data ->> 'target_id')::uuid
                        OR tc.source = (data ->> 'target_source')
 ON CONFLICT DO NOTHING;

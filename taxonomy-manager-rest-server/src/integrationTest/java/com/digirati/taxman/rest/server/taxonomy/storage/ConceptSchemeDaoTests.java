@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 @ExtendWith(DatabaseTestExtension.class)
@@ -39,7 +40,8 @@ public class ConceptSchemeDaoTests {
         dao.storeDataSet(dataset);
 
         var storedDataset = dao.loadDataSet(DUMMY_SCHEME_ID);
-        assertEquals(expectedTitle, storedDataset.getRecord().getTitle());
+        assertTrue(storedDataset.isPresent());
+        assertEquals(expectedTitle, storedDataset.get().getRecord().getTitle());
     }
 
     @Test
@@ -53,7 +55,8 @@ public class ConceptSchemeDaoTests {
         dao.storeDataSet(new ConceptSchemeDataSet(record, expectedTopConcepts));
 
         var storedDataset = dao.loadDataSet(DUMMY_SCHEME_ID);
-        assertEquals(expectedTopConcepts, storedDataset.getTopConcepts());
+        assertTrue(storedDataset.isPresent());
+        assertEquals(expectedTopConcepts, storedDataset.get().getTopConcepts());
     }
 
     @Test
@@ -70,7 +73,8 @@ public class ConceptSchemeDaoTests {
 
         var updatedDataset = dao.loadDataSet(DUMMY_SCHEME_ID);
 
-        assertEquals(List.of(conceptB, conceptC), updatedDataset.getTopConcepts());
+        assertTrue(updatedDataset.isPresent());
+        assertEquals(List.of(conceptB, conceptC), updatedDataset.get().getTopConcepts());
     }
 
     private UUID createDummyConcept() throws SQLException {

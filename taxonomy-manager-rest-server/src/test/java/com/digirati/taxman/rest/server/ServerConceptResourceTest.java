@@ -1,6 +1,8 @@
 package com.digirati.taxman.rest.server;
 
 import io.quarkus.test.junit.QuarkusTest;
+import org.apache.http.HttpStatus;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
@@ -66,4 +68,68 @@ public class ServerConceptResourceTest {
         // @formatter:on
     }
 
+    @Test
+    public void getConcept_whenDeleted_notReturnsConcept() {
+        String conceptLocation =
+                givenJsonLdRequest(getClass(), "concept--delete-with-uri.json")
+                        .when()
+                            .post("/v0.1/concept")
+                        .then()
+                            .extract()
+                            .header("Location");
+
+        given()
+                .when()
+                    .delete(URI.create(conceptLocation))
+                .then()
+                    .statusCode(HttpStatus.SC_NO_CONTENT);
+
+        given()
+                .contentType("application/ld+json")
+                .accept("application/ld+json")
+                .when()
+                    .get(URI.create(conceptLocation))
+                .then()
+                    .statusCode(Matchers.not(HttpStatus.SC_OK));
+
+        // TODO: When proper responses are implemented, check for 410 gone or such
+
+        // @formatter:on
+    }
+
+    @Test
+    public void getConceptsByPartialLabel_is_case_insensitive() {
+        // @formatter:off
+        // 1. Create a concept
+        givenJsonLdRequest(getClass(), "concept--create-with-uri.json", Map.of("@id", "http://example.com/getConceptsByPartialLabel_is_case_insensitive"))
+                .when()
+                .post("/v0.1/concept")
+                .then()
+                .statusCode(201);
+
+        // Future improvement: proper matching...
+
+        // proper prefix
+        given()
+                .pathParam("label", "Tes")
+                .header("Accept", "application/ld+json")
+                .when()
+                .get("/v0.1/concept/search?language=en&label={label}")
+                .then()
+                .log().body()
+                .assertThat()
+                .body("'skos:member'", Matchers.anything());
+
+        // lowercase prefix
+        given()
+                .pathParam("label", "tes")
+                .header("Accept", "application/ld+json")
+                .when()
+                .get("/v0.1/concept/search?language=en&label={label}")
+                .then()
+                .log().body()
+                .assertThat()
+                .body("'skos:member'", Matchers.anything());
+        // @formatter:on
+    }
 }

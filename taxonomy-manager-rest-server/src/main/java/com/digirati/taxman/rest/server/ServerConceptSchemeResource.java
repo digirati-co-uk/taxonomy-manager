@@ -32,13 +32,24 @@ public class ServerConceptSchemeResource implements ConceptSchemeResource {
     public Response getConceptScheme(ConceptSchemePath params) {
         var model = conceptSchemes.find(params.getUuid());
 
-        return Response.ok(model).build();
+        if (model.isPresent()) {
+            return Response.ok(model.get()).build();
+        } else {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
     }
 
     @Override
     public Response updateConceptScheme(ConceptSchemePath params, @Valid ConceptSchemeModel model) {
         model.setUuid(params.getUuid());
         conceptSchemes.update(model);
+
+        return Response.noContent().build();
+    }
+
+    @Override
+    public Response deleteConceptScheme(ConceptSchemePath params) {
+        conceptSchemes.delete(params.getUuid());
 
         return Response.noContent().build();
     }

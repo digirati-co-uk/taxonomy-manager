@@ -1,0 +1,12 @@
+{
+    "@context": {
+        "dcterms": "http://purl.org/dc/terms/",
+        "skos": "http://www.w3.org/2004/02/skos/core#"
+    },
+    "@id": "https://example.org/my-id-for-deletion-001",
+    "@type": "skos:Concept",
+    "skos:prefLabel": [{
+        "@language": "en",
+        "@value": "Test"
+    }]
+}

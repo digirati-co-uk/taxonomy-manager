@@ -6,6 +6,8 @@ import com.digirati.taxman.common.rdf.annotation.RdfType;
 import com.google.common.collect.ImmutableMap;
 import java.lang.reflect.Constructor;
 import java.util.Map;
+import java.util.regex.Pattern;
+
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
@@ -34,11 +36,16 @@ public class RdfModelMetadata<T extends RdfModel> {
      */
     final Map<String, String> namespacePrefixes;
 
+    final String template;
+    final Pattern pattern;
+
     private RdfModelMetadata(
-            Resource type, Constructor<T> constructor, Map<String, String> namespacePrefixes) {
+            Resource type, Constructor<T> constructor, Map<String, String> namespacePrefixes, String template, Pattern pattern) {
         this.type = type;
         this.constructor = constructor;
         this.namespacePrefixes = namespacePrefixes;
+        this.template = template;
+        this.pattern = pattern;
     }
 
     /**
@@ -69,6 +76,10 @@ public class RdfModelMetadata<T extends RdfModel> {
             throw new RdfModelException("RdfModel class must be annotated with @RdfType");
         }
 
+
+        String template = null;
+        Pattern pattern = null;
+
         var namespacesPrefixes = ImmutableMap.<String, String>builder();
         var context = type.getAnnotation(RdfContext.class);
         if (context != null) {
@@ -79,11 +90,20 @@ public class RdfModelMetadata<T extends RdfModel> {
 
                 namespacesPrefixes.put(prefix, uri);
             }
+
+            if (context.template() != null && context.template().length() > 0) {
+                if (!context.template().contains(":id:")) {
+                    throw new IllegalArgumentException("No :id: variable found in template: " + context.template());
+                }
+
+                template = context.template().replace(":id:", "{id}");
+                pattern = Pattern.compile(context.template().replace(":id:", "([^/]+)"));
+            }
         }
 
         Model typeModel = ModelFactory.createDefaultModel();
         Resource typeResource = typeModel.createResource(ty.value());
 
-        return new RdfModelMetadata<>(typeResource, constructor, namespacesPrefixes.build());
+        return new RdfModelMetadata<>(typeResource, constructor, namespacesPrefixes.build(), template, pattern);
     }
 }

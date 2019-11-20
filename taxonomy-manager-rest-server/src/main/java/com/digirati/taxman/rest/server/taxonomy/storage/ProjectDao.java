@@ -4,14 +4,13 @@ import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptSchemeReco
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ProjectRecord;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.mapper.ConceptSchemeRecordMapper;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.mapper.ProjectRecordMapper;
-import org.json.JSONObject;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
 import java.sql.Array;
 import java.sql.Types;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -22,11 +21,11 @@ public class ProjectDao {
     private final ProjectRecordMapper projectRecordMapper = new ProjectRecordMapper();
     private final ConceptSchemeRecordMapper conceptSchemeRecordMapper = new ConceptSchemeRecordMapper();
     private final DataSource dataSource;
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateEx jdbcTemplate;
 
     public ProjectDao(DataSource dataSource) {
         this.dataSource = dataSource;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateEx(dataSource);
     }
 
     /**
@@ -36,17 +35,21 @@ public class ProjectDao {
      * @return the project with the given slug
      * @throws EmptyResultDataAccessException when no project can be found with the given slug
      */
-    public ProjectDataSet loadDataSet(String slug) throws EmptyResultDataAccessException {
+    public Optional<ProjectDataSet> loadDataSet(String slug) throws EmptyResultDataAccessException {
         Object[] recordArgs = {slug};
         int[] recordTypes = {Types.VARCHAR};
 
-        ProjectRecord project = jdbcTemplate.queryForObject("SELECT * FROM get_project(?)",
+        Optional<ProjectRecord> project = jdbcTemplate.queryForOptional("SELECT * FROM get_project(?)",
                 recordArgs, recordTypes, projectRecordMapper);
+
+        if (project.isEmpty()) {
+            return Optional.empty();
+        }
 
         List<ConceptSchemeRecord> conceptSchemes = jdbcTemplate.query("SELECT * FROM get_project_concept_schemes(?)",
                 recordArgs, recordTypes, conceptSchemeRecordMapper);
 
-        return new ProjectDataSet(project, conceptSchemes);
+        return Optional.of(new ProjectDataSet(project.get(), conceptSchemes));
     }
 
     public List<ProjectRecord> findAll() {
@@ -60,12 +63,7 @@ public class ProjectDao {
      * @return true if a project with the slug exists; false otherwise
      */
     public boolean projectExists(String slug) {
-        try {
-            loadDataSet(slug);
-            return true;
-        } catch (EmptyResultDataAccessException e) {
-            return false;
-        }
+        return loadDataSet(slug).isPresent();
     }
 
     /**
@@ -97,5 +95,12 @@ public class ProjectDao {
         int schemeChanges = jdbcTemplate.update("CALL update_project_concept_schemes(?, ?)", schemeArgs, schemeArgTypes);
 
         return (projectChanges | schemeChanges) > 0;
+    }
+
+    public void deleteDataSet(String slug) {
+        Object[] projectArgs = {slug};
+        int[] projectArgTypes = {Types.VARCHAR};
+
+        jdbcTemplate.update("CALL delete_project(?)", projectArgs, projectArgTypes);
     }
 }

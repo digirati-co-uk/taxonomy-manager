@@ -12,6 +12,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
@@ -37,9 +38,10 @@ public class ProjectModelRepository {
         if (projectDao.projectExists(project.getSlug())) {
             throw new ProjectAlreadyExistsException(project.getSlug());
         }
+
         ProjectDataSet dataSet = projectMapper.map(project.getSlug(), project);
         projectDao.storeDataSet(dataSet);
-        return find(project.getSlug());
+        return find(project.getSlug()).orElseThrow();
     }
 
     /**
@@ -49,9 +51,12 @@ public class ProjectModelRepository {
      * @return the project with the given slug
      */
     @Transactional(Transactional.TxType.REQUIRED)
-    public ProjectModel find(String slug) {
-        ProjectDataSet dataSet = projectDao.loadDataSet(slug);
-        return projectMapper.map(dataSet);
+    public Optional<ProjectModel> find(String slug) {
+        var dataSet = projectDao.loadDataSet(slug);
+        if (dataSet.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(projectMapper.map(dataSet.get()));
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
@@ -74,5 +79,9 @@ public class ProjectModelRepository {
         projectDao.loadDataSet(slug);
         ProjectDataSet dataSet = projectMapper.map(slug, project);
         return projectDao.storeDataSet(dataSet);
+    }
+
+    public void delete(String projectSlug) {
+        projectDao.deleteDataSet(projectSlug);
     }
 }
