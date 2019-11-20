@@ -6,11 +6,9 @@ import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptSchemeReco
 import com.digirati.taxman.rest.server.taxonomy.storage.record.mapper.ConceptReferenceMapper;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.mapper.ConceptSchemeRecordMapper;
 import org.json.JSONArray;
-import org.json.JSONObject;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
-import java.sql.Array;
 import java.sql.Types;
 import java.util.UUID;
 
@@ -50,7 +48,7 @@ public class ConceptSchemeDao {
                 recordTypes,
                 referenceMapper);
 
-        return new ConceptSchemeDataSet(record, relationshipRecords);
+        return new ConceptSchemeDataSet(record, relationshipRecords, "owner-slug");
     }
 
     /**

@@ -20,7 +20,7 @@ abstract class AbstractIdResolver {
         this.template = template.replace(":id:", "{id}");
     }
 
-    public Optional<UUID> resolve(URI uri) {
+    public Optional<String> resolve(URI uri) {
         // @TODO: Where are the callers passing in null?
         if (uri.getPath() == null) {
             return Optional.empty();
@@ -32,7 +32,7 @@ abstract class AbstractIdResolver {
         }
 
         var uuid = match.group(1);
-        return Optional.of(UUID.fromString(uuid));
+        return Optional.of(uuid);
     }
 
     public URI resolve(UUID uuid) {

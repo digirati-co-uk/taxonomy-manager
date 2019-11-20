@@ -64,7 +64,9 @@ public class ProjectMapper {
 
         List<ConceptSchemeRecord> schemes = model.getConceptSchemes()
                 .map(scheme -> {
-                    UUID uuid = schemeIdResolver.resolve(URI.create(scheme.getResource().getURI())).orElse(UUID.randomUUID());
+                    UUID uuid = schemeIdResolver.resolve(URI.create(scheme.getResource().getURI()))
+                            .map(UUID::fromString)
+                            .orElse(UUID.randomUUID());
                     ConceptSchemeRecord schemeRecord = new ConceptSchemeRecord(uuid);
                     schemeRecord.setTitle(scheme.getTitle());
                     return schemeRecord;
