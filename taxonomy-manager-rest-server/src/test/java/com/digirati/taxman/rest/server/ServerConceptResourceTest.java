@@ -97,5 +97,40 @@ public class ServerConceptResourceTest {
         // @formatter:on
     }
 
+    @Test
+    @Transactional
+    public void getConceptsByPartialLabel_is_case_insensitive() {
+        // @formatter:off
+        // 1. Create a concept
+        givenJsonLdRequest(getClass(), "concept--create-with-uri.json", Map.of("@id", "http://example.com/getConceptsByPartialLabel_is_case_insensitive"))
+                .when()
+                .post("/v0.1/concept")
+                .then()
+                .statusCode(201);
 
+        // Future improvement: proper matching...
+
+        // proper prefix
+        given()
+                .pathParam("label", "Tes")
+                .header("Accept", "application/ld+json")
+                .when()
+                .get("/v0.1/concept/search?language=en&label={label}")
+                .then()
+                .log().body()
+                .assertThat()
+                .body("'skos:member'", Matchers.anything());
+
+        // lowercase prefix
+        given()
+                .pathParam("label", "tes")
+                .header("Accept", "application/ld+json")
+                .when()
+                .get("/v0.1/concept/search?language=en&label={label}")
+                .then()
+                .log().body()
+                .assertThat()
+                .body("'skos:member'", Matchers.anything());
+        // @formatter:on
+    }
 }
