@@ -1,4 +1,4 @@
-
+DROP FUNCTION IF EXISTS get_project;
 create function get_project(_slug character varying) returns SETOF project_ex
     language plpgsql
 as
