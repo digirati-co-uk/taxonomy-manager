@@ -1,3 +1,6 @@
+DROP PROCEDURE IF EXISTS create_or_update_concept_scheme(uuid, varchar, rdf_plain_literal);
+DROP FUNCTION IF EXISTS create_or_update_concept_scheme(uuid, varchar, rdf_plain_literal);
+
 CREATE OR REPLACE FUNCTION create_or_update_concept_scheme(_uuid uuid,
                                                            _source varchar,
                                                            _title rdf_plain_literal)
