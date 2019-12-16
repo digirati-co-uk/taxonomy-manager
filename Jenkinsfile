@@ -72,24 +72,15 @@ void gradle(String args) {
 }
 
 void runBuild(Closure pipeline) {
-  node {
+  node('linux') {
     checkout(scm)
 
-    def image = docker.build("taxonomy-manager-infra-build", "-f dockerfiles/Dockerfile.build .")
-    def args = [
-      '-v', '/var/run/docker.sock:/var/run/docker.sock',
-      '-v', '$HOME/.m2:/root/.m2',
-      '-v', '$HOME/.gradle:/root/.gradle'
-    ]
-
-    image.inside(args.join(" ")) {
-      stage("Setup") {
-        sh """
-          git config --global user.email "digirati-ci@digirati.com"; git config --global user.name "digirati-ci";
-        """
-      }
-
-      pipeline()
+    stage("Setup") {
+      sh """
+        git config --global user.email "digirati-ci@digirati.com"; git config --global user.name "digirati-ci";
+      """
     }
+
+    pipeline()
   }
 }
