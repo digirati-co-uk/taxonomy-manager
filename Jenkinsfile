@@ -5,9 +5,7 @@ runBuild {
         sh('pre-commit run --all-files --verbose')
       },
       hadolint: {
-        docker.image('hadolint/hadolint:latest-debian').inside {
-          sh('hadolint dockerfiles/Dockerfile.jvm dockerfiles/Dockerfile.build')
-        }
+        sh('hadolint dockerfiles/Dockerfile.jvm dockerfiles/Dockerfile.build')
       },
       failFast: true
     )
