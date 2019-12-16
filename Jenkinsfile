@@ -73,14 +73,17 @@ void gradle(String args) {
 
 void runBuild(Closure pipeline) {
   node('linux') {
-    checkout(scm)
+    container('buildkit') {
+        checkout(scm)
 
-    stage("Setup") {
-      sh """
-        git config --global user.email "digirati-ci@digirati.com"; git config --global user.name "digirati-ci";
-      """
+        stage("Setup") {
+          sh """
+            git config --global user.email "digirati-ci@digirati.com"; git config --global user.name "digirati-ci";
+          """
+        }
+
+        pipeline()
     }
 
-    pipeline()
   }
 }
