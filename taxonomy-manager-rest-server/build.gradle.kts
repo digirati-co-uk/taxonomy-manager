@@ -4,10 +4,11 @@ import org.testcontainers.containers.PostgreSQLContainer
 buildscript {
     repositories {
         mavenCentral()
+        gradlePluginPortal()
     }
 
     dependencies {
-        classpath("io.quarkus:quarkus-gradle-plugin:0.26.1")
+        classpath("gradle.plugin.io.quarkus:quarkus-gradle-plugin:1.3.0.Final")
         classpath("org.testcontainers:testcontainers:1.11.3")
         classpath("org.testcontainers:postgresql:1.11.3")
         classpath("org.postgresql:postgresql:42.2.5")
@@ -48,16 +49,16 @@ sourceSets {
     }
 }
 
-val integrationTestRuntimeOnly by configurations.getting { extendsFrom(configurations.runtimeOnly.get()) }
-val integrationTestImplementation by configurations.getting { extendsFrom(configurations.implementation.get()) }
+val integrationTestRuntimeOnly by configurations.getting { extendsFrom(configurations.testRuntimeOnly.get()) }
+val integrationTestImplementation by configurations.getting { extendsFrom(configurations.testImplementation.get()) }
 
 configurations["integrationTestRuntimeOnly"].extendsFrom(configurations.runtimeOnly.get())
 
 dependencies {
-    implementation(enforcedPlatform("io.quarkus:quarkus-bom:0.26.1"))
+    implementation(enforcedPlatform("io.quarkus:quarkus-bom:1.3.0.Final"))
 
     quarkusExtensions.forEach { ext ->
-        implementation("io.quarkus:quarkus-$ext:0.26.1")
+        implementation("io.quarkus:quarkus-$ext")
     }
 
     implementation("org.springframework", "spring-jdbc", "5.1.3.RELEASE")
@@ -69,13 +70,13 @@ dependencies {
     implementation("com.google.guava", "guava", "27.1-jre")
 
     testImplementation("io.rest-assured:rest-assured:3.3.0")
-    testImplementation("io.quarkus", "quarkus-junit5", "0.26.1")
+    testImplementation("io.quarkus", "quarkus-junit5")
     testImplementation("com.nimbusds", "nimbus-jose-jwt", "7.4")
     testCompileOnly("org.jetbrains:annotations:17.0.0")
 
-    integrationTestImplementation("org.junit.jupiter:junit-jupiter-api:5.4.2")
-    integrationTestImplementation("org.junit.jupiter:junit-jupiter-params:5.4.2")
-    integrationTestImplementation("org.junit.jupiter:junit-jupiter-engine:5.4.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.6.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.6.0")
 
     integrationTestImplementation("org.testcontainers:testcontainers:1.11.3")
     integrationTestImplementation("org.testcontainers:postgresql:1.11.3")
