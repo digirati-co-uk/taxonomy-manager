@@ -4,7 +4,10 @@ import com.digirati.taxman.analysis.index.TermIndex;
 import com.digirati.taxman.common.taxonomy.ConceptLabelExtractor;
 import com.digirati.taxman.common.taxonomy.ConceptModel;
 import com.google.common.eventbus.Subscribe;
+import io.smallrye.reactive.messaging.annotations.Broadcast;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.reactive.messaging.Incoming;
+import org.eclipse.microprofile.reactive.messaging.Outgoing;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -18,22 +21,24 @@ import java.util.function.BiConsumer;
 @ApplicationScoped
 public class ConceptEventListener {
 
+    @Incoming("event-sink")
+    public void handle(ConceptEvent event) {
+        ConceptModel previous = event.getPrevious();
+        if (previous != null) {
+            remove(previous);
+        }
+
+        ConceptModel current = event.getConcept();
+        if (current != null) {
+            add(current);
+        }
+    }
+
     @ConfigProperty(name = "taxman.analysis.default-lang.key", defaultValue = "en")
     String defaultLanguageKey;
 
     @Inject
     TermIndex<UUID> index;
-
-    @Subscribe
-    public void conceptChangeEvent(ConceptEvent conceptEvent) {
-        if (conceptEvent.getPrevious() != null) {
-            remove(conceptEvent.getPrevious());
-        }
-
-        if (conceptEvent.getConcept() != null) {
-            add(conceptEvent.getConcept());
-        }
-    }
 
     private void add(ConceptModel concept) {
         consumeLabels(concept, index::add);

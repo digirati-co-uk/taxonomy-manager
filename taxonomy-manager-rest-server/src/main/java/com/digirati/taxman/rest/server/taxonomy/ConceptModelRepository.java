@@ -14,11 +14,16 @@ import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRecord;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRelationshipRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.vocabulary.DCTerms;
-
+import org.eclipse.microprofile.reactive.messaging.Channel;
+import org.eclipse.microprofile.reactive.messaging.Emitter;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -34,14 +39,19 @@ public class ConceptModelRepository {
      * It can be modified and tested in the future releases.
      */
     private static final boolean USE_TRANSITIVE_RELATIONSHIPS = false;
+
     @Inject
     ConceptMapper conceptMapper;
+
     @Inject
     SearchResultsMapper searchResultsMapper;
+
     @Inject
     ConceptDao conceptDao;
-    @Inject
-    EventService eventService;
+
+    @Inject @Channel("event-source")
+    Emitter<ConceptEvent> eventPublisher;
+
     @Inject
     ConceptIdResolver idResolver;
 
@@ -102,7 +112,7 @@ public class ConceptModelRepository {
         applySymmetricRelationChanges(model, existing);
 
         conceptDao.storeDataSet(conceptMapper.map(model));
-        eventService.send(ConceptEvent.updated(model, existing));
+        eventPublisher.send(ConceptEvent.updated(model, existing));
     }
 
     /**
@@ -161,7 +171,7 @@ public class ConceptModelRepository {
         var uuid = model.getUuid();
         var dataset = conceptMapper.map(model);
         conceptDao.storeDataSet(dataset);
-        eventService.send(ConceptEvent.created(model));
+        eventPublisher.send(ConceptEvent.created(model));
 
         return find(uuid).orElseThrow();
     }
@@ -193,7 +203,7 @@ public class ConceptModelRepository {
             );
 
             conceptDao.storeDataSet(conceptDataSet);
-            eventService.send(ConceptEvent.updated(conceptMapper.map(conceptDataSet), existing));
+            eventPublisher.send(ConceptEvent.updated(conceptMapper.map(conceptDataSet), existing));
         };
 
         // For each broader, create a narrower relationship to this
@@ -214,6 +224,6 @@ public class ConceptModelRepository {
 
         conceptDao.deleteDataSet(uuid);
 
-        eventService.send(ConceptEvent.deleted(concept.get()));
+        eventPublisher.send(ConceptEvent.deleted(concept.get()));
     }
 }

@@ -35,7 +35,9 @@ val quarkusExtensions = setOf(
         "resteasy",
         "resteasy-jsonb",
         "smallrye-jwt",
-        "smallrye-health"
+        "smallrye-health",
+        "smallrye-reactive-messaging",
+        "smallrye-reactive-messaging-amqp"
 )
 
 java {
@@ -58,7 +60,7 @@ dependencies {
     implementation(enforcedPlatform("io.quarkus:quarkus-bom:1.3.0.Final"))
 
     quarkusExtensions.forEach { ext ->
-        implementation("io.quarkus:quarkus-$ext")
+        implementation("io.quarkus:quarkus-$ext:1.3.0.Final")
     }
 
     implementation("org.springframework", "spring-jdbc", "5.1.3.RELEASE")
