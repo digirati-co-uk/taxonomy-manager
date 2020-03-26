@@ -20,10 +20,6 @@ runBuild {
     gradle('assemble')
   }
 
-  stage('Testing') {
-    gradle('check')
-  }
-
   stage('Analysis') {
     def spotbugs = scanForIssues tool: spotBugs(pattern: '**/build/reports/spotbugs/*.xml')
     def checkstyle = scanForIssues tool: checkStyle(pattern: '**/build/reports/checkstyle/*.xml')
