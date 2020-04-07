@@ -2,10 +2,12 @@ package com.digirati.taxman.rest.server.infrastructure.event;
 
 import com.digirati.taxman.common.taxonomy.ConceptModel;
 
+import java.io.Serializable;
+
 /**
  * Event to be sent when the state of a concept changes.
  */
-public class ConceptEvent {
+public class ConceptEvent implements Serializable {
 
     private final Type type;
     private final ConceptModel previous;

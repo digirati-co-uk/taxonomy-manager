@@ -31,13 +31,11 @@ runBuild {
     if (env.CHANGE_ID != null) {
       sonarArgs += "-Dsonar.pullrequest.branch=${env.BRANCH_NAME} -Dsonar.pullrequest.key=${env.CHANGE_ID}"
     }
-
-    gradle("sonarqube ${sonarArgs}")
   }
 
   stage("Publishing") {
     withCredentials([usernamePassword(credentialsId: "jenkins-taxman-acr", usernameVariable: 'registryUsername', passwordVariable: 'registryPassword')]) {
-      sh(label: 'Build container image', """
+      sh(label: 'Build container image', script: """
        docker build -t "${repositoryName}:latest" -f "dockerfiles/Dockerfile.jvm" .
        docker tag "$repositoryName:latest" "$registryUrl/$repositoryName:$tagVersion"
        docker login "https://${registryUrl}" --username "${registryUsername}" --password "${registryPassword}"

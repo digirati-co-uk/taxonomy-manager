@@ -4,6 +4,7 @@ import com.digirati.taxman.common.taxonomy.CollectionModel;
 import com.digirati.taxman.common.taxonomy.ConceptModel;
 import com.digirati.taxman.common.taxonomy.ConceptRelationshipType;
 import com.digirati.taxman.rest.server.infrastructure.event.ConceptEvent;
+import com.digirati.taxman.rest.server.infrastructure.event.ConceptEventListener;
 import com.digirati.taxman.rest.server.infrastructure.event.EventService;
 import com.digirati.taxman.rest.server.taxonomy.identity.ConceptIdResolver;
 import com.digirati.taxman.rest.server.taxonomy.mapper.ConceptMapper;
@@ -49,8 +50,8 @@ public class ConceptModelRepository {
     @Inject
     ConceptDao conceptDao;
 
-    @Inject @Channel("event-source")
-    Emitter<ConceptEvent> eventPublisher;
+    @Inject
+    ConceptEventListener eventPublisher;
 
     @Inject
     ConceptIdResolver idResolver;
@@ -112,7 +113,7 @@ public class ConceptModelRepository {
         applySymmetricRelationChanges(model, existing);
 
         conceptDao.storeDataSet(conceptMapper.map(model));
-        eventPublisher.send(ConceptEvent.updated(model, existing));
+        eventPublisher.notify(ConceptEvent.updated(model, existing));
     }
 
     /**
@@ -171,7 +172,7 @@ public class ConceptModelRepository {
         var uuid = model.getUuid();
         var dataset = conceptMapper.map(model);
         conceptDao.storeDataSet(dataset);
-        eventPublisher.send(ConceptEvent.created(model));
+        eventPublisher.notify(ConceptEvent.created(model));
 
         return find(uuid).orElseThrow();
     }
@@ -203,7 +204,7 @@ public class ConceptModelRepository {
             );
 
             conceptDao.storeDataSet(conceptDataSet);
-            eventPublisher.send(ConceptEvent.updated(conceptMapper.map(conceptDataSet), existing));
+            eventPublisher.notify(ConceptEvent.updated(conceptMapper.map(conceptDataSet), existing));
         };
 
         // For each broader, create a narrower relationship to this
@@ -224,6 +225,6 @@ public class ConceptModelRepository {
 
         conceptDao.deleteDataSet(uuid);
 
-        eventPublisher.send(ConceptEvent.deleted(concept.get()));
+        eventPublisher.notify(ConceptEvent.deleted(concept.get()));
     }
 }
