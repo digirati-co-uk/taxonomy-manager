@@ -4,10 +4,11 @@ import org.testcontainers.containers.PostgreSQLContainer
 buildscript {
     repositories {
         mavenCentral()
+        gradlePluginPortal()
+        maven("https://plugins.gradle.org/m2/")
     }
 
     dependencies {
-        classpath("io.quarkus:quarkus-gradle-plugin:0.26.1")
         classpath("org.testcontainers:testcontainers:1.11.3")
         classpath("org.testcontainers:postgresql:1.11.3")
         classpath("org.postgresql:postgresql:42.2.5")
@@ -18,9 +19,8 @@ plugins {
     java
     jacoco
     checkstyle
+    id ("io.quarkus") version ("1.3.1.Final")
 }
-
-apply(plugin = "io.quarkus")
 
 repositories {
     mavenCentral()
@@ -34,7 +34,9 @@ val quarkusExtensions = setOf(
         "resteasy",
         "resteasy-jsonb",
         "smallrye-jwt",
-        "smallrye-health"
+        "smallrye-health",
+        "smallrye-reactive-messaging",
+        "smallrye-reactive-messaging-amqp"
 )
 
 java {
@@ -48,18 +50,19 @@ sourceSets {
     }
 }
 
-val integrationTestRuntimeOnly by configurations.getting { extendsFrom(configurations.runtimeOnly.get()) }
-val integrationTestImplementation by configurations.getting { extendsFrom(configurations.implementation.get()) }
+val integrationTestRuntimeOnly by configurations.getting { extendsFrom(configurations.testRuntimeOnly.get()) }
+val integrationTestImplementation by configurations.getting { extendsFrom(configurations.testImplementation.get()) }
 
 configurations["integrationTestRuntimeOnly"].extendsFrom(configurations.runtimeOnly.get())
 
 dependencies {
-    implementation(enforcedPlatform("io.quarkus:quarkus-bom:0.26.1"))
+    implementation(enforcedPlatform("io.quarkus:quarkus-bom:1.3.1.Final"))
 
     quarkusExtensions.forEach { ext ->
-        implementation("io.quarkus:quarkus-$ext:0.26.1")
+        implementation("io.quarkus:quarkus-$ext:1.3.1.Final")
     }
 
+    implementation("org.jgroups.quarkus.extension:quarkus-jgroups:1.0.1.Final")
     implementation("org.springframework", "spring-jdbc", "5.1.3.RELEASE")
     implementation("org.json", "json", "20180813")
 
@@ -69,13 +72,13 @@ dependencies {
     implementation("com.google.guava", "guava", "27.1-jre")
 
     testImplementation("io.rest-assured:rest-assured:3.3.0")
-    testImplementation("io.quarkus", "quarkus-junit5", "0.26.1")
+    testImplementation("io.quarkus", "quarkus-junit5")
     testImplementation("com.nimbusds", "nimbus-jose-jwt", "7.4")
     testCompileOnly("org.jetbrains:annotations:17.0.0")
 
-    integrationTestImplementation("org.junit.jupiter:junit-jupiter-api:5.4.2")
-    integrationTestImplementation("org.junit.jupiter:junit-jupiter-params:5.4.2")
-    integrationTestImplementation("org.junit.jupiter:junit-jupiter-engine:5.4.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.6.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.6.0")
 
     integrationTestImplementation("org.testcontainers:testcontainers:1.11.3")
     integrationTestImplementation("org.testcontainers:postgresql:1.11.3")
@@ -94,41 +97,11 @@ tasks {
     test {
         useJUnitPlatform()
         setForkEvery(1)
-
-        doFirst {
-            // Kotlin doesn't support initialization of types with self-referential generics,
-            // so we resort to reflection
-            var testDatabaseContainer = PostgreSQLContainer::class.java
-                    .getDeclaredConstructor(String::class.java)
-                    .newInstance("postgres:11")
-
-            testDatabaseContainer.start()
-
-            systemProperty("quarkus.datasource.url", testDatabaseContainer.jdbcUrl)
-            systemProperty("quarkus.datasource.username", testDatabaseContainer.username)
-            systemProperty("quarkus.datasource.password", testDatabaseContainer.password)
-        }
     }
 }
 
 tasks.withType<QuarkusDev> {
-}
-
-val integrationTest = task<Test>("integrationTest") {
-    description = "Runs integration tests."
-    group = "verification"
-
-    testClassesDirs = sourceSets["integrationTest"].output.classesDirs
-    classpath = sourceSets["integrationTest"].runtimeClasspath
-    shouldRunAfter("test")
-
-    useJUnitPlatform()
-
-    reports {
-        junitXml.isEnabled = true
-    }
-
-    testLogging.showStandardStreams = true
+    jvmArgs = "-Djava.net.preferIPv4Stack=true -Djava.net.preferIPv6Addresses=false"
 }
 
 val mergeBuildOutput = task<Copy>("mergeBuildOutput") {
@@ -146,4 +119,3 @@ val generateTestKeyPair = task<Exec>("generateTestKeyPair") {
 }
 
 tasks.classes { dependsOn(mergeBuildOutput) }
-tasks.check { dependsOn(integrationTest) }
