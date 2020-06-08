@@ -2,6 +2,8 @@ runBuild {
   def repositoryName = "backend"
   def registryUrl = "taxman.azurecr.io"
   def deploymentJob = "../digirati-taxonomy-manager-infra/master"
+  def deploymentEnv = 'dev'
+  def deploymentCustomer = 'digirati'
   def tagVersion = fetchTagVersion()
 
   stage('Linting') {
@@ -55,6 +57,7 @@ runBuild {
         parameters: [
           booleanParam(name: 'DEPLOY', value: true),
           stringParam(name: 'ENVIRONMENT', value: deploymentEnv),
+          stringParam(name: 'CUSTOMER', value: deploymentCustomer),
           stringParam(name: 'BACKEND_IMAGE_TAG', value: tagVersion)
         ],
         propagate: false,
