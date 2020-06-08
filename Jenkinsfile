@@ -1,7 +1,7 @@
 runBuild {
   def repositoryName = "backend"
   def registryUrl = "taxman.azurecr.io"
-  def deploymentJob = "../digirati-taxonomy-manager-infra/master"
+  def deploymentJob = "../deploy/master"
   def deploymentEnv = 'dev'
   def deploymentCustomer = 'digirati'
   def tagVersion = fetchTagVersion()
