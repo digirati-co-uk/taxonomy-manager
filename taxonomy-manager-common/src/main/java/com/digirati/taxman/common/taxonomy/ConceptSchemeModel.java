@@ -7,13 +7,10 @@ import com.digirati.taxman.common.rdf.annotation.RdfConstructor;
 import com.digirati.taxman.common.rdf.annotation.RdfContext;
 import com.digirati.taxman.common.rdf.annotation.RdfType;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Streams;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.vocabulary.SKOS;
 
-import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 

@@ -5,7 +5,6 @@ import com.digirati.taxman.common.taxonomy.ConceptModel;
 import com.digirati.taxman.common.taxonomy.ConceptRelationshipType;
 import com.digirati.taxman.rest.server.infrastructure.event.ConceptEvent;
 import com.digirati.taxman.rest.server.infrastructure.event.ConceptEventListener;
-import com.digirati.taxman.rest.server.infrastructure.event.EventService;
 import com.digirati.taxman.rest.server.taxonomy.identity.ConceptIdResolver;
 import com.digirati.taxman.rest.server.taxonomy.mapper.ConceptMapper;
 import com.digirati.taxman.rest.server.taxonomy.mapper.SearchResultsMapper;
@@ -15,8 +14,7 @@ import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRecord;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRelationshipRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.vocabulary.DCTerms;
-import org.eclipse.microprofile.reactive.messaging.Channel;
-import org.eclipse.microprofile.reactive.messaging.Emitter;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -124,7 +122,8 @@ public class ConceptModelRepository {
      * @param conceptRelationshipType Type of the relationship to consider
      * @return Stream of UUIDs of concepts in the specified relationship to the provided model
      */
-    private Stream<UUID> getRelationshipsOrEmpty(ConceptModel conceptModel, ConceptRelationshipType conceptRelationshipType) {
+    private Stream<UUID> getRelationshipsOrEmpty(ConceptModel conceptModel,
+                                                 ConceptRelationshipType conceptRelationshipType) {
         return conceptModel
                 .getRelationships(conceptRelationshipType, USE_TRANSITIVE_RELATIONSHIPS)
                 .map(relatedConceptModel -> idResolver.resolve(relatedConceptModel.getUri()))
@@ -144,9 +143,12 @@ public class ConceptModelRepository {
      */
     private Stream<UUID> getNewRelationships(ConceptModel newModel, ConceptRelationshipType conceptRelationshipType,
                                              ConceptModel existingModel) {
-        if (existingModel == null) return getRelationshipsOrEmpty(newModel, conceptRelationshipType);
+        if (existingModel == null) {
+            return getRelationshipsOrEmpty(newModel, conceptRelationshipType);
+        }
 
-        Set<UUID> existing = getRelationshipsOrEmpty(existingModel, conceptRelationshipType).collect(Collectors.toSet());
+        Set<UUID> existing = getRelationshipsOrEmpty(existingModel,conceptRelationshipType)
+                .collect(Collectors.toSet());
         return getRelationshipsOrEmpty(newModel, conceptRelationshipType)
                 .filter(c -> !existing.contains(c));
     }
@@ -178,15 +180,14 @@ public class ConceptModelRepository {
     }
 
     /**
-     * Analyze the changes between relationships and create symmetric relations if needed
+     * Analyze the changes between relationships and create symmetric relations if needed.
      *
      * @param model    The new data for the Concept
      * @param existing (Can be null) The current version of the Concept, if one exists
      */
     private void applySymmetricRelationChanges(ConceptModel model, ConceptModel existing) {
 
-        BiConsumer<UUID, ConceptRelationshipType> createRelationshipToModel = (relatedUuid, relationshipType) ->
-        {
+        BiConsumer<UUID, ConceptRelationshipType> createRelationshipToModel = (relatedUuid, relationshipType) -> {
             var conceptDataSetOptional = conceptDao.loadDataSet(relatedUuid);
             if (conceptDataSetOptional.isEmpty()) {
                 // Can't do anything for a non-existent item
@@ -212,10 +213,14 @@ public class ConceptModelRepository {
         for (var type : Set.of(ConceptRelationshipType.BROADER, ConceptRelationshipType.NARROWER)) {
             getNewRelationships(model, type, existing)
                     .forEach(relatedUuid
-                            -> createRelationshipToModel.accept(relatedUuid, type.inverse()));
+                        -> createRelationshipToModel.accept(relatedUuid, type.inverse()));
         }
     }
 
+    /**
+     * Deletes the concept.
+     * @param uuid identifier of the concept
+     */
     public void delete(UUID uuid) {
         var concept = find(uuid);
         if (concept.isEmpty()) {

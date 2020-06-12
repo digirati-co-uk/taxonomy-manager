@@ -2,22 +2,16 @@ package com.digirati.taxman.rest.server.taxonomy.mapper;
 
 import com.digirati.taxman.common.rdf.RdfModelException;
 import com.digirati.taxman.common.rdf.RdfModelFactory;
-import com.digirati.taxman.common.taxonomy.ConceptModel;
 import com.digirati.taxman.common.taxonomy.ConceptSchemeModel;
 import com.digirati.taxman.rest.server.taxonomy.identity.ConceptIdResolver;
 import com.digirati.taxman.rest.server.taxonomy.identity.ConceptSchemeIdResolver;
+import com.digirati.taxman.rest.server.taxonomy.storage.ConceptDataSet;
 import com.digirati.taxman.rest.server.taxonomy.storage.ConceptSchemeDataSet;
-import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptReference;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptSchemeRecord;
-import com.google.common.collect.ArrayListMultimap;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.vocabulary.SKOS;
 
-import java.net.URI;
-import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -29,11 +23,14 @@ public class ConceptSchemeMapper {
     private final ConceptIdResolver conceptIdResolver;
     private final ConceptSchemeIdResolver schemeIdResolver;
     private final RdfModelFactory modelFactory;
+    private final ConceptMapper conceptMapper;
 
-    public ConceptSchemeMapper(ConceptSchemeIdResolver schemeIdResolver, ConceptIdResolver conceptIdResolver, RdfModelFactory modelFactory) {
+    public ConceptSchemeMapper(ConceptSchemeIdResolver schemeIdResolver, ConceptIdResolver conceptIdResolver,
+                               RdfModelFactory modelFactory, ConceptMapper conceptMapper) {
         this.schemeIdResolver = schemeIdResolver;
         this.conceptIdResolver = conceptIdResolver;
         this.modelFactory = modelFactory;
+        this.conceptMapper = conceptMapper;
     }
 
     /**
@@ -54,16 +51,10 @@ public class ConceptSchemeMapper {
             builder.addStringProperty(DCTerms.source, record.getSource());
         }
 
-        for (ConceptReference topConceptReference : dataset.getTopConcepts()) {
-            var embeddedModel = modelFactory.createBuilder(ConceptModel.class)
-                    .addPlainLiteral(SKOS.prefLabel, topConceptReference.getPreferredLabel())
-                    .setUri(conceptIdResolver.resolve(topConceptReference.getId()));
-
-            var source = topConceptReference.getSource();
-            source.ifPresent(uri -> embeddedModel.addEmbeddedModel(DCTerms.source, URI.create(uri)));
-
-            builder.addEmbeddedModel(SKOS.hasTopConcept, embeddedModel);
-        }
+        dataset.getTopConcepts()
+                .stream()
+                .map(conceptRecord -> conceptMapper.map(new ConceptDataSet(conceptRecord)))
+                .forEach(conceptModel -> builder.addEmbeddedModel(SKOS.hasTopConcept, conceptModel));
 
         return builder.build();
     }
@@ -83,21 +74,12 @@ public class ConceptSchemeMapper {
 
         var topConcepts = model.getTopConcepts()
                 .map(concept -> {
-                    UUID id = concept.getUuid();
-                    Resource resource = concept.getResource();
-
+                    // Unsure if this is needed
+                    var id = concept.getUuid();
                     if (id == null) {
-                        id = conceptIdResolver.resolve(concept.getUri()).orElse(null);
+                        concept.setUuid(conceptIdResolver.resolve(concept.getUri()).orElse(null));
                     }
-
-                    var targetSourceResource = resource.getPropertyResourceValue(DCTerms.source);
-
-                    String targetSourceResourceUri = null;
-                    if (targetSourceResource != null) {
-                        targetSourceResourceUri = targetSourceResource.getURI();
-                    }
-
-                    return new ConceptReference(id, targetSourceResourceUri, ArrayListMultimap.create());
+                    return conceptMapper.map(concept).getRecord();
                 })
                 .collect(Collectors.toList());
 
