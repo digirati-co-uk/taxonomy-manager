@@ -1,10 +1,9 @@
 package com.digirati.taxman.rest.server.taxonomy.storage;
 
-import com.digirati.taxman.common.rdf.RdfModelException;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRecord;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptReference;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptSchemeRecord;
-import com.digirati.taxman.rest.server.taxonomy.storage.record.mapper.ConceptReferenceMapper;
+import com.digirati.taxman.rest.server.taxonomy.storage.record.mapper.ConceptRecordMapper;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.mapper.ConceptSchemeRecordMapper;
 import org.json.JSONArray;
 
@@ -15,15 +14,14 @@ import java.util.UUID;
 
 public class ConceptSchemeDao {
 
-    private final ConceptSchemeRecordMapper recordMapper = new ConceptSchemeRecordMapper();
-    private final ConceptReferenceMapper referenceMapper = new ConceptReferenceMapper();
+    private final ConceptSchemeRecordMapper conceptSchemeRecordMapper = new ConceptSchemeRecordMapper();
 
     private final JdbcTemplateEx jdbcTemplate;
-    private final DataSource dataSource;
+
+    private final ConceptRecordMapper conceptRecordMapper = new ConceptRecordMapper();
 
     public ConceptSchemeDao(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplateEx(dataSource);
-        this.dataSource = dataSource;
     }
 
     /**
@@ -41,7 +39,7 @@ public class ConceptSchemeDao {
         var record = jdbcTemplate.queryForOptional("SELECT * FROM get_concept_scheme(?)",
                 recordArgs,
                 recordTypes,
-                recordMapper);
+                conceptSchemeRecordMapper);
 
         if (record.isEmpty()) {
             return Optional.empty();
@@ -51,7 +49,7 @@ public class ConceptSchemeDao {
                 "SELECT * FROM get_concept_scheme_top_concepts(?)",
                 recordArgs,
                 recordTypes,
-                referenceMapper);
+                conceptRecordMapper);
 
         return Optional.of(new ConceptSchemeDataSet(record.get(), relationshipRecords));
     }
@@ -72,7 +70,7 @@ public class ConceptSchemeDao {
         record = jdbcTemplate.queryForObject("SELECT * FROM create_or_update_concept_scheme(?, ?, ?)",
                 recordArgs,
                 recordTypes,
-                recordMapper);
+                conceptSchemeRecordMapper);
 
         UUID uuid = record.getUuid();
 
