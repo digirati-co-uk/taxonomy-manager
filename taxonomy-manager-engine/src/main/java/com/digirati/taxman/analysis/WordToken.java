@@ -11,9 +11,13 @@ import java.util.Map;
 public class WordToken {
 
     private final Map<AnnotationType, String> lexemes;
+    private final int beginPosition;
+    private final int endPosition;
 
-    public WordToken(Map<AnnotationType, String> lexemes) {
+    public WordToken(Map<AnnotationType, String> lexemes, int beginPosition, int endPosition) {
         this.lexemes = lexemes;
+        this.beginPosition = beginPosition;
+        this.endPosition = endPosition;
     }
 
     public static boolean sharesCandidates(List<WordToken> a, List<WordToken> b) {
@@ -37,6 +41,14 @@ public class WordToken {
 
     public Collection<String> candidates() {
         return lexemes.values();
+    }
+
+    public int getBeginPosition() {
+        return beginPosition;
+    }
+
+    public int getEndPosition() {
+        return endPosition;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.digirati.taxman.rest.server.analysis;
 
+import com.digirati.taxman.analysis.IdWithPosition;
 import com.digirati.taxman.analysis.index.TermIndex;
 import com.digirati.taxman.common.rdf.RdfModelException;
 import com.digirati.taxman.common.rdf.RdfModelFactory;
@@ -7,6 +8,7 @@ import com.digirati.taxman.common.taxonomy.CollectionModel;
 import com.digirati.taxman.common.taxonomy.ConceptModel;
 import com.digirati.taxman.rest.analysis.TextAnalysisInput;
 import com.digirati.taxman.rest.server.taxonomy.ConceptModelRepository;
+import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.vocabulary.SKOS;
 import org.jboss.logging.Logger;
 
@@ -16,6 +18,8 @@ import javax.inject.Singleton;
 import javax.ws.rs.WebApplicationException;
 import java.net.URI;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class TextAnalyzer {
@@ -41,14 +45,25 @@ public class TextAnalyzer {
     public CollectionModel tagDocument(TextAnalysisInput input) {
         logger.debug(input.getText());
 
-        var matches = termIndex.match(input.getText());
+        var matches = termIndex.matchWithPosition(input.getText())
+                .stream()
+                .collect(Collectors.toMap(IdWithPosition::getId, Function.identity()));
 
         try {
             var builder = modelFactory.createBuilder(CollectionModel.class);
             builder.setUri(URI.create("urn:collection"));
 
-            var matchedConcepts = concepts.findAll(matches);
-            matchedConcepts.forEach(concept -> builder.addEmbeddedModel(SKOS.member, concept));
+            var matchedConcepts = concepts.findAll(matches.keySet());
+            matchedConcepts.forEach(concept -> {
+                concept.getResource().addProperty(DCTerms.extent,
+                        String.format(
+                                "%d:%d",
+                                matches.get(concept.getUuid()).getBeginPosition(),
+                                matches.get(concept.getUuid()).getEndPosition()
+                        )
+                );
+                builder.addEmbeddedModel(SKOS.member, concept);
+            });
 
             return builder.build();
         } catch (RdfModelException ex) {

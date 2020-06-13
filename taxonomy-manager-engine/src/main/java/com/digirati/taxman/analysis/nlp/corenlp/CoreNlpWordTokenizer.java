@@ -77,7 +77,7 @@ public final class CoreNlpWordTokenizer implements WordTokenizer {
                 continue;
             }
 
-            tokens.add(new WordToken(annotations));
+            tokens.add(new WordToken(annotations, label.beginPosition(), label.endPosition()));
         }
 
         return tokens;

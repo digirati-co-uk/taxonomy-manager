@@ -13,4 +13,6 @@ public interface WordTokenSearchStrategy<IdT> {
     void unindex(WordTokenSearchEntry<IdT> entry);
 
     Set<IdT> match(List<WordToken> input);
+
+    Set<IdWithPosition<IdT>> matchWithPosition(List<WordToken> input);
 }
