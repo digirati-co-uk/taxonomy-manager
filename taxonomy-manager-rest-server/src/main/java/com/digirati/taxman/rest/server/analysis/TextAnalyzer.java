@@ -47,7 +47,7 @@ public class TextAnalyzer {
 
         var matches = termIndex.matchWithPosition(input.getText())
                 .stream()
-                .collect(Collectors.toMap(IdWithPosition::getId, Function.identity()));
+                .collect(Collectors.groupingBy(IdWithPosition::getId));
 
         try {
             var builder = modelFactory.createBuilder(CollectionModel.class);
@@ -55,12 +55,14 @@ public class TextAnalyzer {
 
             var matchedConcepts = concepts.findAll(matches.keySet());
             matchedConcepts.forEach(concept -> {
-                concept.getResource().addProperty(DCTerms.extent,
-                        String.format(
-                                "%d:%d",
-                                matches.get(concept.getUuid()).getBeginPosition(),
-                                matches.get(concept.getUuid()).getEndPosition()
-                        )
+                matches.get(concept.getUuid()).forEach(occurence ->
+                    concept.getResource().addProperty(DCTerms.extent,
+                            String.format(
+                                    "%d:%d",
+                                    occurence.getBeginPosition(),
+                                    occurence.getEndPosition()
+                            )
+                    )
                 );
                 builder.addEmbeddedModel(SKOS.member, concept);
             });
