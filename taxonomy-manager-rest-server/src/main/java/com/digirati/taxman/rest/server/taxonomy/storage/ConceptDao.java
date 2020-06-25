@@ -10,6 +10,7 @@ import java.sql.Array;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 /**
@@ -20,6 +21,8 @@ public class ConceptDao {
     private final JdbcTemplateEx jdbcTemplate;
     private final ConceptRecordMapper recordMapper = new ConceptRecordMapper();
     private final ConceptRelationshipRecordMapper relationshipRecordMapper = new ConceptRelationshipRecordMapper();
+
+    private static final Logger Log = Logger.getLogger("ConceptDao");
 
     public ConceptDao(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplateEx(dataSource);
@@ -123,6 +126,10 @@ public class ConceptDao {
             DaoUtils.createRdfPlainLiteral(record.getScopeNote())
         };
 
+        for (var e:
+             recordArgs) {
+            Log.info(e.toString());
+        }
         int[] recordTypes = new int[recordArgs.length];
         Arrays.fill(recordTypes, Types.OTHER);
 

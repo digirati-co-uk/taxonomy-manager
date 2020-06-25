@@ -5,7 +5,7 @@ create procedure update_concept_semantic_relations(_uuid uuid, _source character
 as
 $$
 -- If there are any relations that we don't have database records for yet, create them.
-INSERT INTO skos_concept_ex (uuid, source)
+INSERT INTO skos_concept (uuid, source)
 SELECT (data ->> 'target_id')::uuid, (data ->> 'target_source')::varchar
 FROM jsonb_array_elements(_relations) data
          LEFT JOIN skos_concept_ex sc ON sc.uuid = (data ->> 'target_id')::uuid

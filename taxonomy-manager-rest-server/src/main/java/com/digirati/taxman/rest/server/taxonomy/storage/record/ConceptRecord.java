@@ -16,6 +16,7 @@ public class ConceptRecord implements Concept {
     private final UUID uuid;
 
     private String source;
+    private String projectSlug;
     private Multimap<String, String> preferredLabel = ArrayListMultimap.create();
     private Multimap<String, String> altLabel = ArrayListMultimap.create();
     private Multimap<String, String> hiddenLabel = ArrayListMultimap.create();
@@ -125,6 +126,14 @@ public class ConceptRecord implements Concept {
         this.scopeNote = scopeNote;
     }
 
+    public String getProjectSlug() {
+        return projectSlug;
+    }
+
+    public void setProjectSlug(String projectSlug) {
+        this.projectSlug = projectSlug;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -146,6 +155,8 @@ public class ConceptRecord implements Concept {
     public String toString() {
         return MoreObjects.toStringHelper(this)
                 .add("uuid", uuid)
+                .add("source", source)
+                .add("projectSlug", projectSlug)
                 .add("preferredLabel", preferredLabel)
                 .add("altLabel", altLabel)
                 .add("hiddenLabel", hiddenLabel)

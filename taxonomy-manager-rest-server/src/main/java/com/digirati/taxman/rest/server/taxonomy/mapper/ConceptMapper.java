@@ -6,7 +6,9 @@ import com.digirati.taxman.common.rdf.RdfModelFactory;
 import com.digirati.taxman.common.taxonomy.ConceptLabelExtractor;
 import com.digirati.taxman.common.taxonomy.ConceptModel;
 import com.digirati.taxman.common.taxonomy.ConceptRelationshipType;
+import com.digirati.taxman.common.taxonomy.ProjectModel;
 import com.digirati.taxman.rest.server.taxonomy.identity.ConceptIdResolver;
+import com.digirati.taxman.rest.server.taxonomy.identity.ProjectIdResolver;
 import com.digirati.taxman.rest.server.taxonomy.storage.ConceptDataSet;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRecord;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRelationshipRecord;
@@ -26,11 +28,22 @@ import java.util.stream.Stream;
  */
 public class ConceptMapper {
 
-    private final ConceptIdResolver idResolver;
+    private final ConceptIdResolver conceptIdResolver;
+    private final ProjectIdResolver projectIdResolver;
     private final RdfModelFactory factory;
 
-    public ConceptMapper(ConceptIdResolver idResolver, RdfModelFactory modelFactory) {
-        this.idResolver = idResolver;
+    /**
+     * Creates new instance of the ConceptMapper.
+     * @param conceptIdResolver Resolver from Concept Id to Concept URI
+     * @param projectIdResolver Resolver from Project Slug to Project URI
+     * @param modelFactory General factory of all RDF models
+     */
+    public ConceptMapper(
+            ConceptIdResolver conceptIdResolver,
+            ProjectIdResolver projectIdResolver,
+            RdfModelFactory modelFactory) {
+        this.conceptIdResolver = conceptIdResolver;
+        this.projectIdResolver = projectIdResolver;
         this.factory = modelFactory;
     }
 
@@ -46,11 +59,17 @@ public class ConceptMapper {
             var record = dataset.getRecord();
             var extractor = new ConceptLabelExtractor(record);
 
-            builder.setUri(idResolver.resolve(record.getUuid()));
+            builder.setUri(conceptIdResolver.resolve(record.getUuid()));
             extractor.extractTo(builder);
 
             if (StringUtils.isNotBlank(record.getSource())) {
                 builder.addEmbeddedModel(DCTerms.source, URI.create(record.getSource()));
+            }
+
+            if (StringUtils.isNotBlank(record.getProjectSlug())) {
+                builder.addEmbeddedModel(DCTerms.isPartOf, factory.createBuilder(ProjectModel.class)
+                    .setUri(projectIdResolver.resolve(record.getProjectSlug()))
+                );
             }
 
             for (ConceptRelationshipRecord relationship : dataset.getRelationshipRecords()) {
@@ -60,7 +79,7 @@ public class ConceptMapper {
 
                 RdfModelBuilder<ConceptModel> embeddedModel = factory.createBuilder(ConceptModel.class)
                         .addPlainLiteral(SKOS.prefLabel, relationship.getTargetPreferredLabel())
-                        .setUri(idResolver.resolve(relationship.getTarget()));
+                        .setUri(conceptIdResolver.resolve(relationship.getTarget()));
 
                 if (source != null) {
                     embeddedModel.addEmbeddedModel(DCTerms.source, URI.create(source));
@@ -104,14 +123,17 @@ public class ConceptMapper {
             boolean transitiveSupported = type.hasTransitiveProperty();
 
             Stream<ConceptModel> relationships = model.getRelationships(type, false);
-            Stream<ConceptModel> transitiveRelationships = transitiveSupported ? model.getRelationships(type, true) : Stream.of();
+            Stream<ConceptModel> transitiveRelationships = transitiveSupported
+                    ? model.getRelationships(type, true)
+                    : Stream.of();
 
             BiConsumer<ConceptModel, Boolean> relationshipMapper = (resource, transitive) -> {
                 var targetUri = resource.getUri();
-                var targetUuid = idResolver.resolve(targetUri).orElse(UUID.randomUUID());
+                var targetUuid = conceptIdResolver.resolve(targetUri).orElse(UUID.randomUUID());
                 var targetSource = resource.getSource();
 
-                var relationshipRecord = new ConceptRelationshipRecord(uuid, targetUuid, targetSource, type, transitive);
+                var relationshipRecord =
+                        new ConceptRelationshipRecord(uuid, targetUuid, targetSource, type, transitive);
                 relationshipRecords.add(relationshipRecord);
             };
 

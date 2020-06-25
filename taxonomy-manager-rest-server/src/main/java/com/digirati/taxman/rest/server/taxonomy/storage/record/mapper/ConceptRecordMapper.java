@@ -13,6 +13,7 @@ public class ConceptRecordMapper implements RowMapper<ConceptRecord> {
         ConceptRecord record = new ConceptRecord(rs.getObject("uuid", UUID.class));
 
         record.setSource(rs.getString("source"));
+        record.setProjectSlug(rs.getString("slug"));
         record.setPreferredLabel(ResultSetUtils.getPlainLiteralMap(rs, "preferred_label"));
         record.setAltLabel(ResultSetUtils.getPlainLiteralMap(rs, "alt_label"));
         record.setHiddenLabel(ResultSetUtils.getPlainLiteralMap(rs, "hidden_label"));

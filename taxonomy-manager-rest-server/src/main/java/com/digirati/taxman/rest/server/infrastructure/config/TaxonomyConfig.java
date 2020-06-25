@@ -35,7 +35,7 @@ public class TaxonomyConfig {
 
     @Produces
     ConceptMapper conceptMapper() {
-        return new ConceptMapper(conceptIdResolver, modelFactory);
+        return new ConceptMapper(conceptIdResolver, projectIdResolver, modelFactory);
     }
 
     @Produces
