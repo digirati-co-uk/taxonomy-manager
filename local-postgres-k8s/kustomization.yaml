@@ -1,0 +1,13 @@
+resources:
+  - postgres.deployment.yaml
+  - postgres.service.yaml
+
+configMapGenerator:
+  - name: postgres-db-config
+    envs:
+      - config/postgres-db-config.env
+
+secretGenerator:
+  - name: postgres-db-secrets
+    envs:
+      - config/postgres-db-secrets.env

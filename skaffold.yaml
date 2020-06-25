@@ -4,12 +4,19 @@ kind: Config
 build:
   local:
     useDockerCLI: true
-    push: true
+    push: false
   artifacts:
     - image: "taxman-backend"
       docker:
         dockerfile: dockerfiles/Dockerfile.jvm
-deploy:
-  kustomize:
-    paths:
-      - k8s/
+profiles:
+  - name: local-postgres
+    deploy:
+      kubeContext: minikube
+      kustomize:
+        paths: [./local-postgres-k8s, ./k8s]
+  - name: base
+    deploy:
+      kubeContext: minikube
+      kustomize:
+        paths: [./k8s]

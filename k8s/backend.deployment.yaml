@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: backend
-          imagePullPolicy: Always
+          imagePullPolicy: Never
           image: taxman-backend
           readinessProbe:
             httpGet:
@@ -32,24 +32,14 @@ spec:
             initialDelaySeconds: 60
             timeoutSeconds: 1
             periodSeconds: 15
+          envFrom:
+            - configMapRef:
+                name: taxman-backend-db-config
+            - secretRef:
+                name: taxman-backend-db-secrets
           env:
-            - name: QUARKUS_DATASOURCE_URL
-              valueFrom:
-                configMapKeyRef:
-                  name: taxman-backend-db-config
-                  key: url
-            - name: QUARKUS_DATASURCE_DRIVER
+            - name: QUARKUS_DATASOURCE_DRIVER
               value: "org.postgresql.Driver"
-            - name: QUARKUS_DATASOURCE_USERNAME
-              valueFrom:
-                configMapKeyRef:
-                  name: taxman-backend-db-config
-                  key: username
-            - name: QUARKUS_DATASOURCE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: taxman-backend-db-secrets
-                  key: password
           ports:
             - containerPort: 8080
               name: http
