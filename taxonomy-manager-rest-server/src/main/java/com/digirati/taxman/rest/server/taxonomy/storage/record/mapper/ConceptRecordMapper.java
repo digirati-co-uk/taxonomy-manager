@@ -22,7 +22,7 @@ public class ConceptRecordMapper implements RowMapper<ConceptRecord> {
         record.setExample(ResultSetUtils.getPlainLiteralMap(rs, "example"));
         record.setHistoryNote(ResultSetUtils.getPlainLiteralMap(rs, "history_note"));
         record.setScopeNote(ResultSetUtils.getPlainLiteralMap(rs, "scope_note"));
-
+        record.setDefinition(ResultSetUtils.getPlainLiteralMap(rs, "definition"));
         return record;
     }
 }

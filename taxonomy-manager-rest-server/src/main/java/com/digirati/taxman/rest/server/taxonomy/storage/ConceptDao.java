@@ -120,13 +120,15 @@ public class ConceptDao {
             DaoUtils.createRdfPlainLiteral(record.getEditorialNote()),
             DaoUtils.createRdfPlainLiteral(record.getExample()),
             DaoUtils.createRdfPlainLiteral(record.getHistoryNote()),
-            DaoUtils.createRdfPlainLiteral(record.getScopeNote())
+            DaoUtils.createRdfPlainLiteral(record.getScopeNote()),
+            DaoUtils.createRdfPlainLiteral(record.getDefinition()),
         };
 
         int[] recordTypes = new int[recordArgs.length];
         Arrays.fill(recordTypes, Types.OTHER);
 
-        jdbcTemplate.update("CALL update_concept(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", recordArgs, recordTypes);
+        // @FIXME gtierney: 12 positional parameters is garbage. Fix this sometime.
+        jdbcTemplate.update("CALL update_concept(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", recordArgs, recordTypes);
 
         int[] relationTypes = {Types.OTHER, Types.VARCHAR, Types.OTHER};
         Object[] relationArgs = {record.getUuid(), record.getSource(), dataset.getRelationshipRecordsJson()};

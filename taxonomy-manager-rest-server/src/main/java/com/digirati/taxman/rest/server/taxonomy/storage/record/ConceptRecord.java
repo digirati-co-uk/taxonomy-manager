@@ -25,6 +25,7 @@ public class ConceptRecord implements Concept {
     private Multimap<String, String> example = ArrayListMultimap.create();
     private Multimap<String, String> historyNote = ArrayListMultimap.create();
     private Multimap<String, String> scopeNote = ArrayListMultimap.create();
+    private Multimap<String, String> definition = ArrayListMultimap.create();
 
     public ConceptRecord(UUID uuid) {
         this.uuid = uuid;
@@ -126,6 +127,15 @@ public class ConceptRecord implements Concept {
     }
 
     @Override
+    public Multimap<String, String> getDefinition() {
+        return definition;
+    }
+
+    public void setDefinition(Multimap<String, String> definition) {
+        this.definition = definition;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -155,6 +165,7 @@ public class ConceptRecord implements Concept {
                 .add("example", example)
                 .add("historyNote", historyNote)
                 .add("scopeNote", scopeNote)
+                .add("definition", definition)
                 .toString();
     }
 }
