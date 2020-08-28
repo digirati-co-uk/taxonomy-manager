@@ -101,6 +101,11 @@ public final class ConceptModel implements RdfModel, PersistentModel, Concept {
         return getPlainLiteral(SKOS.scopeNote);
     }
 
+    @Override
+    public Multimap<String, String> getDefinition() {
+        return getPlainLiteral(SKOS.definition);
+    }
+
     /**
      * Get a stream of all the {@link Resource}s that are related to this model with
      * the given relationship {@code type}.

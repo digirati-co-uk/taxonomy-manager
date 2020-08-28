@@ -97,6 +97,7 @@ public class ConceptMapper {
         record.setExample(model.getExample());
         record.setHistoryNote(model.getHistoryNote());
         record.setScopeNote(model.getScopeNote());
+        record.setDefinition(model.getDefinition());
 
         var relationshipRecords = new ArrayList<ConceptRelationshipRecord>();
 

@@ -33,6 +33,8 @@ public interface Concept {
 
     Multimap<String, String> getScopeNote();
 
+    Multimap<String, String> getDefinition();
+
     /**
      * Gets all labels for this concept for a given language key.
      *
