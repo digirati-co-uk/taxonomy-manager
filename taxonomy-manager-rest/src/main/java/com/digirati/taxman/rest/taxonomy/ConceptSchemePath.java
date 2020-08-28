@@ -3,7 +3,7 @@ package com.digirati.taxman.rest.taxonomy;
 import javax.ws.rs.PathParam;
 import java.util.UUID;
 
-public class ConceptSchemePath {
+public class ConceptSchemePath extends ProjectPath {
 
     @PathParam("scheme")
     private String scheme;
@@ -15,7 +15,7 @@ public class ConceptSchemePath {
         this.scheme = scheme;
     }
 
-    public UUID getUuid() {
+    public UUID getSchemeUuid() {
         return UUID.fromString(scheme);
     }
 }

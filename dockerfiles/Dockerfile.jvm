@@ -15,12 +15,26 @@ ENV GRADLE_OPTS="-Dorg.gradle.caching=false -Dorg.gradle.daemon=false -Dorg.grad
 
 COPY build.gradle.kts settings.gradle.kts gradlew gradle.properties ./
 COPY gradle ./gradle/
+COPY config ./config/
+
+COPY taxonomy-manager-rest/build.gradle.kts ./taxonomy-manager-rest/
+COPY taxonomy-manager-rest-server/build.gradle.kts ./taxonomy-manager-rest-server/
+COPY taxonomy-manager-common/build.gradle.kts ./taxonomy-manager-common/
+COPY taxonomy-manager-engine/build.gradle.kts ./taxonomy-manager-engine/
+
+RUN ./gradlew clean dependencies
+
+COPY taxonomy-manager-engine ./taxonomy-manager-engine/
+RUN ./gradlew :taxonomy-manager-engine:build
+
+COPY taxonomy-manager-common ./taxonomy-manager-common/
+RUN ./gradlew :taxonomy-manager-common:build
+
 COPY taxonomy-manager-rest ./taxonomy-manager-rest/
 COPY taxonomy-manager-rest-server ./taxonomy-manager-rest-server/
-COPY taxonomy-manager-common ./taxonomy-manager-common/
-COPY taxonomy-manager-engine ./taxonomy-manager-engine/
 
-RUN ./gradlew clean assemble && rm -Rf "$HOME/.gradle"
+RUN ./gradlew assemble \
+    && rm -Rf "$HOME/.gradle"
 
 FROM registry.access.redhat.com/ubi8/ubi-minimal:8.0 AS runtime
 

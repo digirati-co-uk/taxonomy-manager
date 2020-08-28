@@ -7,12 +7,14 @@ import com.digirati.taxman.rest.server.taxonomy.ConceptModelRepository;
 import com.digirati.taxman.rest.taxonomy.ConceptPath;
 import com.digirati.taxman.rest.taxonomy.ConceptRelationshipParams;
 import com.digirati.taxman.rest.taxonomy.ConceptResource;
+import com.digirati.taxman.rest.taxonomy.ConceptSchemePath;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.core.Response;
+import java.util.UUID;
 
 @ApplicationScoped
 public class ServerConceptResource implements ConceptResource {
@@ -24,8 +26,9 @@ public class ServerConceptResource implements ConceptResource {
     ConceptModelRepository concepts;
 
     @Override
-    public Response createConcept(@Valid ConceptModel model) {
-        var updatedModel = concepts.create(model);
+    public Response createConcept(@BeanParam ConceptSchemePath conceptSchemePath,  @Valid ConceptModel model) {
+        var updatedModel =
+                concepts.create(model, conceptSchemePath.getSchemeUuid(), conceptSchemePath.getProjectSlug());
         var uri = updatedModel.getUri();
 
         return Response.created(uri).entity(updatedModel).build();
@@ -33,7 +36,7 @@ public class ServerConceptResource implements ConceptResource {
 
     @Override
     public Response getConcept(@BeanParam ConceptPath params) {
-        var model = concepts.find(params.getUuid());
+        var model = concepts.find(params.getConceptUuid());
 
         if (model.isPresent()) {
             return Response.ok(model.get()).build();
@@ -46,7 +49,7 @@ public class ServerConceptResource implements ConceptResource {
     public Response getRelationships(@BeanParam ConceptPath params,
                                      @Valid @BeanParam ConceptRelationshipParams relationshipParams) {
 
-        var uuid = params.getUuid();
+        var uuid = params.getConceptUuid();
         var type = relationshipParams.getType();
         var depth = relationshipParams.getDepth();
 
@@ -54,23 +57,25 @@ public class ServerConceptResource implements ConceptResource {
     }
 
     @Override
-    public Response getConceptsByPartialLabel(String partialLabel, String languageKey) {
-        CollectionModel matches = concepts.findByPartialLabel(partialLabel, languageKey);
+    public Response getConceptsByPartialLabel(
+            String partialLabel, String languageKey, UUID conceptSchemeUuid, String projectSlug) {
+        CollectionModel matches =
+                concepts.findByPartialLabel(partialLabel, languageKey, conceptSchemeUuid, projectSlug);
 
         return Response.ok(matches).build();
     }
 
     @Override
     public Response updateConcept(@BeanParam ConceptPath params, @Valid ConceptModel model) {
-        model.setUuid(params.getUuid());
-        concepts.update(model);
+        model.setUuid(params.getConceptUuid());
+        concepts.update(model, params.getSchemeUuid(), params.getProjectSlug());
 
         return Response.noContent().build();
     }
 
     @Override
     public Response deleteConcept(ConceptPath params) {
-        concepts.delete(params.getUuid());
+        concepts.delete(params.getConceptUuid(), params.getSchemeUuid(), params.getProjectSlug());
 
         return Response.noContent().build();
     }

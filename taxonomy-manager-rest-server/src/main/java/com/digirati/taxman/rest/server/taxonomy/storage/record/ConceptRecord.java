@@ -17,6 +17,7 @@ public class ConceptRecord implements Concept {
 
     private String source;
     private String projectSlug;
+    private UUID schemeUuid;
     private Multimap<String, String> preferredLabel = ArrayListMultimap.create();
     private Multimap<String, String> altLabel = ArrayListMultimap.create();
     private Multimap<String, String> hiddenLabel = ArrayListMultimap.create();
@@ -132,6 +133,14 @@ public class ConceptRecord implements Concept {
 
     public void setProjectSlug(String projectSlug) {
         this.projectSlug = projectSlug;
+    }
+
+    public UUID getSchemeUuid() {
+        return schemeUuid;
+    }
+
+    public void setSchemeUuid(UUID schemeUuid) {
+        this.schemeUuid = schemeUuid;
     }
 
     @Override

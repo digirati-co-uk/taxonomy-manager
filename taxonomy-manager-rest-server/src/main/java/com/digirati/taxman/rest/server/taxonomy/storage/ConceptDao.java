@@ -10,7 +10,6 @@ import java.sql.Array;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.*;
-import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 /**
@@ -21,8 +20,6 @@ public class ConceptDao {
     private final JdbcTemplateEx jdbcTemplate;
     private final ConceptRecordMapper recordMapper = new ConceptRecordMapper();
     private final ConceptRelationshipRecordMapper relationshipRecordMapper = new ConceptRelationshipRecordMapper();
-
-    private static final Logger Log = Logger.getLogger("ConceptDao");
 
     public ConceptDao(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplateEx(dataSource);
@@ -42,7 +39,9 @@ public class ConceptDao {
      *
      * @param uuids A collection of UUIDs representing {@link ConceptRecord}s.
      */
-    public List<ConceptRecord> findAllRecords(Collection<UUID> uuids) {
+    public List<ConceptRecord> findAllRecords(Collection<UUID> uuids,
+                                              Optional<String> projectSlug,
+                                              Optional<UUID> conceptSchemeUuid) {
         Array uuidArray;
 
         try (var conn = jdbcTemplate.getDataSource().getConnection()) {
@@ -51,8 +50,8 @@ public class ConceptDao {
             throw new RuntimeException(e);
         }
 
-        Object[] conceptArgs = {uuidArray};
-        int[] conceptTypes = {Types.ARRAY};
+        Object[] conceptArgs = {uuidArray, projectSlug.orElse(null), conceptSchemeUuid.orElse(null)};
+        int[] conceptTypes = {Types.ARRAY, Types.VARCHAR, Types.OTHER};
 
         return jdbcTemplate.query(
                 "SELECT * FROM get_concepts_by_uuids(?)",
@@ -126,10 +125,6 @@ public class ConceptDao {
             DaoUtils.createRdfPlainLiteral(record.getScopeNote())
         };
 
-        for (var e:
-             recordArgs) {
-            Log.info(e.toString());
-        }
         int[] recordTypes = new int[recordArgs.length];
         Arrays.fill(recordTypes, Types.OTHER);
 

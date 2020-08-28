@@ -2,21 +2,33 @@ apiVersion: skaffold/v2alpha4
 kind: Config
 
 build:
-  local:
-    useDockerCLI: true
-    push: false
+  googleCloudBuild:
+    projectId: toolbox-272913
   artifacts:
-    - image: "taxman-backend"
+    - image: "gcr.io/toolbox-272913/taxman-backend"
       docker:
         dockerfile: dockerfiles/Dockerfile.jvm
 profiles:
-  - name: local-postgres
+  - name: base-with-postgres
     deploy:
-      kubeContext: minikube
+      kubeContext: gke_toolbox-272913_europe-west1-d_toolbox-cluster-6bce7d8a
       kustomize:
         paths: [./local-postgres-k8s, ./k8s]
   - name: base
     deploy:
-      kubeContext: minikube
+      kubeContext: gke_toolbox-272913_europe-west1-d_toolbox-cluster-6bce7d8a
       kustomize:
         paths: [./k8s]
+  - name: local-postgres
+    build:
+      local:
+        useDockerCLI: true
+        push: false
+    deploy:
+      kubeContext: minikube
+      kustomize:
+        paths: [./local-postgres-k8s]
+    patches:
+      - op: replace
+        path: /build/artifacts/0/docker/dockerfile
+        value: dockerfiles/Dockerfile.dummy

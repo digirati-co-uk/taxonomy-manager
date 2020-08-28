@@ -14,10 +14,24 @@ spec:
       labels:
         app: taxman-backend
     spec:
+      initContainers:
+        - name: check-db-ready
+          image: postgres:11.4
+          command: ['sh', '-c',
+                    'until pg_isready -h postgres -p 5432;
+               do echo waiting for database; sleep 2; done;']
+      tolerations:
+        - key: "sku"
+          operator: "Equal"
+          value: "jenkins"
+          effect: "NoSchedule"
+      nodeSelector:
+        beta.kubernetes.io/os: "linux"
+        role: "jobs"
       containers:
         - name: backend
-          imagePullPolicy: Never
-          image: taxman-backend
+          imagePullPolicy: Always
+          image: "gcr.io/toolbox-272913/taxman-backend"
           readinessProbe:
             httpGet:
               path: /health/ready

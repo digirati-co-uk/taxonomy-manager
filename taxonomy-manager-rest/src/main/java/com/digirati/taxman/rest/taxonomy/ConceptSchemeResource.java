@@ -15,27 +15,28 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
-@Path("/v0.1/concept-scheme")
+@Path("/v0.1")
 public interface ConceptSchemeResource {
     @POST
+    @Path("/{project}")
     @Consumes({MediaTypes.APPLICATION_RDF_XML_VALUE, MediaTypes.APPLICATION_JSONLD_SKOS_VALUE})
     @Produces({MediaTypes.APPLICATION_RDF_XML_VALUE, MediaTypes.APPLICATION_JSONLD_SKOS_VALUE})
     @JsonLdFrame(input = "jsonld/framing/concept-scheme.json")
-    Response createConceptScheme(@Valid ConceptSchemeModel model);
+    Response createConceptScheme(@BeanParam ProjectPath projectPath, @Valid ConceptSchemeModel model);
 
     @GET
-    @Path("/{scheme}")
+    @Path("/{project}/{scheme}")
     @Consumes({MediaTypes.APPLICATION_JSONLD_SKOS_VALUE, MediaTypes.APPLICATION_RDF_XML_VALUE})
     @Produces({MediaTypes.APPLICATION_JSONLD_SKOS_VALUE, MediaTypes.APPLICATION_RDF_XML_VALUE})
     @JsonLdFrame(input = "jsonld/framing/concept-scheme.json")
     Response getConceptScheme(@BeanParam ConceptSchemePath params);
 
     @PUT
-    @Path("/{scheme}")
+    @Path("/{project}/{scheme}")
     @Consumes({MediaTypes.APPLICATION_RDF_XML_VALUE, MediaTypes.APPLICATION_JSONLD_SKOS_VALUE})
     Response updateConceptScheme(@BeanParam ConceptSchemePath params, @Valid ConceptSchemeModel model);
 
     @DELETE
-    @Path("/{scheme}")
+    @Path("/{project}/{scheme}")
     Response deleteConceptScheme(@BeanParam ConceptSchemePath params);
 }

@@ -15,8 +15,8 @@ public class CorsFilter implements ContainerResponseFilter {
 
         // If running locally, allow CORS to make local dev easier
         if (requestContext.getUriInfo().getBaseUri().getHost().equalsIgnoreCase("localhost")) {
-            responseContext.getHeaders().add(
-                    "Access-Control-Allow-Origin", "*");
+//            responseContext.getHeaders().add(
+//                    "Access-Control-Allow-Origin", "*");
             responseContext.getHeaders().add(
                     "Access-Control-Allow-Headers", "*");
             responseContext.getHeaders().add(

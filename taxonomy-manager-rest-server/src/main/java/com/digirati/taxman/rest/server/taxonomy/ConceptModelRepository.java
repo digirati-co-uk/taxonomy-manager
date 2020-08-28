@@ -32,7 +32,6 @@ import java.util.stream.Stream;
  */
 @ApplicationScoped
 public class ConceptModelRepository {
-
     /**
      * This is currently set to false, as we don't fully support transitive relationships.
      * It can be modified and tested in the future releases.
@@ -74,7 +73,7 @@ public class ConceptModelRepository {
      * @return all concepts with preferred labels beginning with the given substring
      */
     @Transactional(Transactional.TxType.REQUIRED)
-    public CollectionModel findByPartialLabel(String partialLabel, String languageKey) {
+    public CollectionModel findByPartialLabel(String partialLabel, String languageKey, UUID conceptSchemeUuid, String projectSlug) {
         Collection<ConceptRecord> concepts = conceptDao.getConceptsByPartialLabel(partialLabel, languageKey);
         return searchResultsMapper.map(concepts, partialLabel);
     }
@@ -86,8 +85,10 @@ public class ConceptModelRepository {
      * @return the RDF model of the concept requested.
      */
     @Transactional(Transactional.TxType.REQUIRED)
-    public List<ConceptModel> findAll(Collection<UUID> uuid) {
-        return conceptDao.findAllRecords(uuid)
+    public List<ConceptModel> findAll(Collection<UUID> uuid,
+                                      Optional<String> projectSlug,
+                                      Optional<UUID> conceptSchemeUUID) {
+        return conceptDao.findAllRecords(uuid, projectSlug, conceptSchemeUUID)
                 .stream()
                 .map(record -> conceptMapper.map(new ConceptDataSet(record)))
                 .collect(Collectors.toList());
@@ -97,7 +98,7 @@ public class ConceptModelRepository {
      * Perform an idempotent update of an existing {@link ConceptModel}, updating all stored properties
      * as well relationships.
      */
-    public void update(ConceptModel model) {
+    public void update(ConceptModel model, UUID conceptSchemeUuid, String projectSlug) {
         ConceptModel existing = null;
         if (model.getUuid() == null) {
             model.setUuid(UUID.randomUUID());
@@ -161,7 +162,7 @@ public class ConceptModelRepository {
      * @return The updated model.
      */
     @Transactional(Transactional.TxType.REQUIRED)
-    public ConceptModel create(ConceptModel model) {
+    public ConceptModel create(ConceptModel model, UUID conceptSchemeUuid, String projectSlug) {
         String originalUri = model.getResource().getURI();
         if (StringUtils.isNotBlank(originalUri)) {
             model.getResource().addProperty(DCTerms.source, originalUri);
@@ -173,6 +174,7 @@ public class ConceptModelRepository {
 
         var uuid = model.getUuid();
         var dataset = conceptMapper.map(model);
+
         conceptDao.storeDataSet(dataset);
         eventPublisher.notify(ConceptEvent.created(model));
 
@@ -221,7 +223,7 @@ public class ConceptModelRepository {
      * Deletes the concept.
      * @param uuid identifier of the concept
      */
-    public void delete(UUID uuid) {
+    public void delete(UUID uuid, UUID conceptSchemeUuid, String projectSlug) {
         var concept = find(uuid);
         if (concept.isEmpty()) {
             // Perfect.

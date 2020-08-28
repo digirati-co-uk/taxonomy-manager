@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.WebApplicationException;
 import java.net.URI;
+import java.util.Optional;
 import java.util.UUID;
 
 @ApplicationScoped
@@ -38,7 +39,9 @@ public class TextAnalyzer {
      * @param input The document to tag.
      * @return A list of {@link ConceptModel}s appearing as tags.
      */
-    public CollectionModel tagDocument(TextAnalysisInput input) {
+    public CollectionModel tagDocument(TextAnalysisInput input,
+                                       Optional<String> projectSlug,
+                                       Optional<UUID> conceptSchemeUuid) {
         logger.debug(input.getText());
 
         var matches = termIndex.match(input.getText());
@@ -47,7 +50,7 @@ public class TextAnalyzer {
             var builder = modelFactory.createBuilder(CollectionModel.class);
             builder.setUri(URI.create("urn:collection"));
 
-            var matchedConcepts = concepts.findAll(matches);
+            var matchedConcepts = concepts.findAll(matches, projectSlug, conceptSchemeUuid);
             matchedConcepts.forEach(concept -> builder.addEmbeddedModel(SKOS.member, concept));
 
             return builder.build();

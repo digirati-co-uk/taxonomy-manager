@@ -14,6 +14,14 @@ spec:
       labels:
         app: postgres
     spec:
+      tolerations:
+        - key: "sku"
+          operator: "Equal"
+          value: "jenkins"
+          effect: "NoSchedule"
+      nodeSelector:
+        beta.kubernetes.io/os: "linux"
+        role: "jobs"
       containers:
         - name: postgres
           image: postgres:11.4
@@ -25,6 +33,7 @@ spec:
                 name: postgres-db-config
             - secretRef:
                 name: postgres-db-secrets
+          args: ["-c", "logging_collector=on", "-c", "log_statement=all"]
 #          volumeMounts:
 #            - mountPath: /var/lib/postgresql/data
 #              name: postgredb

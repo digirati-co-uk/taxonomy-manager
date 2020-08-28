@@ -5,7 +5,6 @@ import com.digirati.taxman.common.taxonomy.ConceptSchemeModel;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.transaction.Transactional;
 import java.util.UUID;
 
 @ApplicationScoped
@@ -23,13 +22,15 @@ public class ConceptSchemeImporter {
      * @param model A concept scheme model, including any nested concepts or relations.
      * @return The transformed concept scheme after import into the system.
      */
-    public ConceptSchemeModel importScheme(ConceptSchemeModel model) {
+    public ConceptSchemeModel importScheme(ConceptSchemeModel model, String projectSlug) {
+        var scheme = conceptSchemeRepository.create(model, projectSlug);
+
         var conceptModels = model.getAllResources(ConceptModel.class);
         conceptModels.forEach(concept -> {
             concept.setUuid(UUID.randomUUID());
-            conceptRepository.create(concept);
+            conceptRepository.create(concept,scheme.getUuid(),projectSlug);
         });
 
-        return conceptSchemeRepository.create(model);
+        return conceptSchemeRepository.find(scheme.getUuid()).orElseThrow();
     }
 }

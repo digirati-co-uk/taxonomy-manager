@@ -51,7 +51,7 @@ public class ConceptSchemeModelRepository {
      * @param model The {@code skos:ConceptScheme} model to store.
      * @return the stored {@link com.digirati.taxman.common.taxonomy.ConceptSchemeModel}.
      */
-    public ConceptSchemeModel create(ConceptSchemeModel model) {
+    public ConceptSchemeModel create(ConceptSchemeModel model, String projectSlug) {
         // If the Concept comes with an existing URI, then store it as a dcterms:source
         String originalUri = model.getResource().getURI();
         if (StringUtils.isNotBlank(originalUri)) {
@@ -63,7 +63,7 @@ public class ConceptSchemeModelRepository {
             model.setUuid(UUID.randomUUID());
         }
 
-        var uuid = update(model);
+        var uuid = update(model, projectSlug);
 
         return find(uuid).orElseThrow();
     }
@@ -75,13 +75,13 @@ public class ConceptSchemeModelRepository {
      * @return UUID of the record updated
      */
     @Transactional(Transactional.TxType.REQUIRED)
-    public UUID update(ConceptSchemeModel conceptScheme) {
+    public UUID update(ConceptSchemeModel conceptScheme, String projectSlug) {
         ConceptSchemeDataSet dataset = dataMapper.map(conceptScheme);
 
         return conceptSchemeDao.storeDataSet(dataset);
     }
 
-    public void delete(UUID uuid) {
+    public void delete(UUID uuid, String projectSlug) {
         conceptSchemeDao.deleteDataSet(uuid);
     }
 }

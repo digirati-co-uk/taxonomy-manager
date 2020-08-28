@@ -1,0 +1,17 @@
+.git
+/.gradle
+/build
+**/out
+/data
+/*k8s
+/*/build
+/docker-compose.yml
+/*.md
+/skaffold.yaml
+/Jenkinsfile
+/.gitignore
+/.editorconfig
+/.hadoling.yaml
+/.pre-commit-config.yaml
+/.idea
+/docs

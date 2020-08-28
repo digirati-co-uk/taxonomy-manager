@@ -3,7 +3,6 @@ kind: Service
 metadata:
   name: taxman-backend
 spec:
-  type: NodePort
   selector:
     app: taxman-backend
   ports:
