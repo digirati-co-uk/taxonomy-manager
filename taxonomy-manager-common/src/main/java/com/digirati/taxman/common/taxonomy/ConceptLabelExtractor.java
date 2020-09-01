@@ -31,5 +31,6 @@ public final class ConceptLabelExtractor {
         consumer.accept(SKOS.example, concept.getExample());
         consumer.accept(SKOS.historyNote, concept.getHistoryNote());
         consumer.accept(SKOS.scopeNote, concept.getScopeNote());
+        consumer.accept(SKOS.definition, concept.getDefinition());
     }
 }

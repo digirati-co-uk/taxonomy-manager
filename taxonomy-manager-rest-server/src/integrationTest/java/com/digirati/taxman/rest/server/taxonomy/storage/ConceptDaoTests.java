@@ -43,7 +43,8 @@ public class ConceptDaoTests {
                 labelPropertiesArgs("editorialNote", ConceptRecord::setEditorialNote, ConceptRecord::getEditorialNote),
                 labelPropertiesArgs("example", ConceptRecord::setExample, ConceptRecord::getExample),
                 labelPropertiesArgs("historyNote", ConceptRecord::setHistoryNote, ConceptRecord::getHistoryNote),
-                labelPropertiesArgs("scopeNote", ConceptRecord::setScopeNote, ConceptRecord::getScopeNote)
+                labelPropertiesArgs("scopeNote", ConceptRecord::setScopeNote, ConceptRecord::getScopeNote),
+                labelPropertiesArgs("definition", ConceptRecord::setDefinition, ConceptRecord::getDefinition)
         );
     }
 
