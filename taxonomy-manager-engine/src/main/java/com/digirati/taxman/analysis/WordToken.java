@@ -67,7 +67,7 @@ public class WordToken {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(lexemes);
+        return Objects.hashCode(lexemes, beginPosition, endPosition);
     }
 
     /**

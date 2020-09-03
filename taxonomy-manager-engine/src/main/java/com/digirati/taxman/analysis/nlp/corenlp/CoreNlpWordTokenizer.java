@@ -28,7 +28,7 @@ public final class CoreNlpWordTokenizer implements WordTokenizer {
     private final StanfordCoreNLP nlp;
     private final List<CoreNlpWordNormalizer> normalizers;
 
-    private final Pattern HtmlTagReplacer = Pattern.compile("\\<\\s*\\/?\\s*\\w+\\s*\\>");
+    private final Pattern XML_TAG_REGEX = Pattern.compile("\\<\\s*\\/?\\s*\\w+\\s*\\>");
 
     CoreNlpWordTokenizer(StanfordCoreNLP nlp, List<CoreNlpWordNormalizer> normalizers) {
         this.nlp = nlp;
@@ -54,7 +54,7 @@ public final class CoreNlpWordTokenizer implements WordTokenizer {
     @Override
     public List<WordToken> tokenize(String input) {
         // Strip HTML tags and replace them with equivalent amount of '_' chars
-        HtmlTagReplacer.matcher(input).replaceAll(
+        input = XML_TAG_REGEX.matcher(input).replaceAll(
                 matchResult -> StringUtils.repeat('_', matchResult.end() - matchResult.start()));
 
         // Some input strings like to delimit text with a forward slash. This causes problems for Stanford CoreNLP,

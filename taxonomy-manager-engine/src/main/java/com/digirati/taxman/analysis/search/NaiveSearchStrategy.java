@@ -1,6 +1,6 @@
 package com.digirati.taxman.analysis.search;
 
-import com.digirati.taxman.analysis.IdWithPosition;
+import com.digirati.taxman.analysis.TermMatch;
 import com.digirati.taxman.analysis.WordToken;
 import com.digirati.taxman.analysis.WordTokenSearchEntry;
 import com.digirati.taxman.analysis.WordTokenSearchStrategy;
@@ -29,8 +29,8 @@ public class NaiveSearchStrategy<IdT> implements WordTokenSearchStrategy<IdT> {
     }
 
     @Override
-    public Set<IdT> match(List<WordToken> tokens) {
-        var matches = new HashSet<IdT>();
+    public Set<TermMatch<IdT>> match(List<WordToken> tokens) {
+        var matches = new HashSet<TermMatch<IdT>>();
 
         for (int tokenIndex = 0; tokenIndex < tokens.size(); tokenIndex++) {
             var token = tokens.get(tokenIndex);
@@ -45,35 +45,7 @@ public class NaiveSearchStrategy<IdT> implements WordTokenSearchStrategy<IdT> {
                 var currentTokens = tokens.subList(tokenIndex, currentTokenEndIndex);
 
                 if (WordToken.sharesCandidates(candidateTokens, currentTokens)) {
-                    matches.add(candidate.getIdentity());
-                }
-            }
-        }
-
-        return matches;
-    }
-
-    @Override
-    public Set<IdWithPosition<IdT>> matchWithPosition(List<WordToken> tokens) {
-        var matches = new HashSet<IdWithPosition<IdT>>();
-
-        for (int tokenIndex = 0; tokenIndex < tokens.size(); tokenIndex++) {
-            var token = tokens.get(tokenIndex);
-            var candidateEntries = entries.parallelStream()
-                    .filter(entry -> token.sharesCandidates(entry.getRootToken()))
-                    .sorted(ENTRY_SIZE_COMPARATOR.reversed()) // Prefer matches on longer terms first
-                    .collect(Collectors.toList());
-
-            for (var candidate : candidateEntries) {
-                var candidateTokens = candidate.getTokens();
-                var currentTokenEndIndex = Math.min(tokenIndex + candidateTokens.size(), tokens.size());
-                var currentTokens = tokens.subList(tokenIndex, currentTokenEndIndex);
-
-                if (WordToken.sharesCandidates(candidateTokens, currentTokens)) {
-                    matches.add(new IdWithPosition<>(
-                            candidate.getIdentity(),
-                            token.getBeginPosition(),
-                            token.getEndPosition()));
+                    matches.add(new TermMatch<>(candidate.getIdentity(), currentTokens));
                 }
             }
         }

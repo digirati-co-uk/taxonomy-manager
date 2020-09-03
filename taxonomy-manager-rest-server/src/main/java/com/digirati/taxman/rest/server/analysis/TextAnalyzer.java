@@ -1,6 +1,6 @@
 package com.digirati.taxman.rest.server.analysis;
 
-import com.digirati.taxman.analysis.IdWithPosition;
+import com.digirati.taxman.analysis.TermMatch;
 import com.digirati.taxman.analysis.index.TermIndex;
 import com.digirati.taxman.common.rdf.RdfModelException;
 import com.digirati.taxman.common.rdf.RdfModelFactory;
@@ -14,11 +14,9 @@ import org.jboss.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import javax.ws.rs.WebApplicationException;
 import java.net.URI;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
@@ -45,9 +43,9 @@ public class TextAnalyzer {
     public CollectionModel tagDocument(TextAnalysisInput input) {
         logger.debug(input.getText());
 
-        var matches = termIndex.matchWithPosition(input.getText())
+        var matches = termIndex.match(input.getText())
                 .stream()
-                .collect(Collectors.groupingBy(IdWithPosition::getId));
+                .collect(Collectors.groupingBy(TermMatch::getId));
 
         try {
             var builder = modelFactory.createBuilder(CollectionModel.class);
