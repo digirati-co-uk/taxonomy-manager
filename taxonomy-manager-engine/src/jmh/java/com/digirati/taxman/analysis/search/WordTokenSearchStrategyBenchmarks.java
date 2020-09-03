@@ -46,7 +46,7 @@ public class WordTokenSearchStrategyBenchmarks {
 
     private static List<WordToken> naiveTokenize(String line) {
         return Arrays.stream(line.split(" "))
-                .map(word -> new WordToken(Map.of(AnnotationType.TOKEN, word)))
+                .map(word -> new WordToken(Map.of(AnnotationType.TOKEN, word), 1,2))
                 .collect(Collectors.toList());
     }
 

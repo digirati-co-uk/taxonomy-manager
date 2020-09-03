@@ -1,5 +1,6 @@
 package com.digirati.taxman.analysis.index;
 
+import com.digirati.taxman.analysis.TermMatch;
 import com.digirati.taxman.analysis.WordTokenSearchEntry;
 import com.digirati.taxman.analysis.WordTokenSearchStrategy;
 import com.digirati.taxman.analysis.WordTokenizer;
@@ -39,7 +40,7 @@ public class TermIndex<IdT>  {
         searchStrategy.unindex(entry);
     }
 
-    public Set<IdT> match(String input) {
+    public Set<TermMatch<IdT>> match(String input) {
         var tokens = tokenizer.tokenize(input);
         var matches = searchStrategy.match(tokens);
 

@@ -10,10 +10,12 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public final class CoreNlpWordTokenizer implements WordTokenizer {
     private static final List<CoreNlpWordNormalizer> DEFAULT_NORMALIZERS = List.of(
@@ -25,6 +27,8 @@ public final class CoreNlpWordTokenizer implements WordTokenizer {
 
     private final StanfordCoreNLP nlp;
     private final List<CoreNlpWordNormalizer> normalizers;
+
+    private final Pattern XML_TAG_REGEX = Pattern.compile("\\<\\s*\\/?\\s*\\w+\\s*\\>");
 
     CoreNlpWordTokenizer(StanfordCoreNLP nlp, List<CoreNlpWordNormalizer> normalizers) {
         this.nlp = nlp;
@@ -49,9 +53,13 @@ public final class CoreNlpWordTokenizer implements WordTokenizer {
 
     @Override
     public List<WordToken> tokenize(String input) {
+        // Strip HTML tags and replace them with equivalent amount of '_' chars
+        input = XML_TAG_REGEX.matcher(input).replaceAll(
+                matchResult -> StringUtils.repeat('_', matchResult.end() - matchResult.start()));
+
         // Some input strings like to delimit text with a forward slash. This causes problems for Stanford CoreNLP,
         // which expects words to be delimited by whitespace or regular punctuation.
-        final String normalizedInput = input.replaceAll("/", " / ");
+        final String normalizedInput = input.replaceAll("/", " ");
         final Annotation phrase = nlp.process(normalizedInput);
 
         List<CoreLabel> labels = phrase.get(CoreAnnotations.TokensAnnotation.class);
@@ -77,7 +85,7 @@ public final class CoreNlpWordTokenizer implements WordTokenizer {
                 continue;
             }
 
-            tokens.add(new WordToken(annotations));
+            tokens.add(new WordToken(annotations, label.beginPosition(), label.endPosition()));
         }
 
         return tokens;

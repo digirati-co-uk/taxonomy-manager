@@ -1,10 +1,12 @@
 package com.digirati.taxman.analysis.index;
 
+import com.digirati.taxman.analysis.TermMatch;
 import com.digirati.taxman.analysis.nlp.corenlp.CoreNlpWordTokenizer;
 import com.digirati.taxman.analysis.search.NaiveSearchStrategy;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -13,12 +15,21 @@ public class TermIndexTest {
         return new TermIndex<>(CoreNlpWordTokenizer.create("en"), new NaiveSearchStrategy<>());
     }
 
+    public static void assertTokenIdMatched(Set<String> expectedTokenIds, Set<TermMatch<String>> matches) {
+        Set<String> matchedIds = matches
+                .stream()
+                .map(TermMatch::getId)
+                .collect(Collectors.toSet());
+
+        assertEquals(expectedTokenIds, matchedIds);
+    }
+
     @Test
     public void search_ShouldNotIdentifyAcronymsWithDifferentCase() {
         var index = create();
         index.add("id1", "CAN");
 
-        assertEquals(Set.of(), index.match("I can confirm the topic of today"));
+        assertTokenIdMatched(Set.of(), index.match("I can confirm the topic of today"));
     }
 
     @Test
@@ -26,7 +37,7 @@ public class TermIndexTest {
         var index = create();
         index.add("id1", "CAN");
 
-        assertEquals(Set.of("id1"), index.match("The topic of today is CAN"));
+        assertTokenIdMatched(Set.of("id1"), index.match("The topic of today is CAN"));
     }
 
     @Test
@@ -34,7 +45,7 @@ public class TermIndexTest {
         var index = create();
         index.add("id1", "UAN-30");
 
-        assertEquals(Set.of("id1"), index.match("UAN 30%"));
+        assertTokenIdMatched(Set.of("id1"), index.match("UAN 30%"));
     }
 
     @Test
@@ -43,7 +54,7 @@ public class TermIndexTest {
         index.add("id1", "Ammonium Nitrate");
         index.add("id2", "CAN");
 
-        assertEquals(Set.of("id1", "id2"), index.match("Ammonium Nitrate/CAN"));
+        assertTokenIdMatched(Set.of("id1", "id2"), index.match("Ammonium Nitrate/CAN"));
     }
 
     @Test
@@ -52,7 +63,7 @@ public class TermIndexTest {
         index.add("id1", "finished steel");
         index.add("id2", "finished steel");
 
-        assertEquals(Set.of("id1", "id2"), index.match("finished steel"));
+        assertTokenIdMatched(Set.of("id1", "id2"), index.match("finished steel"));
     }
 
 //    @Test
@@ -61,7 +72,7 @@ public class TermIndexTest {
         index.add("id1", "steel");
         index.add("id2", "steel girder");
 
-        assertEquals(Set.of("id1"), index.match("steel"));
+        assertTokenIdMatched(Set.of("id1"), index.match("steel"));
     }
 
     @Test
@@ -69,7 +80,7 @@ public class TermIndexTest {
         var index = create();
         index.add("id1", "finished steel");
 
-        assertEquals(Set.of(), index.match("a sentence is finished. steel."));
+        assertTokenIdMatched(Set.of(), index.match("a sentence is finished. steel."));
     }
 
 }

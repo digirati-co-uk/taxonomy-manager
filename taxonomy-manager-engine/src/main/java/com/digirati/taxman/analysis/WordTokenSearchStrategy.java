@@ -12,5 +12,5 @@ public interface WordTokenSearchStrategy<IdT> {
 
     void unindex(WordTokenSearchEntry<IdT> entry);
 
-    Set<IdT> match(List<WordToken> input);
+    Set<TermMatch<IdT>> match(List<WordToken> input);
 }

@@ -1,5 +1,6 @@
 package com.digirati.taxman.analysis.search;
 
+import com.digirati.taxman.analysis.TermMatch;
 import com.digirati.taxman.analysis.WordToken;
 import com.digirati.taxman.analysis.WordTokenSearchEntry;
 import com.digirati.taxman.analysis.WordTokenSearchStrategy;
@@ -28,8 +29,8 @@ public class NaiveSearchStrategy<IdT> implements WordTokenSearchStrategy<IdT> {
     }
 
     @Override
-    public Set<IdT> match(List<WordToken> tokens) {
-        var matches = new HashSet<IdT>();
+    public Set<TermMatch<IdT>> match(List<WordToken> tokens) {
+        var matches = new HashSet<TermMatch<IdT>>();
 
         for (int tokenIndex = 0; tokenIndex < tokens.size(); tokenIndex++) {
             var token = tokens.get(tokenIndex);
@@ -44,7 +45,7 @@ public class NaiveSearchStrategy<IdT> implements WordTokenSearchStrategy<IdT> {
                 var currentTokens = tokens.subList(tokenIndex, currentTokenEndIndex);
 
                 if (WordToken.sharesCandidates(candidateTokens, currentTokens)) {
-                    matches.add(candidate.getIdentity());
+                    matches.add(new TermMatch<>(candidate.getIdentity(), currentTokens));
                 }
             }
         }
