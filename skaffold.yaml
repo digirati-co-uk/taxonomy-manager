@@ -7,8 +7,9 @@ build:
     push: true
   artifacts:
     - image: "taxman-backend"
-      docker:
-        dockerfile: dockerfiles/Dockerfile.jvm
+      jib:
+        type: "gradle"
+        project: "taxonomy-manager-rest-server"
 deploy:
   kustomize:
     paths:
