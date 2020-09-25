@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  labels:
+    app: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      tolerations:
+        - key: "sku"
+          operator: "Equal"
+          value: "jenkins"
+          effect: "NoSchedule"
+      nodeSelector:
+        beta.kubernetes.io/os: "linux"
+        role: "jobs"
+      containers:
+        - name: postgres
+          image: postgres:11.4
+          imagePullPolicy: "IfNotPresent"
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - configMapRef:
+                name: postgres-db-config
+            - secretRef:
+                name: postgres-db-secrets
+          args: ["-c", "logging_collector=on", "-c", "log_statement=all"]
+#          volumeMounts:
+#            - mountPath: /var/lib/postgresql/data
+#              name: postgredb
+#      volumes:
+#        - name: postgredb
+#          persistentVolumeClaim:
+#            claimName: postgres-pv-claim

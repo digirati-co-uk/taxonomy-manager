@@ -1,0 +1,24 @@
+resources:
+  - ../base
+  - postgres.deployment.yaml
+  - postgres.service.yaml
+
+configMapGenerator:
+  - name: postgres-db-config
+    envs:
+      - config/postgres-db-config.env
+
+  - name: taxman-backend-db-config
+    behavior: merge
+    literals:
+      - QUARKUS_DATASOURCE_URL=jdbc:postgresql://postgres:5432/taxman
+
+secretGenerator:
+  - name: taxman-backend-db-secrets
+    behavior: merge
+    literals:
+      - QUARKUS_DATASOURCE_PASSWORD=taxman
+
+  - name: postgres-db-secrets
+    envs:
+      - config/postgres-db-secrets.env

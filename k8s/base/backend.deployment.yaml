@@ -37,19 +37,19 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   name: taxman-backend-db-config
-                  key: url
+                  key: QUARKUS_DATASOURCE_URL
             - name: QUARKUS_DATASURCE_DRIVER
               value: "org.postgresql.Driver"
             - name: QUARKUS_DATASOURCE_USERNAME
               valueFrom:
                 configMapKeyRef:
                   name: taxman-backend-db-config
-                  key: username
+                  key: QUARKUS_DATASOURCE_USERNAME
             - name: QUARKUS_DATASOURCE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: taxman-backend-db-secrets
-                  key: password
+                  key: QUARKUS_DATASOURCE_PASSWORD
           ports:
             - containerPort: 8080
               name: http
