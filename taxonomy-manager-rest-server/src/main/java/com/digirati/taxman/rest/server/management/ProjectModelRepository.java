@@ -1,12 +1,16 @@
 package com.digirati.taxman.rest.server.management;
 
+import com.digirati.taxman.common.rdf.RdfModelBuilder;
 import com.digirati.taxman.common.taxonomy.CollectionModel;
+import com.digirati.taxman.common.taxonomy.ConceptSchemeModel;
 import com.digirati.taxman.common.taxonomy.ProjectModel;
 import com.digirati.taxman.rest.server.infrastructure.exception.ProjectAlreadyExistsException;
+import com.digirati.taxman.rest.server.taxonomy.ConceptSchemeImporter;
 import com.digirati.taxman.rest.server.taxonomy.mapper.ProjectListingMapper;
 import com.digirati.taxman.rest.server.taxonomy.mapper.ProjectMapper;
 import com.digirati.taxman.rest.server.taxonomy.storage.ProjectDao;
 import com.digirati.taxman.rest.server.taxonomy.storage.ProjectDataSet;
+import org.apache.jena.vocabulary.DCTerms;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -17,6 +21,9 @@ import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class ProjectModelRepository {
+
+    @Inject
+    ConceptSchemeImporter importer;
 
     @Inject
     ProjectDao projectDao;
@@ -39,8 +46,7 @@ public class ProjectModelRepository {
             throw new ProjectAlreadyExistsException(project.getSlug());
         }
 
-        ProjectDataSet dataSet = projectMapper.map(project.getSlug(), project);
-        projectDao.storeDataSet(dataSet);
+        update(project.getSlug(), project);
         return find(project.getSlug()).orElseThrow();
     }
 
@@ -76,6 +82,16 @@ public class ProjectModelRepository {
      */
     @Transactional(Transactional.TxType.REQUIRED)
     public boolean update(String slug, ProjectModel project) {
+        List<ConceptSchemeModel> updatedSchemes = project.getAllResources(ConceptSchemeModel.class)
+                .map(scheme -> importer.importScheme(scheme))
+                .collect(Collectors.toList());
+
+        // Get rid of the existing models.
+        project.clear(DCTerms.hasPart);
+        for (ConceptSchemeModel model : updatedSchemes) {
+            project.add(DCTerms.hasPart, model);
+        }
+
         projectDao.loadDataSet(slug);
         ProjectDataSet dataSet = projectMapper.map(slug, project);
         return projectDao.storeDataSet(dataSet);
