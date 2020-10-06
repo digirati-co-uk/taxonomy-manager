@@ -11,7 +11,8 @@ CREATE OR REPLACE PROCEDURE update_concept(_uuid uuid,
                                            _editorial_note jsonb,
                                            _example jsonb,
                                            _history_note jsonb,
-                                           _scope_note jsonb)
+                                           _scope_note jsonb,
+                                           _definition jsonb)
     LANGUAGE plpgsql
 AS
 $$
@@ -27,7 +28,8 @@ BEGIN
             editorial_note  = _editorial_note,
             example         = _example,
             history_note    = _history_note,
-            scope_note      = _scope_note
+            scope_note      = _scope_note,
+            definition      = _definition
         WHERE source = _source
           AND uuid = _uuid;
         IF found THEN
@@ -50,7 +52,8 @@ BEGIN
                                           editorial_note,
                                           example,
                                           history_note,
-                                          scope_note)
+                                          scope_note,
+                                          definition)
             VALUES (
                    _uuid,
                    _source,
@@ -62,7 +65,8 @@ BEGIN
                    _editorial_note,
                    _example,
                    _history_note,
-                   _scope_note)
+                   _scope_note,
+                   _definition)
             ON CONFLICT (source) DO UPDATE
                 SET source          = _source,
                     preferred_label = _preferred_label,
@@ -73,7 +77,8 @@ BEGIN
                     editorial_note  = _editorial_note,
                     example         = _example,
                     history_note    = _history_note,
-                    scope_note      = _scope_note;
+                    scope_note      = _scope_note,
+                    definition      = _definition;
             RETURN;
         EXCEPTION
             WHEN unique_violation THEN
@@ -89,7 +94,8 @@ BEGIN
                                                   editorial_note,
                                                   example,
                                                   history_note,
-                                                  scope_note)
+                                                  scope_note,
+                                                  definition)
                     VALUES (
                            _uuid,
                            _source,
@@ -101,7 +107,8 @@ BEGIN
                            _editorial_note,
                            _example,
                            _history_note,
-                           _scope_note)
+                           _scope_note,
+                           _definition)
                     ON CONFLICT (uuid) DO UPDATE
                         SET source          = _source,
                             preferred_label = _preferred_label,
@@ -112,7 +119,8 @@ BEGIN
                             editorial_note  = _editorial_note,
                             example         = _example,
                             history_note    = _history_note,
-                            scope_note      = _scope_note;
+                            scope_note      = _scope_note,
+                            definition      = _definition;
                     RETURN;
                 EXCEPTION
                     WHEN unique_violation THEN
