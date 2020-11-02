@@ -6,6 +6,7 @@ import com.digirati.taxman.common.rdf.RdfModelFactory;
 import com.digirati.taxman.common.rdf.RdfModelFormat;
 import com.digirati.taxman.common.rdf.io.RdfModelReader;
 import com.digirati.taxman.rest.MediaTypes;
+import com.google.common.collect.HashMultimap;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
@@ -61,7 +62,8 @@ public class TypedRdfModelMessageBodyReader implements MessageBodyReader<RdfMode
             throw new NoContentException("No content available in request body");
         }
 
-        pushbackStream.unread(read);
+        var attributes = HashMultimap.<String, String>create();
+        httpHeaders.forEach(attributes::putAll);
 
         RdfModelFormat format;
         if (mediaType.isCompatible(MediaTypes.APPLICATION_RDF_XML)) {
@@ -74,7 +76,7 @@ public class TypedRdfModelMessageBodyReader implements MessageBodyReader<RdfMode
 
         RdfModelReader reader = new RdfModelReader(modelFactory);
         try {
-            return reader.read(type, format, pushbackStream);
+            return reader.read(type, format, pushbackStream, attributes);
         } catch (RdfModelException e) {
             throw new WebApplicationException(e);
         }
