@@ -1,0 +1,13 @@
+resources:
+  - backend.deployment.yaml
+  - backend.service.yaml
+
+configMapGenerator:
+  - name: taxman-backend-db-config
+    envs:
+      - config/taxman-db-config.env
+
+secretGenerator:
+  - name: taxman-backend-db-secrets
+    envs:
+      - config/taxman-db-secrets.env

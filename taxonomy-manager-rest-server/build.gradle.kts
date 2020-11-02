@@ -9,6 +9,7 @@ buildscript {
     }
 
     dependencies {
+        classpath("com.google.cloud.tools:jib-quarkus-extension-gradle:0.1.1")
         classpath("org.testcontainers:testcontainers:1.11.3")
         classpath("org.testcontainers:postgresql:1.11.3")
         classpath("org.postgresql:postgresql:42.2.5")
@@ -20,10 +21,29 @@ plugins {
     jacoco
     checkstyle
     id ("io.quarkus") version ("1.3.1.Final")
+    id ("com.google.cloud.tools.jib")
 }
 
 repositories {
     mavenCentral()
+}
+
+jib {
+    container {
+        mainClass = "io.quarkus.runner.GeneratedMain"
+        jvmFlags = listOf("-Dquarkus.http.host=0.0.0.0", "-Djava.util.logging.manager=org.jboss.logmanager.LogManager")
+        user = "1000"
+    }
+
+    to {
+        image = "taxonomy-manager:latest"
+    }
+
+    pluginExtensions {
+        pluginExtension {
+            implementation = "com.google.cloud.tools.jib.gradle.extension.quarkus.JibQuarkusExtension"
+        }
+    }
 }
 
 val quarkusExtensions = setOf(
@@ -54,6 +74,10 @@ val integrationTestRuntimeOnly by configurations.getting { extendsFrom(configura
 val integrationTestImplementation by configurations.getting { extendsFrom(configurations.testImplementation.get()) }
 
 configurations["integrationTestRuntimeOnly"].extendsFrom(configurations.runtimeOnly.get())
+
+quarkus {
+    setFinalName("taxonomy-manager-rest-server")
+}
 
 dependencies {
     implementation(enforcedPlatform("io.quarkus:quarkus-bom:1.3.1.Final"))
@@ -104,18 +128,8 @@ tasks.withType<QuarkusDev> {
     jvmArgs = "-Djava.net.preferIPv4Stack=true -Djava.net.preferIPv6Addresses=false"
 }
 
-val mergeBuildOutput = task<Copy>("mergeBuildOutput") {
-    fun getOutputs(project: Project) = project.sourceSets.getByName("main").output
-
-    from(getOutputs(project(":taxonomy-manager-common")))
-    from(getOutputs(project(":taxonomy-manager-engine")))
-    from(getOutputs(project(":taxonomy-manager-rest")))
-
-    into("$buildDir/classes/java/main/")
-}
-
 val generateTestKeyPair = task<Exec>("generateTestKeyPair") {
     commandLine = listOf("sh", "$projectDir/generate-key-pair.sh")
 }
 
-tasks.classes { dependsOn(mergeBuildOutput) }
+tasks.jib { dependsOn(tasks.quarkusBuild) }

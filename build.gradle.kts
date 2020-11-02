@@ -4,11 +4,21 @@ import org.sonarqube.gradle.SonarQubeTask
 import java.nio.file.Files
 import java.nio.file.Paths
 
+buildscript {
+    dependencies {
+        classpath("com.google.cloud.tools:jib-quarkus-extension-gradle:0.1.1")
+
+    }
+}
+
 plugins {
     id("com.gradle.build-scan") version "2.0.2"
     id("org.sonarqube") version "2.7"
+    id("com.google.cloud.tools.jib") version "2.5.0" apply(false)
     id("com.github.spotbugs") version "1.7.1" apply (false)
 }
+
+
 
 val ci: String by project
 val isCiRunning = ci.toBoolean()

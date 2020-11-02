@@ -29,6 +29,15 @@ import java.util.stream.Stream;
  */
 public interface RdfModel {
     /**
+     * Clear all RDF statements associated with a property, effectively emptying a list.
+     *
+     * @param property The property to clear.
+     */
+    default void clear(Property property) {
+        getResource().removeAll(property);
+    }
+
+    /**
      * Get the Jena {@link Resource} that this model represents.
      *
      * @return The Jena {@code Resource} of this model.
@@ -38,6 +47,10 @@ public interface RdfModel {
     }
 
     RdfModelContext getContext();
+
+    default void add(Property property, RdfModel model) {
+        getResource().addProperty(property, model.getResource());
+    }
 
     /**
      * Find all of the resources identified by the given {@code type} that appear in the same graph as this model,

@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: taxman-backend
+  labels:
+    app: taxman-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: taxman-backend
+  template:
+    metadata:
+      labels:
+        app: taxman-backend
+    spec:
+      containers:
+        - name: backend
+          imagePullPolicy: Always
+          image: taxman-backend
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+            periodSeconds: 15
+          livenessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            initialDelaySeconds: 60
+            timeoutSeconds: 1
+            periodSeconds: 15
+          env:
+            - name: QUARKUS_DATASOURCE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: taxman-backend-db-config
+                  key: QUARKUS_DATASOURCE_URL
+            - name: QUARKUS_DATASURCE_DRIVER
+              value: "org.postgresql.Driver"
+            - name: QUARKUS_DATASOURCE_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: taxman-backend-db-config
+                  key: QUARKUS_DATASOURCE_USERNAME
+            - name: QUARKUS_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: taxman-backend-db-secrets
+                  key: QUARKUS_DATASOURCE_PASSWORD
+          ports:
+            - containerPort: 8080
+              name: http
