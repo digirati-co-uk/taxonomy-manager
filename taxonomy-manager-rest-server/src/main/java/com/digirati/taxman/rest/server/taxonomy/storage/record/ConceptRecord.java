@@ -6,7 +6,6 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
-import java.util.HashMap;
 import java.util.UUID;
 
 /**
@@ -14,6 +13,7 @@ import java.util.UUID;
  */
 public class ConceptRecord implements Concept {
     private final UUID uuid;
+    private final String projectId;
 
     private String source;
     private Multimap<String, String> preferredLabel = ArrayListMultimap.create();
@@ -27,8 +27,14 @@ public class ConceptRecord implements Concept {
     private Multimap<String, String> scopeNote = ArrayListMultimap.create();
     private Multimap<String, String> definition = ArrayListMultimap.create();
 
-    public ConceptRecord(UUID uuid) {
+    public ConceptRecord(UUID uuid, String projectId) {
         this.uuid = uuid;
+        this.projectId = projectId;
+    }
+
+    @Override
+    public String getProjectId() {
+        return projectId;
     }
 
     @Override

@@ -25,7 +25,7 @@ public class TextAnalyzer {
     private static final Logger logger = Logger.getLogger(TextAnalyzer.class.getName());
 
     @Inject
-    TermIndex<UUID> termIndex;
+    TermIndex<String, UUID> termIndex;
 
     @Inject
     RdfModelFactory modelFactory;
@@ -41,9 +41,12 @@ public class TextAnalyzer {
      * @return A list of {@link ConceptModel}s appearing as tags.
      */
     public CollectionModel tagDocument(TextAnalysisInput input) {
-        logger.debug(input.getText());
+        String text = input.getText();
+        logger.debug(text);
 
-        var matches = termIndex.match(input.getText())
+        var matches = input.getProjectId()
+                .map(id -> termIndex.match(id, text))
+                .orElseGet(() -> termIndex.match(text))
                 .stream()
                 .collect(Collectors.groupingBy(TermMatch::getId));
 

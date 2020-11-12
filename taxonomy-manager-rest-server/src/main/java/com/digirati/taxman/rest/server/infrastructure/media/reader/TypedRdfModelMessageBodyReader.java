@@ -62,6 +62,8 @@ public class TypedRdfModelMessageBodyReader implements MessageBodyReader<RdfMode
             throw new NoContentException("No content available in request body");
         }
 
+        pushbackStream.unread(read);
+
         var attributes = HashMultimap.<String, String>create();
         httpHeaders.forEach(attributes::putAll);
 

@@ -13,6 +13,8 @@ public interface Concept {
 
     UUID getUuid();
 
+    String getProjectId();
+
     String getSource();
 
     Multimap<String, String> getPreferredLabel();
