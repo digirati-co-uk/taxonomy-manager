@@ -126,6 +126,6 @@ public final class ConceptModel implements Concept, RdfModel, PersistentProjectS
 
     @Override
     public void setProjectId(String id) {
-        this.projectId = projectId;
+        this.projectId = id;
     }
 }

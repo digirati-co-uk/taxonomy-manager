@@ -8,6 +8,7 @@ import com.digirati.taxman.common.rdf.io.RdfModelReader;
 import com.digirati.taxman.rest.MediaTypes;
 import com.google.common.collect.HashMultimap;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -27,18 +28,11 @@ import java.lang.reflect.Type;
  * provided RDF was well formed.
  */
 @Provider
+@ApplicationScoped
 public class TypedRdfModelMessageBodyReader implements MessageBodyReader<RdfModel> {
 
-    private final RdfModelFactory modelFactory;
-
-    public TypedRdfModelMessageBodyReader() {
-        this(new RdfModelFactory());
-    }
-
     @Inject
-    public TypedRdfModelMessageBodyReader(RdfModelFactory modelFactory) {
-        this.modelFactory = modelFactory;
-    }
+    RdfModelFactory modelFactory;
 
     @Override
     public boolean isReadable(

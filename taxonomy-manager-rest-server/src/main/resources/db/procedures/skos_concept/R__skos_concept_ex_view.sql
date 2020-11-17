@@ -1,2 +1,5 @@
 create or replace view skos_concept_ex as
-select * from skos_concept where deleted = false;
+select c.*, p.slug as project_slug
+from skos_concept c
+inner join project p on p.id = c.project_id
+where c.deleted = false;

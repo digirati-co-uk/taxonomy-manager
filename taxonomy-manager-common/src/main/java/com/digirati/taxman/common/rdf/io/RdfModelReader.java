@@ -56,7 +56,7 @@ public class RdfModelReader {
             throw new RdfModelException("RDF error produced on deserialization", ex);
         }
 
-        return modelFactory.createListFromModel(type, model);
+        return modelFactory.createListFromModel(type, model, attributes);
     }
 
     /**
