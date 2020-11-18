@@ -4,6 +4,7 @@ import com.digirati.taxman.analysis.index.TermIndex;
 import com.digirati.taxman.common.taxonomy.ConceptLabelExtractor;
 import com.digirati.taxman.rest.server.infrastructure.config.TaxonomyIndexConfig;
 import com.digirati.taxman.rest.server.taxonomy.storage.ConceptDao;
+import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRecord;
 import io.quarkus.runtime.StartupEvent;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.flywaydb.core.Flyway;
@@ -13,11 +14,10 @@ import org.slf4j.LoggerFactory;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class AppInitListener {
@@ -33,7 +33,7 @@ public class AppInitListener {
     ConceptDao conceptDao;
 
     @Inject
-    TermIndex<UUID> termIndex;
+    TermIndex<String, UUID> termIndex;
 
     @Inject
     Flyway flyway;
@@ -44,20 +44,19 @@ public class AppInitListener {
 
         logger.info("Searching for terms");
         try (var conceptRecords = conceptDao.loadAllRecords()) {
-            var terms = new HashMap<UUID, String>();
+            var projectConceptRecords = conceptRecords.collect(Collectors.groupingBy(ConceptRecord::getProjectId));
 
-            conceptRecords.forEach(record -> {
-                var uuid = record.getUuid();
-                var labelExtractor = new ConceptLabelExtractor(record);
+            projectConceptRecords.forEach((project, records) -> {
+                records.forEach(record -> {
+                    var uuid = record.getUuid();
+                    var labelExtractor = new ConceptLabelExtractor(record);
 
-                labelExtractor.extractTo((property, literal) -> {
-                    Collection<String> values = literal.get(defaultLanguageKey);
-                    values.forEach(value -> termIndex.add(uuid, value));
+                    labelExtractor.extractTo((property, literal) -> {
+                        Collection<String> values = literal.get(defaultLanguageKey);
+                        values.forEach(value -> termIndex.add(project, uuid, value));
+                    });
                 });
             });
-
-            logger.info("Found {} terms", terms.size());
-            termIndex.addAll(terms);
         }
 
         logger.info("Finished building term index");

@@ -6,7 +6,9 @@ import com.digirati.taxman.common.rdf.RdfModelFactory;
 import com.digirati.taxman.common.rdf.RdfModelFormat;
 import com.digirati.taxman.common.rdf.io.RdfModelReader;
 import com.digirati.taxman.rest.MediaTypes;
+import com.google.common.collect.HashMultimap;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -26,18 +28,11 @@ import java.lang.reflect.Type;
  * provided RDF was well formed.
  */
 @Provider
+@ApplicationScoped
 public class TypedRdfModelMessageBodyReader implements MessageBodyReader<RdfModel> {
 
-    private final RdfModelFactory modelFactory;
-
-    public TypedRdfModelMessageBodyReader() {
-        this(new RdfModelFactory());
-    }
-
     @Inject
-    public TypedRdfModelMessageBodyReader(RdfModelFactory modelFactory) {
-        this.modelFactory = modelFactory;
-    }
+    RdfModelFactory modelFactory;
 
     @Override
     public boolean isReadable(
@@ -63,6 +58,9 @@ public class TypedRdfModelMessageBodyReader implements MessageBodyReader<RdfMode
 
         pushbackStream.unread(read);
 
+        var attributes = HashMultimap.<String, String>create();
+        httpHeaders.forEach(attributes::putAll);
+
         RdfModelFormat format;
         if (mediaType.isCompatible(MediaTypes.APPLICATION_RDF_XML)) {
             format = RdfModelFormat.RDFXML;
@@ -74,7 +72,7 @@ public class TypedRdfModelMessageBodyReader implements MessageBodyReader<RdfMode
 
         RdfModelReader reader = new RdfModelReader(modelFactory);
         try {
-            return reader.read(type, format, pushbackStream);
+            return reader.read(type, format, pushbackStream, attributes);
         } catch (RdfModelException e) {
             throw new WebApplicationException(e);
         }

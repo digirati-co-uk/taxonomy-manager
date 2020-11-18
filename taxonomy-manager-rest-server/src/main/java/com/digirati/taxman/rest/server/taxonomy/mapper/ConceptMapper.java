@@ -86,7 +86,7 @@ public class ConceptMapper {
     public ConceptDataSet map(ConceptModel model) {
         final UUID uuid = model.getUuid();
 
-        var record = new ConceptRecord(uuid);
+        var record = new ConceptRecord(uuid, model.getProjectId());
         record.setSource(model.getSource());
         record.setPreferredLabel(model.getPreferredLabel());
         record.setAltLabel(model.getAltLabel());

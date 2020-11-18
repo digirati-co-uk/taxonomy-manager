@@ -4,7 +4,9 @@ import com.digirati.taxman.common.rdf.RdfModel;
 import com.digirati.taxman.common.rdf.RdfModelException;
 import com.digirati.taxman.common.rdf.RdfModelFactory;
 import com.digirati.taxman.common.rdf.RdfModelFormat;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Multimap;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.shared.JenaException;
@@ -33,6 +35,18 @@ public class RdfModelReader {
     public <T extends RdfModel> List<T> readAll(
             Class<T> type, RdfModelFormat format, InputStream modelStream)
             throws RdfModelException {
+        return readAll(type, format, modelStream, HashMultimap.create());
+    }
+
+    /**
+     * Read a list of {@link RdfModel} types from a stream of input containing RDF data in any of
+     * the {@link RdfModelFormat}s.
+     *
+     * @throws RdfModelException if an error occurred during reading of the RDF data.
+     */
+    public <T extends RdfModel> List<T> readAll(
+            Class<T> type, RdfModelFormat format, InputStream modelStream, Multimap<String, String> attributes)
+            throws RdfModelException {
 
         Model model;
         try {
@@ -42,22 +56,23 @@ public class RdfModelReader {
             throw new RdfModelException("RDF error produced on deserialization", ex);
         }
 
-        return modelFactory.createListFromModel(type, model);
+        return modelFactory.createListFromModel(type, model, attributes);
     }
 
     /**
      * Read a single typed {@link RdfModel} from the RDF graph provided in the {@code modelStream}.
      *
+     * @param <T>         The type of the typed model.
      * @param type        The class of the typed model to read.
      * @param format      The format the graph in {@code modelStream} is encoded in.
      * @param modelStream The input stream containing the RDF graph.
-     * @param <T>         The type of the typed model.
+     * @param attributes
      * @return A typed {@link RdfModel} deserialized from the input graph.
      * @throws RdfModelException if the graph is ill-formed, or an error is produced by JENA.
      */
     public <T extends RdfModel> T read(
-            Class<T> type, RdfModelFormat format, InputStream modelStream)
+            Class<T> type, RdfModelFormat format, InputStream modelStream, Multimap<String, String> attributes)
             throws RdfModelException {
-        return Iterables.getOnlyElement(readAll(type, format, modelStream));
+        return Iterables.getOnlyElement(readAll(type, format, modelStream, attributes));
     }
 }

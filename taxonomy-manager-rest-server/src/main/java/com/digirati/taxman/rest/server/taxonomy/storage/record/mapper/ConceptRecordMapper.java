@@ -10,7 +10,10 @@ import java.util.UUID;
 public class ConceptRecordMapper implements RowMapper<ConceptRecord> {
     @Override
     public ConceptRecord mapRow(ResultSet rs, int rowNum) throws SQLException {
-        ConceptRecord record = new ConceptRecord(rs.getObject("uuid", UUID.class));
+        ConceptRecord record = new ConceptRecord(
+                rs.getObject("uuid", UUID.class),
+                rs.getString("project_slug")
+        );
 
         record.setSource(rs.getString("source"));
         record.setPreferredLabel(ResultSetUtils.getPlainLiteralMap(rs, "preferred_label"));

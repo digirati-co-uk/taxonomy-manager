@@ -17,7 +17,7 @@ public class TaxonomyIndexConfig {
 
     @Produces
     @Singleton
-    public TermIndex<UUID> termIndex() {
-        return new TermIndex<>(CoreNlpWordTokenizer.create(languageKey), new NaiveSearchStrategy<>());
+    public TermIndex<String, UUID> termIndex() {
+        return new TermIndex<String, UUID>(CoreNlpWordTokenizer.create(languageKey), new NaiveSearchStrategy<>());
     }
 }

@@ -18,6 +18,7 @@ public final class Rfc7807WebApplicationExceptionMapper
     @Override
     public Response toResponse(WebApplicationException exception) {
         logger.error(exception.getMessage(), exception);
+
         var response = exception.getResponse();
         var type = response.getStatusInfo();
 

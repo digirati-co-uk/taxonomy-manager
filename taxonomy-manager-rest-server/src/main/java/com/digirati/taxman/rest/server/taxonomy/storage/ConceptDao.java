@@ -108,9 +108,10 @@ public class ConceptDao {
      */
     public void storeDataSet(ConceptDataSet dataset) {
         var record = dataset.getRecord();
-
+System.out.println();
         Object[] recordArgs = {
             record.getUuid(),
+            record.getProjectId(),
             record.getSource(),
             DaoUtils.createRdfPlainLiteral(record.getPreferredLabel()),
             DaoUtils.createRdfPlainLiteral(record.getAltLabel()),
@@ -126,9 +127,10 @@ public class ConceptDao {
 
         int[] recordTypes = new int[recordArgs.length];
         Arrays.fill(recordTypes, Types.OTHER);
+        recordTypes[1] = Types.VARCHAR;
 
         // @FIXME gtierney: 12 positional parameters is garbage. Fix this sometime.
-        jdbcTemplate.update("CALL update_concept(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", recordArgs, recordTypes);
+        jdbcTemplate.update("CALL update_concept(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", recordArgs, recordTypes);
 
         int[] relationTypes = {Types.OTHER, Types.VARCHAR, Types.OTHER};
         Object[] relationArgs = {record.getUuid(), record.getSource(), dataset.getRelationshipRecordsJson()};

@@ -2,6 +2,7 @@ DROP PROCEDURE IF exists update_concept;
 DROP FUNCTION IF EXISTS update_concept;
 
 CREATE OR REPLACE PROCEDURE update_concept(_uuid uuid,
+                                           _projectslug varchar,
                                            _source varchar,
                                            _preferred_label jsonb,
                                            _alt_label jsonb,
@@ -43,6 +44,7 @@ BEGIN
         BEGIN
             INSERT INTO skos_concept AS c (
                                           uuid,
+                                          project_id,
                                           source,
                                           preferred_label,
                                           alt_label,
@@ -56,6 +58,7 @@ BEGIN
                                           definition)
             VALUES (
                    _uuid,
+                   (SELECT id FROM project WHERE slug = _projectslug),
                    _source,
                    _preferred_label,
                    _alt_label,
@@ -85,6 +88,7 @@ BEGIN
                 BEGIN
                     INSERT INTO skos_concept AS c (
                                                   uuid,
+                                                  project_id,
                                                   source,
                                                   preferred_label,
                                                   alt_label,
@@ -98,6 +102,7 @@ BEGIN
                                                   definition)
                     VALUES (
                            _uuid,
+                           (SELECT id FROM project WHERE slug = _projectslug),
                            _source,
                            _preferred_label,
                            _alt_label,

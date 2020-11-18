@@ -1,28 +1,26 @@
 package com.digirati.taxman.common.taxonomy;
 
-import com.digirati.taxman.common.rdf.PersistentModel;
+import com.digirati.taxman.common.rdf.PersistentProjectScopedModel;
 import com.digirati.taxman.common.rdf.RdfModel;
 import com.digirati.taxman.common.rdf.RdfModelContext;
 import com.digirati.taxman.common.rdf.annotation.RdfConstructor;
 import com.digirati.taxman.common.rdf.annotation.RdfContext;
 import com.digirati.taxman.common.rdf.annotation.RdfType;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Streams;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.vocabulary.SKOS;
 
-import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
 @RdfType("http://www.w3.org/2004/02/skos/core#Concept")
 @RdfContext(value = {"skos=" + SKOS.uri, "dcterms=" + DCTerms.NS}, template = "/v0.1/concept/:id:")
-public final class ConceptModel implements RdfModel, PersistentModel, Concept {
+public final class ConceptModel implements Concept, RdfModel, PersistentProjectScopedModel {
 
     private final RdfModelContext context;
     private UUID uuid;
+    private String projectId;
 
     @RdfConstructor
     public ConceptModel(RdfModelContext context) {
@@ -119,5 +117,15 @@ public final class ConceptModel implements RdfModel, PersistentModel, Concept {
 
         return getResources(ConceptModel.class, skosProperty);
 
+    }
+
+    @Override
+    public String getProjectId() {
+        return projectId;
+    }
+
+    @Override
+    public void setProjectId(String id) {
+        this.projectId = id;
     }
 }

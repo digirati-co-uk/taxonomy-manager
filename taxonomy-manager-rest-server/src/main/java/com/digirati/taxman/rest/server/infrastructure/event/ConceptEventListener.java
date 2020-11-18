@@ -5,7 +5,6 @@ import com.digirati.taxman.common.taxonomy.ConceptLabelExtractor;
 import com.digirati.taxman.common.taxonomy.ConceptModel;
 import io.quarkus.runtime.StartupEvent;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.jgroups.JChannel;
 import org.jgroups.Message;
 import org.jgroups.ReceiverAdapter;
@@ -18,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -33,7 +31,7 @@ public class ConceptEventListener extends ReceiverAdapter {
     String defaultLanguageKey;
 
     @Inject
-    TermIndex<UUID> index;
+    TermIndex<String, UUID> index;
 
     protected void init(@Observes StartupEvent evt) throws Exception {
         channel.setReceiver(this);
@@ -68,7 +66,7 @@ public class ConceptEventListener extends ReceiverAdapter {
             consumeLabels(current, added::add);
         }
 
-        ConceptChangeEvent changeEvent = new ConceptChangeEvent(uuid, added, removed);
+        ConceptChangeEvent changeEvent = new ConceptChangeEvent(uuid, current.getProjectId(), added, removed);
         try {
             channel.send(new Message(/* null = all in the cluster */ null, changeEvent));
         } catch (Exception ex) {
@@ -78,9 +76,10 @@ public class ConceptEventListener extends ReceiverAdapter {
 
     public void handle(ConceptChangeEvent event) {
         var uuid = event.getUuid();
+        String projectId = event.getProjectId();
 
         for (String added : event.getAdded()) {
-            index.add(uuid, added);
+            index.add(projectId, uuid, added);
         }
 
         for (String removed : event.getRemoved()) {
