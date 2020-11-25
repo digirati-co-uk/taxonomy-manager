@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.digirati.taxman.rest.server.infrastructure.config.RdfConfig.X_PROJECT_SLUG;
+
 @ApplicationScoped
 public class ProjectModelRepository {
 
@@ -82,6 +84,9 @@ public class ProjectModelRepository {
      */
     @Transactional(Transactional.TxType.REQUIRED)
     public boolean update(String slug, ProjectModel project) {
+        // hack to propagate this context through RdfModelFactory
+        project.getContext().getAdditionalAttributes().put(X_PROJECT_SLUG, slug);
+
         List<ConceptSchemeModel> updatedSchemes = project.getAllResources(ConceptSchemeModel.class)
                 .map(scheme -> importer.importScheme(scheme))
                 .collect(Collectors.toList());
