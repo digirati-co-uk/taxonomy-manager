@@ -7,6 +7,8 @@ import com.digirati.taxman.common.rdf.RdfModelFormat;
 import com.digirati.taxman.common.rdf.io.RdfModelReader;
 import com.digirati.taxman.rest.MediaTypes;
 import com.google.common.collect.HashMultimap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -30,6 +32,8 @@ import java.lang.reflect.Type;
 @Provider
 @ApplicationScoped
 public class TypedRdfModelMessageBodyReader implements MessageBodyReader<RdfModel> {
+
+    private static final Logger logger = LoggerFactory.getLogger(TypedRdfModelMessageBodyReader.class);
 
     @Inject
     RdfModelFactory modelFactory;
@@ -60,6 +64,10 @@ public class TypedRdfModelMessageBodyReader implements MessageBodyReader<RdfMode
 
         var attributes = HashMultimap.<String, String>create();
         httpHeaders.forEach(attributes::putAll);
+
+        attributes.forEach((key, attr) -> {
+            logger.info("header {} = {}", key, attr);
+        });
 
         RdfModelFormat format;
         if (mediaType.isCompatible(MediaTypes.APPLICATION_RDF_XML)) {

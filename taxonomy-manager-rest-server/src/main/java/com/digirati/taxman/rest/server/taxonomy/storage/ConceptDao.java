@@ -108,7 +108,7 @@ public class ConceptDao {
      */
     public void storeDataSet(ConceptDataSet dataset) {
         var record = dataset.getRecord();
-System.out.println();
+
         Object[] recordArgs = {
             record.getUuid(),
             record.getProjectId(),
