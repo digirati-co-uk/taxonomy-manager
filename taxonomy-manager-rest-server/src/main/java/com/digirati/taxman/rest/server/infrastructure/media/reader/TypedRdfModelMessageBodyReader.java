@@ -7,6 +7,7 @@ import com.digirati.taxman.common.rdf.RdfModelFormat;
 import com.digirati.taxman.common.rdf.io.RdfModelReader;
 import com.digirati.taxman.rest.MediaTypes;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Iterables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,10 +64,8 @@ public class TypedRdfModelMessageBodyReader implements MessageBodyReader<RdfMode
         pushbackStream.unread(read);
 
         var attributes = HashMultimap.<String, String>create();
-        httpHeaders.forEach(attributes::putAll);
-
-        attributes.forEach((key, attr) -> {
-            logger.info("header {} = {}", key, attr);
+        httpHeaders.forEach((key, attr) -> {
+            attributes.put(key.toLowerCase(), Iterables.getFirst(attr, null));
         });
 
         RdfModelFormat format;

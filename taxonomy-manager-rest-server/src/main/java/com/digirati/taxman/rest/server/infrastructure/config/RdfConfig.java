@@ -17,13 +17,16 @@ import java.util.UUID;
 
 @ApplicationScoped
 public class RdfConfig {
+
+    public static final String X_PROJECT_SLUG = "x-project-slug";
+
     public static void decorateProjectScopedModels(RdfModel model, Resource resource, Multimap<String, String> attributes) {
-        if (!(model instanceof PersistentProjectScopedModel) || !attributes.containsKey("X-Project-Slug")) {
+        if (!(model instanceof PersistentProjectScopedModel) || !attributes.containsKey(X_PROJECT_SLUG)) {
             return;
         }
 
         try {
-            var projectIdValue = Iterables.getOnlyElement(attributes.get("X-Project-Slug"));
+            var projectIdValue = Iterables.getOnlyElement(attributes.get(X_PROJECT_SLUG));
             var projectScopedModel = (PersistentProjectScopedModel) model;
 
             projectScopedModel.setProjectId(projectIdValue);
