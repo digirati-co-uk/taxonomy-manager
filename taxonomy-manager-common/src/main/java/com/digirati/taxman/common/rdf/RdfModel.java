@@ -77,7 +77,7 @@ public interface RdfModel {
         return Streams.stream(iter)
                 .map(res -> {
                     try {
-                        return factory.create(type, res);
+                        return factory.create(type, res, context.getAdditionalAttributes());
                     } catch (RdfModelException e) {
                         // Need a better way of re-throwing this as unchecked,
                         // ultimately, this only arises from programmer error.
@@ -95,7 +95,7 @@ public interface RdfModel {
                 .map(Statement::getResource)
                 .map(res -> {
                     try {
-                        return factory.create(type, res);
+                        return factory.create(type, res, context.getAdditionalAttributes());
                     } catch (RdfModelException e) {
                         // Need a better way of re-throwing this as unchecked,
                         // ultimately, this only arises from programmer error.

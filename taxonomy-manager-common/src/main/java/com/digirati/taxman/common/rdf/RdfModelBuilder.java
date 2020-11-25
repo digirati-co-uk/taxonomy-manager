@@ -1,5 +1,6 @@
 package com.digirati.taxman.common.rdf;
 
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import org.apache.jena.rdf.model.Literal;
@@ -159,7 +160,7 @@ public class RdfModelBuilder<T extends RdfModel> {
         }
 
         try {
-            return metadata.constructor.newInstance(new RdfModelContext(modelFactory, resource));
+            return metadata.constructor.newInstance(new RdfModelContext(modelFactory, resource, HashMultimap.create()));
         } catch (ReflectiveOperationException e) {
             throw new RdfModelException("Unable to create RDF mapped model class", e);
         }

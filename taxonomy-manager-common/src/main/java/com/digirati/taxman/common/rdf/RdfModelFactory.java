@@ -70,7 +70,7 @@ public class RdfModelFactory {
                 resource.addProperty(DCTerms.source, resource);
             }
 
-            T model = metadata.constructor.newInstance(new RdfModelContext(this, resource));
+            T model = metadata.constructor.newInstance(new RdfModelContext(this, resource, additionalAttributes));
             for (var listener : listeners) {
                 listener.onCreation(model, resource, additionalAttributes);
             }
