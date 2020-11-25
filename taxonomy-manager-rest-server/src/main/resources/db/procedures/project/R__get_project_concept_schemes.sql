@@ -4,7 +4,7 @@ as
 $$
 begin
     return QUERY
-        select cs.uuid, cs.title, cs.source
+        select cs.uuid, cs.title, cs.source, p.slug as project_slug
         from project_skos_concept_scheme pcs
                 inner join project_ex p on pcs.project_id = p.id
                 inner join skos_concept_scheme_ex cs on pcs.concept_scheme_id = cs.id
