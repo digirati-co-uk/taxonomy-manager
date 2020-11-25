@@ -64,10 +64,10 @@ public class ConceptSchemeDao {
     public UUID storeDataSet(ConceptSchemeDataSet dataset) {
         ConceptSchemeRecord record = dataset.getRecord();
 
-        Object[] recordArgs = {record.getUuid(), record.getSource(), DaoUtils.createRdfPlainLiteral(record.getTitle())};
-        int[] recordTypes = {Types.OTHER, Types.VARCHAR, Types.OTHER};
+        Object[] recordArgs = {record.getUuid(), record.getProjectSlug(), record.getSource(), DaoUtils.createRdfPlainLiteral(record.getTitle())};
+        int[] recordTypes = {Types.OTHER, Types.VARCHAR, Types.VARCHAR, Types.OTHER};
 
-        record = jdbcTemplate.queryForObject("SELECT * FROM create_or_update_concept_scheme(?, ?, ?)",
+        record = jdbcTemplate.queryForObject("SELECT * FROM create_or_update_concept_scheme(?, ?, ?, ?)",
                 recordArgs,
                 recordTypes,
                 conceptSchemeRecordMapper);

@@ -27,7 +27,7 @@ public class ConceptSchemeDaoTests {
     public void shouldStoreLabels() {
         var dao = new ConceptSchemeDao(dataSource);
 
-        var record = new ConceptSchemeRecord(DUMMY_SCHEME_ID);
+        var record = new ConceptSchemeRecord(DUMMY_SCHEME_ID, "project-slug");
         var expectedTitle = ArrayListMultimap.<String, String>create();
         expectedTitle.put("en", "test");
         record.setTitle(expectedTitle);
@@ -46,8 +46,8 @@ public class ConceptSchemeDaoTests {
         var conceptId = createDummyConcept();
 
         var dao = new ConceptSchemeDao(dataSource);
-        var record = new ConceptSchemeRecord(DUMMY_SCHEME_ID);
-        var expectedTopConcepts = List.of(new ConceptRecord(conceptId));
+        var record = new ConceptSchemeRecord(DUMMY_SCHEME_ID, "project-slug");
+        var expectedTopConcepts = List.of(new ConceptRecord(conceptId, "project-slug"));
 
         dao.storeDataSet(new ConceptSchemeDataSet(record, expectedTopConcepts));
 
@@ -58,12 +58,12 @@ public class ConceptSchemeDaoTests {
 
     @Test
     public void shouldRemoveTopConcepts() throws Exception {
-        var conceptA = new ConceptRecord(createDummyConcept());
-        var conceptB = new ConceptRecord(createDummyConcept());
-        var conceptC = new ConceptRecord(createDummyConcept());
+        var conceptA = new ConceptRecord(createDummyConcept(), "project-slug");
+        var conceptB = new ConceptRecord(createDummyConcept(), "project-slug");
+        var conceptC = new ConceptRecord(createDummyConcept(), "project-slug");
 
         var dao = new ConceptSchemeDao(dataSource);
-        var record = new ConceptSchemeRecord(DUMMY_SCHEME_ID);
+        var record = new ConceptSchemeRecord(DUMMY_SCHEME_ID, "project-slug");
 
         dao.storeDataSet(new ConceptSchemeDataSet(record, List.of(conceptA, conceptB)));
         dao.storeDataSet(new ConceptSchemeDataSet(record, List.of(conceptB, conceptC)));

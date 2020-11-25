@@ -11,7 +11,7 @@ public class ConceptSchemeRecordMapper implements RowMapper<ConceptSchemeRecord>
 
     @Override
     public ConceptSchemeRecord mapRow(ResultSet rs, int rowNum) throws SQLException {
-        ConceptSchemeRecord record = new ConceptSchemeRecord(rs.getObject("uuid", UUID.class));
+        ConceptSchemeRecord record = new ConceptSchemeRecord(rs.getObject("uuid", UUID.class), rs.getString("project_slug"));
 
         record.setTitle(ResultSetUtils.getPlainLiteralMap(rs, "title"));
         record.setSource(rs.getString("source"));

@@ -84,17 +84,7 @@ public class ProjectDao {
 
         int projectChanges = jdbcTemplate.update("CALL create_or_update_project(?, ?)", projectArgs, projectArgTypes);
 
-        UUID[] schemeUuids = dataSet.getConceptSchemes().stream()
-                .map(ConceptSchemeRecord::getUuid)
-                .toArray(UUID[]::new);
-
-        Array uuidArray = DaoUtils.createArrayOf(schemeUuids, "uuid", dataSource);
-        Object[] schemeArgs = {slug, uuidArray};
-        int[] schemeArgTypes = {Types.VARCHAR, Types.ARRAY};
-
-        int schemeChanges = jdbcTemplate.update("CALL update_project_concept_schemes(?, ?)", schemeArgs, schemeArgTypes);
-
-        return (projectChanges | schemeChanges) > 0;
+        return projectChanges > 0;
     }
 
     public void deleteDataSet(String slug) {

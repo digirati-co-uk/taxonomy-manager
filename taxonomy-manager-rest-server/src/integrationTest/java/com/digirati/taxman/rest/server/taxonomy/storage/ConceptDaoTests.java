@@ -53,7 +53,7 @@ public class ConceptDaoTests {
         var dao = new ConceptDao(dataSource);
         var uuid = UUID.fromString("3828f4e5-ad0d-402c-978a-e2b9939332c7");
 
-        var record = new ConceptRecord(uuid, 1L);
+        var record = new ConceptRecord(uuid, "project-slug");
         var expectedLabels = ArrayListMultimap.<String, String>create();
         expectedLabels.put("en", "value");
 
@@ -71,7 +71,7 @@ public class ConceptDaoTests {
     public void shouldUpdateLabels(@SuppressWarnings("unused") String name, LabelSetter setter, LabelGetter getter) {
         var dao = new ConceptDao(dataSource);
         var uuid = UUID.fromString("3828f4e5-ad0d-402c-978a-e2b9939332c7");
-        var record = new ConceptRecord(uuid, 1L);
+        var record = new ConceptRecord(uuid, "project-slug");
         var label = ArrayListMultimap.<String, String>create();
         label.put("en", "value");
 
@@ -100,26 +100,26 @@ public class ConceptDaoTests {
         var uuidB = UUID.fromString("f0ea2717-1114-46f4-bc51-a25985571a01");
         var relationships = List.of(new ConceptRelationshipRecord(uuidA, uuidB, null, ConceptRelationshipType.BROADER, false));
 
-        dao.storeDataSet(new ConceptDataSet(new ConceptRecord(uuidB, 1L)));
-        dao.storeDataSet(new ConceptDataSet(new ConceptRecord(uuidA, 1L), relationships));
+        dao.storeDataSet(new ConceptDataSet(new ConceptRecord(uuidB, "project-slug")));
+        dao.storeDataSet(new ConceptDataSet(new ConceptRecord(uuidA, "project-slug"), relationships));
 
         Assertions.assertEquals(relationships, dao.loadDataSet(uuidA).orElseThrow().getRelationshipRecords());
     }
 
     @Test
     public void search_ShouldRetrieveConceptsByPartialLabel() {
-        var one = new ConceptRecord(UUID.randomUUID(), 1L);
+        var one = new ConceptRecord(UUID.randomUUID(), "project-slug");
         one.getPreferredLabel().put("en", "one");
         one.getPreferredLabel().put("fr", "un");
 
-        var two = new ConceptRecord(UUID.randomUUID(), 1L);
+        var two = new ConceptRecord(UUID.randomUUID(), "project-slug");
         two.getPreferredLabel().put("en", "two");
 
-        var eleven = new ConceptRecord(UUID.randomUUID(), 1L);
+        var eleven = new ConceptRecord(UUID.randomUUID(), "project-slug");
         eleven.getPreferredLabel().put("en", "eleven");
         eleven.getAltLabel().put("fr", "onze");
 
-        var hundred = new ConceptRecord(UUID.randomUUID(), 1L);
+        var hundred = new ConceptRecord(UUID.randomUUID(), "project-slug");
         hundred.getPreferredLabel().put("en", "a hundred");
         hundred.getHiddenLabel().put("en", "one hundred");
 

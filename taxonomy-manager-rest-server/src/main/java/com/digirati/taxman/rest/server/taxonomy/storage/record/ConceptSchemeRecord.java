@@ -12,13 +12,19 @@ public class ConceptSchemeRecord {
     private final UUID uuid;
     private Multimap<String, String> title = ArrayListMultimap.create();
     private String source;
+    private String projectSlug;
 
-    public ConceptSchemeRecord(UUID uuid) {
+    public ConceptSchemeRecord(UUID uuid, String projectSlug) {
         this.uuid = uuid;
+        this.projectSlug = projectSlug;
     }
 
     public UUID getUuid() {
         return uuid;
+    }
+
+    public String getProjectSlug() {
+        return projectSlug;
     }
 
     public Multimap<String, String> getTitle() {

@@ -44,8 +44,8 @@ class ProjectDaoTests {
     void shouldStoreNewSchemes() throws SQLException {
         // Given
         ProjectDao dao = new ProjectDao(dataSource);
-        ConceptSchemeRecord schemeA = new ConceptSchemeRecord(createDummyScheme());
-        ConceptSchemeRecord schemeB = new ConceptSchemeRecord(createDummyScheme());
+        ConceptSchemeRecord schemeA = new ConceptSchemeRecord(createDummyScheme(), "project-slug");
+        ConceptSchemeRecord schemeB = new ConceptSchemeRecord(createDummyScheme(), "project-slug");
         List<ConceptSchemeRecord> schemes = List.of(schemeA, schemeB);
 
         var title = ArrayListMultimap.<String, String>create();
@@ -69,9 +69,9 @@ class ProjectDaoTests {
     void shouldRemoveSchemesWhichAreNoLongerAssociatedWithProject() throws SQLException {
         // Given
         ProjectDao dao = new ProjectDao(dataSource);
-        ConceptSchemeRecord schemeA = new ConceptSchemeRecord(createDummyScheme());
-        ConceptSchemeRecord schemeB = new ConceptSchemeRecord(createDummyScheme());
-        ConceptSchemeRecord schemeC = new ConceptSchemeRecord(createDummyScheme());
+        ConceptSchemeRecord schemeA = new ConceptSchemeRecord(createDummyScheme(), "project-slug");
+        ConceptSchemeRecord schemeB = new ConceptSchemeRecord(createDummyScheme(), "project-slug");
+        ConceptSchemeRecord schemeC = new ConceptSchemeRecord(createDummyScheme(), "project-slug");
 
         var title = ArrayListMultimap.<String, String>create();
         title.put("en", "Test");
@@ -98,7 +98,7 @@ class ProjectDaoTests {
     void shouldListAllProjects() throws SQLException {
         // Given
         ProjectDao dao = new ProjectDao(dataSource);
-        ConceptSchemeRecord scheme = new ConceptSchemeRecord(createDummyScheme());
+        ConceptSchemeRecord scheme = new ConceptSchemeRecord(createDummyScheme(), "project-slug");
 
         ProjectRecord record1 = new ProjectRecord("project-1");
         var title1 = ArrayListMultimap.<String, String>create();

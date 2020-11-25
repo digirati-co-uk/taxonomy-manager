@@ -1,6 +1,7 @@
 package com.digirati.taxman.common.taxonomy;
 
 import com.digirati.taxman.common.rdf.PersistentModel;
+import com.digirati.taxman.common.rdf.PersistentProjectScopedModel;
 import com.digirati.taxman.common.rdf.RdfModel;
 import com.digirati.taxman.common.rdf.RdfModelContext;
 import com.digirati.taxman.common.rdf.annotation.RdfConstructor;
@@ -16,10 +17,11 @@ import java.util.stream.Stream;
 
 @RdfType("http://www.w3.org/2004/02/skos/core#ConceptScheme")
 @RdfContext(value = {"skos=" + SKOS.uri, "dcterms=" + DCTerms.NS}, template = "/v0.1/concept-scheme/:id:")
-public final class ConceptSchemeModel implements RdfModel, PersistentModel {
+public final class ConceptSchemeModel implements RdfModel, PersistentProjectScopedModel {
 
     private final RdfModelContext context;
     private UUID uuid;
+    private String projectId;
 
     @RdfConstructor
     public ConceptSchemeModel(RdfModelContext context) {
@@ -59,5 +61,15 @@ public final class ConceptSchemeModel implements RdfModel, PersistentModel {
      */
     public Stream<ConceptModel> getTopConcepts() {
         return getResources(ConceptModel.class, SKOS.hasTopConcept);
+    }
+
+    @Override
+    public String getProjectId() {
+        return projectId;
+    }
+
+    @Override
+    public void setProjectId(String id) {
+        this.projectId = id;
     }
 }

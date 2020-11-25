@@ -94,6 +94,7 @@ public class ProjectModelRepository {
 
         projectDao.loadDataSet(slug);
         ProjectDataSet dataSet = projectMapper.map(slug, project);
+
         return projectDao.storeDataSet(dataSet);
     }
 

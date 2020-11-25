@@ -68,7 +68,7 @@ public class ConceptSchemeMapper {
     public ConceptSchemeDataSet map(ConceptSchemeModel model) {
         var uuid = model.getUuid();
 
-        var record = new ConceptSchemeRecord(uuid);
+        var record = new ConceptSchemeRecord(uuid, model.getProjectId());
         record.setTitle(model.getTitle());
         record.setSource(model.getSource());
 
