@@ -19,7 +19,7 @@ BEGIN
                    _source,
                    _title)
             ON CONFLICT (uuid, COALESCE(source, '')) DO UPDATE SET title = _title
-            RETURNING id, uuid, source, title, _projectslug::varchar(50);
+            RETURNING id, uuid, source, title, _projectslug::varchar(50) as project_slug, deleted;
 EXCEPTION
     WHEN unique_violation
         THEN RAISE unique_violation USING MESSAGE =
