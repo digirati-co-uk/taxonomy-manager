@@ -87,15 +87,8 @@ public class ProjectModelRepository {
         // hack to propagate this context through RdfModelFactory
         project.getContext().getAdditionalAttributes().put(X_PROJECT_SLUG, slug);
 
-        List<ConceptSchemeModel> updatedSchemes = project.getAllResources(ConceptSchemeModel.class)
-                .map(scheme -> importer.importScheme(scheme))
-                .collect(Collectors.toList());
-
-        // Get rid of the existing models.
-        project.clear(DCTerms.hasPart);
-        for (ConceptSchemeModel model : updatedSchemes) {
-            project.add(DCTerms.hasPart, model);
-        }
+        project.getAllResources(ConceptSchemeModel.class)
+                .forEach(scheme -> importer.importScheme(scheme));
 
         projectDao.loadDataSet(slug);
         ProjectDataSet dataSet = projectMapper.map(slug, project);
