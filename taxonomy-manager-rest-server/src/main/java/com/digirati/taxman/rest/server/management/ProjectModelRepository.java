@@ -2,10 +2,13 @@ package com.digirati.taxman.rest.server.management;
 
 import com.digirati.taxman.common.rdf.RdfModelBuilder;
 import com.digirati.taxman.common.taxonomy.CollectionModel;
+import com.digirati.taxman.common.taxonomy.ConceptModel;
 import com.digirati.taxman.common.taxonomy.ConceptSchemeModel;
 import com.digirati.taxman.common.taxonomy.ProjectModel;
 import com.digirati.taxman.rest.server.infrastructure.exception.ProjectAlreadyExistsException;
+import com.digirati.taxman.rest.server.taxonomy.ConceptModelRepository;
 import com.digirati.taxman.rest.server.taxonomy.ConceptSchemeImporter;
+import com.digirati.taxman.rest.server.taxonomy.ConceptSchemeModelRepository;
 import com.digirati.taxman.rest.server.taxonomy.mapper.ProjectListingMapper;
 import com.digirati.taxman.rest.server.taxonomy.mapper.ProjectMapper;
 import com.digirati.taxman.rest.server.taxonomy.storage.ProjectDao;
@@ -15,8 +18,10 @@ import org.apache.jena.vocabulary.DCTerms;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.digirati.taxman.rest.server.infrastructure.config.RdfConfig.X_PROJECT_SLUG;
@@ -26,6 +31,12 @@ public class ProjectModelRepository {
 
     @Inject
     ConceptSchemeImporter importer;
+
+    @Inject
+    ConceptSchemeModelRepository conceptSchemeModelRepository;
+
+    @Inject
+    ConceptModelRepository conceptRepository;
 
     @Inject
     ProjectDao projectDao;
@@ -82,18 +93,47 @@ public class ProjectModelRepository {
      * @param project the updated project
      * @return true if anything changed, false otherwise
      */
-    @Transactional(Transactional.TxType.REQUIRED)
+    @Transactional(Transactional.TxType.NEVER)
     public boolean update(String slug, ProjectModel project) {
+        ProjectDataSet dataSet = projectMapper.map(slug, project);
+        if (!projectDao.storeDataSet(dataSet)) {
+
+        }
+
         // hack to propagate this context through RdfModelFactory
         project.getContext().getAdditionalAttributes().put(X_PROJECT_SLUG, slug);
 
-        project.getAllResources(ConceptSchemeModel.class)
-                .forEach(scheme -> importer.importScheme(scheme));
+        var uuids = new HashMap<String, UUID>();
+        var conceptModels = project.getAllResources(ConceptModel.class);
+        conceptModels.forEach(concept -> {
+            if (concept.isNew()) {
+                UUID uuid = UUID.randomUUID();
 
-        projectDao.loadDataSet(slug);
-        ProjectDataSet dataSet = projectMapper.map(slug, project);
+                uuids.put(concept.getSource(), uuid);
+                concept.setUuid(uuid);
+            }
 
-        return projectDao.storeDataSet(dataSet);
+            conceptRepository.update(concept);
+        });
+
+        var conceptSchemes = project.getAllResources(ConceptSchemeModel.class);
+        conceptSchemes.forEach(scheme -> {
+            if (scheme.isNew()) {
+                scheme.setUuid(UUID.randomUUID());
+            }
+
+            List<ConceptModel> topConcepts = scheme.getTopConcepts().map(concept -> {
+                concept.setUuid(uuids.get(concept.getSource()));
+                return concept;
+            })
+            .collect(Collectors.toList());
+
+            scheme.setTopConcepts(topConcepts);
+
+            conceptSchemeModelRepository.update(scheme);
+        });
+
+        return true;
     }
 
     public void delete(String projectSlug) {

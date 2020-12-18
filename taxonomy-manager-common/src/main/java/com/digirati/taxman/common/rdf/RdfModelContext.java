@@ -3,12 +3,16 @@ package com.digirati.taxman.common.rdf;
 import com.google.common.collect.Multimap;
 import org.apache.jena.rdf.model.Resource;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 public final class RdfModelContext {
     private final RdfModelFactory modelFactory;
     private final Resource resource;
     private final Multimap<String, String> additionalAttributes;
+    private final Map<String, RdfModel> cache = new HashMap<>();
 
     public RdfModelContext(RdfModelFactory modelFactory, Resource resource, Multimap<String, String> additionalAttributes) {
         this.modelFactory = modelFactory;
@@ -25,6 +29,14 @@ public final class RdfModelContext {
 
     public Resource getResource() {
         return resource;
+    }
+
+    public void cacheResource(String uri, RdfModel model) {
+        cache.put(uri, model);
+    }
+
+    public <T extends RdfModel> Optional<T> getCachedResource(String uri) {
+        return Optional.ofNullable((T)cache.get(uri));
     }
 
     public Multimap<String, String> getAdditionalAttributes() {

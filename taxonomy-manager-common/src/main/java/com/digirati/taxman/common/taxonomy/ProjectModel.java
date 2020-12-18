@@ -10,6 +10,7 @@ import com.google.common.collect.Streams;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.vocabulary.DCTerms;
+import org.apache.jena.vocabulary.RDFS;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -17,8 +18,8 @@ import java.util.stream.Stream;
 /**
  * Models the RDF representation of a project.
  */
-@RdfType("rdfs:Dataset")
-@RdfContext({"dcterms=" + DCTerms.NS})
+@RdfType("http://www.w3.org/2000/01/rdf-schema#Dataset")
+@RdfContext({"dcterms=" + DCTerms.NS, "rdfs="+ RDFS.uri})
 public class ProjectModel implements RdfModel {
 
     private final RdfModelContext context;

@@ -12,6 +12,7 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.vocabulary.SKOS;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -22,6 +23,7 @@ public final class ConceptSchemeModel implements RdfModel, PersistentProjectScop
     private final RdfModelContext context;
     private UUID uuid;
     private String projectId;
+    private List<ConceptModel> models;
 
     @RdfConstructor
     public ConceptSchemeModel(RdfModelContext context) {
@@ -56,11 +58,15 @@ public final class ConceptSchemeModel implements RdfModel, PersistentProjectScop
         return getPlainLiteral(DCTerms.title);
     }
 
+    public void setTopConcepts(List<ConceptModel> models) {
+        this.models = models;
+    }
+
     /**
      * Get a stream of all the concepts that are related to this concept scheme.
      */
     public Stream<ConceptModel> getTopConcepts() {
-        return getResources(ConceptModel.class, SKOS.hasTopConcept);
+        return models != null ? models.stream() : getResources(ConceptModel.class, SKOS.hasTopConcept);
     }
 
     @Override

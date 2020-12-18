@@ -46,7 +46,7 @@ public final class ConceptModel implements Concept, RdfModel, PersistentProjectS
     @Override
     public String getSource() {
         Resource sourceResource = getResource().getPropertyResourceValue(DCTerms.source);
-        return sourceResource == null ? null : sourceResource.getURI();
+        return sourceResource == null ? getStringProperty(DCTerms.source) : sourceResource.getURI();
     }
 
     @Override
