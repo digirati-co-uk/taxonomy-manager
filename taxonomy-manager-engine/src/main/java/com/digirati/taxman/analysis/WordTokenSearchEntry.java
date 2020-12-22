@@ -25,7 +25,7 @@ public class WordTokenSearchEntry<IdT> {
 
     public WordToken getRootToken() {
         if (tokens.isEmpty()) {
-            throw new IllegalStateException("A term index entry cannot exist without a root token");
+            throw new IllegalStateException("A term index entry cannot exist without a root token (term with identity: " + identity + ")");
         }
 
         return tokens.get(0);
