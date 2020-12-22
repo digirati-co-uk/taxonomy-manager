@@ -12,6 +12,7 @@ import com.google.common.collect.Multiset;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -19,6 +20,8 @@ import java.util.stream.Collectors;
  * and input queries.
  */
 public class TermIndex<ScopeT, IdT>  {
+
+    private static final Logger logger = Logger.getLogger(TermIndex.class.getName());
 
     private final WordTokenizer tokenizer;
     private final WordTokenSearchStrategy<IdT> searchStrategy;
@@ -36,6 +39,12 @@ public class TermIndex<ScopeT, IdT>  {
 
     public void add(ScopeT scope, IdT id, String text) {
         var tokens = tokenizer.tokenize(text);
+
+        if (tokens.isEmpty()) {
+            logger.warning(String.format("Token in scope %s with id %s has no tokens for text: %s", scope, id, text));
+            return;
+        }
+
         var entry = new WordTokenSearchEntry<>(id, tokens);
 
         scopedIds.put(scope, id);
