@@ -185,7 +185,7 @@ public class ConceptModelRepository {
      * @param model    The new data for the Concept
      * @param existing (Can be null) The current version of the Concept, if one exists
      */
-    private void applySymmetricRelationChanges(ConceptModel model, ConceptModel existing) {
+    public void applySymmetricRelationChanges(ConceptModel model, ConceptModel existing) {
 
         BiConsumer<UUID, ConceptRelationshipType> createRelationshipToModel = (relatedUuid, relationshipType) -> {
             var conceptDataSetOptional = conceptDao.loadDataSet(relatedUuid);

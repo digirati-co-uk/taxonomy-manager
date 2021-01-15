@@ -97,7 +97,7 @@ public class ProjectModelRepository {
     public boolean update(String slug, ProjectModel project) {
         ProjectDataSet dataSet = projectMapper.map(slug, project);
         if (!projectDao.storeDataSet(dataSet)) {
-
+            return false;
         }
 
         // hack to propagate this context through RdfModelFactory
@@ -114,6 +114,10 @@ public class ProjectModelRepository {
             }
 
             conceptRepository.update(concept);
+        });
+
+        conceptModels.forEach(concept -> {
+            conceptRepository.applySymmetricRelationChanges(concept, null);
         });
 
         var conceptSchemes = project.getAllResources(ConceptSchemeModel.class);
