@@ -52,8 +52,10 @@ public class ConceptEventListener extends ReceiverAdapter {
         ConceptModel previous = event.getPrevious();
         List<String> removed = new ArrayList<>();
         UUID uuid = null;
+        String project = null;
 
         if (previous != null) {
+            project = previous.getProjectId();
             uuid = previous.getUuid();
             consumeLabels(previous, removed::add);
         }
@@ -62,11 +64,15 @@ public class ConceptEventListener extends ReceiverAdapter {
         ConceptModel current = event.getConcept();
 
         if (current != null) {
+            if (project == null) {
+                project = current.getProjectId();
+            }
+
             uuid = current.getUuid();
             consumeLabels(current, added::add);
         }
 
-        ConceptChangeEvent changeEvent = new ConceptChangeEvent(uuid, current.getProjectId(), added, removed);
+        ConceptChangeEvent changeEvent = new ConceptChangeEvent(uuid, project, added, removed);
         try {
             channel.send(new Message(/* null = all in the cluster */ null, changeEvent));
         } catch (Exception ex) {
