@@ -108,9 +108,9 @@ public class ConceptModelRepository {
             }
         }
 
+        conceptDao.storeDataSet(conceptMapper.map(model));
         applySymmetricRelationChanges(model, existing);
 
-        conceptDao.storeDataSet(conceptMapper.map(model));
         eventPublisher.notify(ConceptEvent.updated(model, existing));
     }
 

@@ -96,15 +96,13 @@ public class ProjectModelRepository {
     @Transactional(Transactional.TxType.NEVER)
     public boolean update(String slug, ProjectModel project) {
         ProjectDataSet dataSet = projectMapper.map(slug, project);
-        if (!projectDao.storeDataSet(dataSet)) {
-            return false;
-        }
+        projectDao.storeDataSet(dataSet);
 
         // hack to propagate this context through RdfModelFactory
         project.getContext().getAdditionalAttributes().put(X_PROJECT_SLUG, slug);
 
         var uuids = new HashMap<String, UUID>();
-        var conceptModels = project.getAllResources(ConceptModel.class);
+        var conceptModels = project.getAllResources(ConceptModel.class).collect(Collectors.toUnmodifiableList());
         conceptModels.forEach(concept -> {
             if (concept.isNew()) {
                 UUID uuid = UUID.randomUUID();
@@ -113,11 +111,8 @@ public class ProjectModelRepository {
                 concept.setUuid(uuid);
             }
 
+            concept.setProjectId(slug);
             conceptRepository.update(concept);
-        });
-
-        conceptModels.forEach(concept -> {
-            conceptRepository.applySymmetricRelationChanges(concept, null);
         });
 
         var conceptSchemes = project.getAllResources(ConceptSchemeModel.class);
