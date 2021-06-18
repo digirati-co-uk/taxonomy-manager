@@ -18,7 +18,7 @@ BEGIN
                    (SELECT id FROM project WHERE slug = _projectslug),
                    _source,
                    _title)
-            ON CONFLICT (uuid, COALESCE(source, '')) DO UPDATE SET title = _title
+            ON CONFLICT (project_id, uuid, COALESCE(source, '')) DO UPDATE SET title = _title
             RETURNING id, uuid, title, source, deleted, _projectslug::varchar(50) as project_slug;
 EXCEPTION
     WHEN unique_violation

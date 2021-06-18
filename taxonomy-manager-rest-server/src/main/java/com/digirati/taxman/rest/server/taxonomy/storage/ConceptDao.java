@@ -130,10 +130,10 @@ public class ConceptDao {
         recordTypes[1] = Types.VARCHAR;
 
         // @FIXME gtierney: 12 positional parameters is garbage. Fix this sometime.
-        jdbcTemplate.update("CALL update_concept(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", recordArgs, recordTypes);
+        var concept = jdbcTemplate.queryForObject("SELECT * FROM update_concept(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", recordArgs, recordTypes, recordMapper);
 
         int[] relationTypes = {Types.OTHER, Types.VARCHAR, Types.OTHER};
-        Object[] relationArgs = {record.getUuid(), record.getSource(), dataset.getRelationshipRecordsJson()};
+        Object[] relationArgs = {concept.getUuid(), concept.getSource(), dataset.getRelationshipRecordsJson()};
 
         jdbcTemplate.update("CALL update_concept_semantic_relations(?, ?, ?)", relationArgs, relationTypes);
     }

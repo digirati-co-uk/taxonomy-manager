@@ -34,7 +34,8 @@ BEGIN
         WHERE source = _source
           AND uuid = _uuid;
         IF found THEN
-            RETURN;
+            RETURN QUERY
+                SELECT concept.* FROM skos_concept_ex concept WHERE concept.source = _source;
         END IF;
 
         -- not there, so try to insert the key
@@ -82,7 +83,8 @@ BEGIN
                     history_note    = _history_note,
                     scope_note      = _scope_note,
                     definition      = _definition;
-            RETURN;
+            RETURN QUERY
+                SELECT concept.* FROM skos_concept_ex concept WHERE concept.source = _source;
         EXCEPTION
             WHEN unique_violation THEN
                 BEGIN
@@ -126,7 +128,8 @@ BEGIN
                             history_note    = _history_note,
                             scope_note      = _scope_note,
                             definition      = _definition;
-                    RETURN;
+                    RETURN QUERY
+                        SELECT concept.* FROM skos_concept_ex concept WHERE concept.source = _source;
                 EXCEPTION
                     WHEN unique_violation THEN
                     -- Do nothing, and loop to try the UPDATE again.
