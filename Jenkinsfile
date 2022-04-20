@@ -7,6 +7,9 @@ runBuild {
   def tagVersion = fetchTagVersion()
 
   stage('Linting') {
+    sh("""
+        git config --global url."https://github.com/".insteadOf git://github.com/
+    """)
     parallel(
       precommit: {
         sh('pre-commit run --all-files --verbose')
