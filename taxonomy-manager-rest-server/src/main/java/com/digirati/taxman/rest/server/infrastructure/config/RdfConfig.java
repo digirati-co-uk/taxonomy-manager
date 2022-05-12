@@ -53,8 +53,11 @@ public class RdfConfig {
      */
     public static final String uri = "http://crugroup.com/commodities#";
     public static final Property inCommodityGroup = m.createProperty(uri + "inCommodityGroup");
+    public static final Property isCommodityGroup = m.createProperty(uri + "isCommodityGrup");
     public static final Property inTopicGroup = m.createProperty(uri + "inTopicGroup");
+    public static final Property isTopicGroup = m.createProperty(uri + "isTopicGroup");
     public static final Property inRegionGroup = m.createProperty(uri + "inRegionGroup");
+    public static final Property isRegionGroup = m.createProperty(uri + "isRegionGroup");
 
     private static final Map<String, String> CONCEPT_TO_REGION_GROUP = Map.ofEntries(
             Map.entry("b6dffb2d-3bd8-49b3-9c38-08314e7049f8", "69b1198a-95dc-46fc-8879-52fb9a7d8095"),
@@ -323,17 +326,19 @@ public class RdfConfig {
         String id = resource.getURI();
         if (id != null) {
             conceptIdResolver.resolve(URI.create(id)).map(UUID::toString).ifPresent(uuidKey -> {
-                handleGroup(resource, uuidKey, CONCEPT_TO_COMMODITY_GROUP, inCommodityGroup);
-                handleGroup(resource, uuidKey, CONCEPT_TO_TOPIC_GROUP, inTopicGroup);
-                handleGroup(resource, uuidKey, CONCEPT_TO_REGION_GROUP, inRegionGroup);
+                handleGroup(resource, uuidKey, CONCEPT_TO_COMMODITY_GROUP, inCommodityGroup, isCommodityGroup);
+                handleGroup(resource, uuidKey, CONCEPT_TO_TOPIC_GROUP, inTopicGroup, isTopicGroup);
+                handleGroup(resource, uuidKey, CONCEPT_TO_REGION_GROUP, inRegionGroup, isRegionGroup);
             });
         }
     }
 
-    private void handleGroup(Resource reource, String uuid, Map<String, String> grouping, Property groupProperty) {
+    private void handleGroup(Resource reource, String uuid, Map<String, String> grouping, Property groupProperty, Property inverseProperty) {
         if (grouping.containsKey(uuid)) {
             String groupId = grouping.get(uuid);
             reource.addProperty(groupProperty, reource.getModel().createResource(conceptIdResolver.resolve(UUID.fromString(groupId)).toString()));
+        } else if (grouping.containsValue(uuid)) {
+            reource.addLiteral(inverseProperty, true);
         }
     }
 }
