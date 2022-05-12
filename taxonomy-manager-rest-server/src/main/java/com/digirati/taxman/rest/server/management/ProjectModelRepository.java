@@ -53,7 +53,6 @@ public class ProjectModelRepository {
      * @param project the project to create
      * @return the created project
      */
-    @Transactional(Transactional.TxType.REQUIRED)
     public ProjectModel create(ProjectModel project) throws ProjectAlreadyExistsException {
         if (projectDao.projectExists(project.getSlug())) {
             throw new ProjectAlreadyExistsException(project.getSlug());
@@ -69,7 +68,6 @@ public class ProjectModelRepository {
      * @param slug the slug of the project to search for
      * @return the project with the given slug
      */
-    @Transactional(Transactional.TxType.REQUIRED)
     public Optional<ProjectModel> find(String slug) {
         var dataSet = projectDao.loadDataSet(slug);
         if (dataSet.isEmpty()) {

@@ -9,7 +9,7 @@ import javax.ws.rs.core.UriInfo;
  * An application wide thread-local context that maintains the active URI for the current request.
  */
 @ApplicationScoped
-class WebContextHolder {
+public class WebContextHolder {
     private final ThreadLocal<UriInfo> localUri = new ThreadLocal<>();
 
     void setUriInfo(UriInfo info) {
@@ -28,7 +28,7 @@ class WebContextHolder {
      */
     @RequestScoped
     @Produces
-    UriInfo uriInfo() {
+    public UriInfo uriInfo() {
         return localUri.get();
     }
 }

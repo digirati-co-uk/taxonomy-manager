@@ -160,7 +160,12 @@ public class RdfModelBuilder<T extends RdfModel> {
         }
 
         try {
-            return metadata.constructor.newInstance(new RdfModelContext(modelFactory, resource, HashMultimap.create()));
+            T newModel =  metadata.constructor.newInstance(new RdfModelContext(modelFactory, resource, HashMultimap.create()));
+            for (var listener : modelFactory.listeners) {
+                listener.onCreation(newModel, resource, MultimapBuilder.hashKeys().arrayListValues().build());
+            }
+
+            return newModel;
         } catch (ReflectiveOperationException e) {
             throw new RdfModelException("Unable to create RDF mapped model class", e);
         }

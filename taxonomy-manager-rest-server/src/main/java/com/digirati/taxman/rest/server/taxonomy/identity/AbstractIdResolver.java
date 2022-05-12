@@ -7,11 +7,11 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-abstract class AbstractIdResolver {
+public abstract class AbstractIdResolver {
     private final Pattern pattern;
     private final String template;
 
-    AbstractIdResolver(String template) {
+    protected AbstractIdResolver(String template) {
         if (!template.contains(":id:")) {
             throw new IllegalArgumentException("No :id: variable found in template: " + template);
         }

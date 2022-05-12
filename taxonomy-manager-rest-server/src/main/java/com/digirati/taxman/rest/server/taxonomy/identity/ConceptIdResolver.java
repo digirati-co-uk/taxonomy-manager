@@ -10,7 +10,7 @@ public class ConceptIdResolver extends AbstractIdResolver {
     @Inject
     UriInfo uriInfo;
 
-    ConceptIdResolver() {
+    protected ConceptIdResolver() {
         super("/v0.1/concept/:id:");
     }
 

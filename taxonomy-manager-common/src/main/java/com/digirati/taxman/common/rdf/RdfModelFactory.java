@@ -22,7 +22,7 @@ import java.util.Map;
  */
 public class RdfModelFactory {
 
-    private final List<RdfModelCreationListener> listeners;
+    final List<RdfModelCreationListener> listeners;
 
     public RdfModelFactory() {
         this(Collections.emptyList());
