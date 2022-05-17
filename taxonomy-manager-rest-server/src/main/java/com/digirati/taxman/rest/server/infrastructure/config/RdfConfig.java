@@ -9,10 +9,7 @@ import com.digirati.taxman.rest.server.taxonomy.ConceptModelRepository;
 import com.digirati.taxman.rest.server.taxonomy.identity.AbstractIdResolver;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.Property;
-import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.*;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
@@ -20,7 +17,10 @@ import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.UUID;
 
 @ApplicationScoped
 public class RdfConfig {
@@ -340,10 +340,12 @@ public class RdfConfig {
             Model model = reource.getModel();
             UUID groupUuid = UUID.fromString(groupId);
             String groupUri = conceptIdResolver.resolve(groupUuid).toString();
-            Optional<ConceptModel> groupModel = concepts.find(groupUuid);
+            Resource groupResourceRef = ResourceFactory.createResource(groupUri);
 
-            groupModel
-                    .ifPresent(group -> model.add(group.getResource().getModel()));
+            if (!model.containsResource(groupResourceRef)) {
+                concepts.find(groupUuid)
+                        .ifPresent(groupConcept -> model.add(groupConcept.getResource().getModel()));
+            }
 
             reource.addProperty(groupProperty, model.createResource(groupUri));
         } else if (grouping.containsValue(uuid)) {
