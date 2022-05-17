@@ -5,6 +5,7 @@ import com.digirati.taxman.common.rdf.RdfModel;
 import com.digirati.taxman.common.rdf.RdfModelFactory;
 import com.digirati.taxman.common.taxonomy.ConceptModel;
 import com.digirati.taxman.rest.server.infrastructure.web.WebContextHolder;
+import com.digirati.taxman.rest.server.taxonomy.ConceptModelRepository;
 import com.digirati.taxman.rest.server.taxonomy.identity.AbstractIdResolver;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
@@ -19,10 +20,7 @@ import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.UUID;
+import java.util.*;
 
 @ApplicationScoped
 public class RdfConfig {
@@ -45,6 +43,9 @@ public class RdfConfig {
 
     @Inject
     InlineConceptIdResolver conceptIdResolver;
+
+    @Inject
+    ConceptModelRepository concepts;
 
     private static final Model m = ModelFactory.createDefaultModel();
 
@@ -336,7 +337,15 @@ public class RdfConfig {
     private void handleGroup(Resource reource, String uuid, Map<String, String> grouping, Property groupProperty, Property inverseProperty) {
         if (grouping.containsKey(uuid)) {
             String groupId = grouping.get(uuid);
-            reource.addProperty(groupProperty, reource.getModel().createResource(conceptIdResolver.resolve(UUID.fromString(groupId)).toString()));
+            Model model = reource.getModel();
+            UUID groupUuid = UUID.fromString(groupId);
+            String groupUri = conceptIdResolver.resolve(groupUuid).toString();
+            Optional<ConceptModel> groupModel = concepts.find(groupUuid);
+
+            groupModel
+                    .ifPresent(group -> model.add(group.getResource().getModel()));
+
+            reource.addProperty(groupProperty, model.createResource(groupUri));
         } else if (grouping.containsValue(uuid)) {
             reource.addLiteral(inverseProperty, true);
         }
