@@ -25,6 +25,9 @@ import java.util.UUID;
 @ApplicationScoped
 public class RdfConfig {
 
+    private final ThreadLocal<Boolean> isInRecursiveCall =
+            ThreadLocal.withInitial(() -> false);
+
     @ApplicationScoped
     public static class InlineConceptIdResolver extends AbstractIdResolver {
 
@@ -322,15 +325,21 @@ public class RdfConfig {
             return;
         }
 
+        boolean isRecursive = isInRecursiveCall.get();
+        if (!isRecursive) {
+            isInRecursiveCall.set(true);
 
-        ConceptModel model = (ConceptModel) rdfModel;
-        String id = resource.getURI();
-        if (id != null) {
-            conceptIdResolver.resolve(URI.create(id)).map(UUID::toString).ifPresent(uuidKey -> {
-                handleGroup(resource, uuidKey, CONCEPT_TO_COMMODITY_GROUP, inCommodityGroup, isCommodityGroup);
-                handleGroup(resource, uuidKey, CONCEPT_TO_TOPIC_GROUP, inTopicGroup, isTopicGroup);
-                handleGroup(resource, uuidKey, CONCEPT_TO_REGION_GROUP, inRegionGroup, isRegionGroup);
-            });
+            ConceptModel model = (ConceptModel) rdfModel;
+            String id = resource.getURI();
+            if (id != null) {
+                conceptIdResolver.resolve(URI.create(id)).map(UUID::toString).ifPresent(uuidKey -> {
+                    handleGroup(resource, uuidKey, CONCEPT_TO_COMMODITY_GROUP, inCommodityGroup, isCommodityGroup);
+                    handleGroup(resource, uuidKey, CONCEPT_TO_TOPIC_GROUP, inTopicGroup, isTopicGroup);
+                    handleGroup(resource, uuidKey, CONCEPT_TO_REGION_GROUP, inRegionGroup, isRegionGroup);
+                });
+            }
+
+            isInRecursiveCall.set(false);
         }
     }
 
