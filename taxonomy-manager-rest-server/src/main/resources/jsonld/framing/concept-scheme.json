@@ -1,7 +1,8 @@
 {
   "@context": {
     "dcterms": "http://purl.org/dc/terms/",
-    "skos": "http://www.w3.org/2004/02/skos/core#"
+    "skos": "http://www.w3.org/2004/02/skos/core#",
+    "cru": "http://crugroup.com/commodities#"
   },
   "@type": "skos:ConceptScheme",
   "dcterms:title": {},
