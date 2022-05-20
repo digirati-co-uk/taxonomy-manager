@@ -9,6 +9,7 @@
   "skos:hasTopConcept": {
     "@type": "skos:Concept",
     "@container": "@set",
-    "@default": []
+    "@default": [],
+    "@embed": "@always"
   }
 }
