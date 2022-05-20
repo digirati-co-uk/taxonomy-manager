@@ -5,9 +5,6 @@
     "cru": "http://crugroup.com/commodities#"
   },
   "@type": "skos:Concept",
-  "cru:inCommodityGroup": {
-    "@container": "@language"
-  },
   "skos:prefLabel": {
     "@container": "@language"
   },

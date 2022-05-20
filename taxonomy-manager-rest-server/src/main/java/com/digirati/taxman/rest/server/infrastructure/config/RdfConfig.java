@@ -57,7 +57,7 @@ public class RdfConfig {
      */
     public static final String uri = "http://crugroup.com/commodities#";
     public static final Property inCommodityGroup = m.createProperty(uri + "inCommodityGroup");
-    public static final Property isCommodityGroup = m.createProperty(uri + "isCommodityGrup");
+    public static final Property isCommodityGroup = m.createProperty(uri + "isCommodityGroup");
     public static final Property inTopicGroup = m.createProperty(uri + "inTopicGroup");
     public static final Property isTopicGroup = m.createProperty(uri + "isTopicGroup");
     public static final Property inRegionGroup = m.createProperty(uri + "inRegionGroup");
