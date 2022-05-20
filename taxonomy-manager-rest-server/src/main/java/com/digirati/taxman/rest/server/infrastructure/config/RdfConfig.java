@@ -144,7 +144,8 @@ public class RdfConfig {
             Map.entry("a5410520-cdd3-4421-971e-c6a4d04e9db2", "84b2461c-b1a6-4869-82e9-a75776d3bc04"),
             Map.entry("1ee7f68e-c412-4c18-9b30-28a8e82e7c49", "84b2461c-b1a6-4869-82e9-a75776d3bc04"),
             Map.entry("8824dee9-2797-4ccb-bcba-c4d12b926e58", "84b2461c-b1a6-4869-82e9-a75776d3bc04"),
-            Map.entry("b2404ad2-8142-46ca-8342-068aff37bacc", "84b2461c-b1a6-4869-82e9-a75776d3bc04")
+            Map.entry("b2404ad2-8142-46ca-8342-068aff37bacc", "84b2461c-b1a6-4869-82e9-a75776d3bc04"),
+            Map.entry("1b26a114-fefa-4c6e-9877-fd918390650e", "580a27f3-1538-4caa-a4ad-e07807f95f07")
     );
 
     private static final Map<String, String> CONCEPT_TO_TOPIC_GROUP = Map.ofEntries(
