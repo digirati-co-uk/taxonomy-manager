@@ -11,11 +11,13 @@
   "skos:broader": {
     "@type": "skos:Concept",
     "@container": "@set",
-    "@default": []
+    "@default": [],
+    "@embed": "@always"
   },
   "skos:narrower": {
     "@type": "skos:Concept",
     "@container": "@set",
-    "@default": []
+    "@default": [],
+    "@embed": "@always"
   }
 }
