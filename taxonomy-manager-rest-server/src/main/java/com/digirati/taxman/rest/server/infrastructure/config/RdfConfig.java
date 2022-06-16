@@ -17,10 +17,7 @@ import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.UUID;
+import java.util.*;
 
 @ApplicationScoped
 public class RdfConfig {
@@ -62,7 +59,7 @@ public class RdfConfig {
     public static final Property isTopicGroup = m.createProperty(uri + "isTopicGroup");
     public static final Property inRegionGroup = m.createProperty(uri + "inRegionGroup");
     public static final Property isRegionGroup = m.createProperty(uri + "isRegionGroup");
-
+    public static final Set<String> ADDITIONAL_REGION_GROUPS = Set.of("cf28b330-7a1f-46ac-8c6b-dcb2eeccc7dc");
     private static final Map<String, String> CONCEPT_TO_REGION_GROUP = Map.ofEntries(
             Map.entry("b6dffb2d-3bd8-49b3-9c38-08314e7049f8", "69b1198a-95dc-46fc-8879-52fb9a7d8095"),
             Map.entry("436a13ad-9213-40b1-a64a-190d82986975", "69b1198a-95dc-46fc-8879-52fb9a7d8095"),
@@ -334,9 +331,9 @@ public class RdfConfig {
             String id = resource.getURI();
             if (id != null) {
                 conceptIdResolver.resolve(URI.create(id)).map(UUID::toString).ifPresent(uuidKey -> {
-                    handleGroup(resource, uuidKey, CONCEPT_TO_COMMODITY_GROUP, inCommodityGroup, isCommodityGroup);
-                    handleGroup(resource, uuidKey, CONCEPT_TO_TOPIC_GROUP, inTopicGroup, isTopicGroup);
-                    handleGroup(resource, uuidKey, CONCEPT_TO_REGION_GROUP, inRegionGroup, isRegionGroup);
+                    handleGroup(resource, uuidKey, CONCEPT_TO_COMMODITY_GROUP, inCommodityGroup, isCommodityGroup, Set.of());
+                    handleGroup(resource, uuidKey, CONCEPT_TO_TOPIC_GROUP, inTopicGroup, isTopicGroup, Set.of());
+                    handleGroup(resource, uuidKey, CONCEPT_TO_REGION_GROUP, inRegionGroup, isRegionGroup, ADDITIONAL_REGION_GROUPS);
                 });
             }
 
@@ -344,10 +341,10 @@ public class RdfConfig {
         }
     }
 
-    private void handleGroup(Resource reource, String uuid, Map<String, String> grouping, Property groupProperty, Property inverseProperty) {
+    private void handleGroup(Resource resource, String uuid, Map<String, String> grouping, Property groupProperty, Property inverseProperty, Set<String> additionalGroupIds) {
         if (grouping.containsKey(uuid)) {
             String groupId = grouping.get(uuid);
-            Model model = reource.getModel();
+            Model model = resource.getModel();
             UUID groupUuid = UUID.fromString(groupId);
             String groupUri = conceptIdResolver.resolve(groupUuid).toString();
             Resource groupResourceRef = ResourceFactory.createResource(groupUri);
@@ -357,9 +354,13 @@ public class RdfConfig {
                         .ifPresent(groupConcept -> model.add(groupConcept.getResource().getModel()));
             }
 
-            reource.addProperty(groupProperty, model.createResource(groupUri));
+            resource.addProperty(groupProperty, model.createResource(groupUri));
         } else if (grouping.containsValue(uuid)) {
-            reource.addLiteral(inverseProperty, true);
+            resource.addLiteral(inverseProperty, true);
+        }
+
+        if (additionalGroupIds.contains(uuid)) {
+            resource.addLiteral(inverseProperty, true);
         }
     }
 }
