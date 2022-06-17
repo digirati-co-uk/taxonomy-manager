@@ -475,7 +475,7 @@ public class RdfConfig {
     }
 
     private void handleGroup(Resource resource, String uuid, Map<String, String> grouping, Property groupProperty, Property inverseProperty, Set<String> additionalGroupIds) {
-        if (grouping.containsKey(uuid)) {
+        if (grouping.containsKey(uuid) && !grouping.containsValue(uuid)) {
             String groupId = grouping.get(uuid);
             Model model = resource.getModel();
             UUID groupUuid = UUID.fromString(groupId);
