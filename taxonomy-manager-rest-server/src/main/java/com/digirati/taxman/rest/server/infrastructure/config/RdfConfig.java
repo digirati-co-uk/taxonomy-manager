@@ -59,6 +59,7 @@ public class RdfConfig {
     public static final Property isTopicGroup = m.createProperty(uri + "isTopicGroup");
     public static final Property inRegionGroup = m.createProperty(uri + "inRegionGroup");
     public static final Property isRegionGroup = m.createProperty(uri + "isRegionGroup");
+    public static final Set<String> ADDITIONAL_TOPIC_GROUPS = Set.of("3f2cc76f-3065-4d47-904f-af4b53b96b05", "314d5a4f-1097-463d-9634-07792bcba566", "700913a2-62c9-41d9-9011-1a16aea0f0db");
     public static final Set<String> ADDITIONAL_REGION_GROUPS = Set.of("cf28b330-7a1f-46ac-8c6b-dcb2eeccc7dc");
     private static final Map<String, String> CONCEPT_TO_REGION_GROUP = Map.ofEntries(
             Map.entry("d9c761e8-0ccb-4f1a-a3a9-b37624110600", "1ceb32aa-0450-41a5-9958-544b628b7c2f"),
@@ -301,6 +302,10 @@ public class RdfConfig {
     );
 
     private static final Map<String, String> CONCEPT_TO_COMMODITY_GROUP = Map.ofEntries(
+            Map.entry("4c762487-e337-42fa-9cf7-0f99d5c61127", "6051c49f-56a8-41d0-a250-a4cb8c3f4084"),
+            Map.entry("0d498a9c-3a8e-48c8-8e93-7f7cbfba1169", "6051c49f-56a8-41d0-a250-a4cb8c3f4084"),
+            Map.entry("6c0c77fd-83c6-40ff-ba5d-201a753c66cf", "6051c49f-56a8-41d0-a250-a4cb8c3f4084"),
+            Map.entry("6135578d-d1b7-4dad-b2db-0e6b475eeb32", "a6d3b095-fd28-45e8-b751-75bf1da0a0f7"),
             Map.entry("5e4ad9ec-0328-469a-a257-0035e735e381", "7ed44b39-d791-435d-b01a-24eb10788dee"),
             Map.entry("009b52a6-fc3f-47e9-8c82-b1fab17303f7", "7ed44b39-d791-435d-b01a-24eb10788dee"),
             Map.entry("38e25244-2d82-46d9-bce4-cbe8478938ad", "7ed44b39-d791-435d-b01a-24eb10788dee"),
@@ -316,8 +321,6 @@ public class RdfConfig {
             Map.entry("ea23a2ae-bc12-4f7d-8e8d-3f3d2deaebed", "a05ddfe0-0c41-4f9f-b0d7-4ba3f0e61bc1"),
             Map.entry("53d5d55d-8999-4bee-aa4b-cee87643e8b4", "a05ddfe0-0c41-4f9f-b0d7-4ba3f0e61bc1"),
             Map.entry("aa0dd981-a489-4d4d-83aa-61122f62ef5b", "a05ddfe0-0c41-4f9f-b0d7-4ba3f0e61bc1"),
-            Map.entry("0d498a9c-3a8e-48c8-8e93-7f7cbfba1169", "a05ddfe0-0c41-4f9f-b0d7-4ba3f0e61bc1"),
-            Map.entry("4c762487-e337-42fa-9cf7-0f99d5c61127", "a05ddfe0-0c41-4f9f-b0d7-4ba3f0e61bc1"),
             Map.entry("2d6b24eb-3f06-478b-9d35-9fe50a044a82", "a962a29a-e4d6-40c5-8bde-2a549d292e8a"),
             Map.entry("e34dbda6-c221-4dda-822e-7bf1ddd90bcb", "a962a29a-e4d6-40c5-8bde-2a549d292e8a"),
             Map.entry("3b66b278-7266-4634-b833-9bebf675ff2d", "a962a29a-e4d6-40c5-8bde-2a549d292e8a"),
@@ -383,41 +386,42 @@ public class RdfConfig {
             Map.entry("65a7dcf3-7439-4582-91b7-d97a89a37540", "2c92873a-9225-4774-b8be-263482f1a7b4"),
             Map.entry("46ec4a36-cfec-42a7-b0c6-0ce815d1ce22", "2c92873a-9225-4774-b8be-263482f1a7b4"),
             Map.entry("0d7d339a-00c5-44c6-b0f4-d6c634a887da", "2c92873a-9225-4774-b8be-263482f1a7b4"),
-            Map.entry("9ef873c7-35e6-4208-b541-e7fcc86490ff","2c92873a-9225-4774-b8be-263482f1a7b4"),
-            Map.entry("3d00f2fc-9fa3-4fd6-bce4-8be603ca5c37","2c92873a-9225-4774-b8be-263482f1a7b4"),
-            Map.entry("e3044ee1-d666-4fc5-8d31-1dcdafc4f85a","2c92873a-9225-4774-b8be-263482f1a7b4"),
-            Map.entry("5bf8e6df-7eba-4958-8cee-e34dd56fba9e","2c92873a-9225-4774-b8be-263482f1a7b4"),
-            Map.entry("9db63908-83ad-4125-b5b0-539015ef689e","2c92873a-9225-4774-b8be-263482f1a7b4"),
-            Map.entry("b86f36f1-aeb5-4c43-887d-13101241ccd9","4bc49c2e-f6f3-4c5c-a7e5-47cd7915e38e"),
-            Map.entry("c24a391a-6d6d-408e-994b-b8f35af718ea","4bc49c2e-f6f3-4c5c-a7e5-47cd7915e38e"),
-            Map.entry("c739e42b-308d-47ee-9a06-0c2241e5da18","4bc49c2e-f6f3-4c5c-a7e5-47cd7915e38e"),
-            Map.entry("43e8be98-1bde-4af9-b470-9b759731712d","4bc49c2e-f6f3-4c5c-a7e5-47cd7915e38e"),
-            Map.entry("b01f0958-1765-4389-92c7-82dc75f5c0e6","4bc49c2e-f6f3-4c5c-a7e5-47cd7915e38e"),
-            Map.entry("3f027298-6521-44f6-9699-9b9a53794e06","4bc49c2e-f6f3-4c5c-a7e5-47cd7915e38e"),
-            Map.entry("1dc38e3e-1055-4252-8359-fac65c8e779b","4bc49c2e-f6f3-4c5c-a7e5-47cd7915e38e"),
-            Map.entry("eff8d319-935e-40be-a8ab-e5681435fb81","4bc49c2e-f6f3-4c5c-a7e5-47cd7915e38e"),
-            Map.entry("4fd89c4d-1555-4e04-97c7-314b08d4453f","4bc49c2e-f6f3-4c5c-a7e5-47cd7915e38e"),
-            Map.entry("97fc7397-2d30-432f-ac42-157f7071a054","4bc49c2e-f6f3-4c5c-a7e5-47cd7915e38e"),
-            Map.entry("b5ed86c9-792e-4395-950d-32e50195c3db","4bc49c2e-f6f3-4c5c-a7e5-47cd7915e38e"),
-            Map.entry("98cadd31-6ff4-4be1-9595-f8b7625cca43","4bc49c2e-f6f3-4c5c-a7e5-47cd7915e38e"),
-            Map.entry("6bf8420c-7dd8-4ae8-9194-6b9cd02e39f7","4bc49c2e-f6f3-4c5c-a7e5-47cd7915e38e"),
-            Map.entry("d8c8d9c5-7645-4932-8de0-90f6c43a4f44","4bc49c2e-f6f3-4c5c-a7e5-47cd7915e38e"),
-            Map.entry("9e1ec3ec-2bb5-43c4-8197-1f416869f936","4bc49c2e-f6f3-4c5c-a7e5-47cd7915e38e"),
-            Map.entry("18a2920e-6973-4547-bbd0-94207e3156fd","4bc49c2e-f6f3-4c5c-a7e5-47cd7915e38e"),
-            Map.entry("f86610d1-897c-4f11-b750-5fb1d9a29429","6051c49f-56a8-41d0-a250-a4cb8c3f4084"),
-            Map.entry("a50c5f74-efda-4cdb-8221-984ac88d28a2","6051c49f-56a8-41d0-a250-a4cb8c3f4084"),
-            Map.entry("b730779b-a473-4fa1-ac6d-361af4e8d5ca","6051c49f-56a8-41d0-a250-a4cb8c3f4084"),
-            Map.entry("8b527223-42a8-47e1-9047-138dd732de8a","6051c49f-56a8-41d0-a250-a4cb8c3f4084"),
-            Map.entry("5cd9196e-9695-437d-818f-4c1f94b33363","6051c49f-56a8-41d0-a250-a4cb8c3f4084"),
-            Map.entry("578e0fab-7740-420d-9ce9-96fe10e8cc70","a962a29a-e4d6-40c5-8bde-2a549d292e8a"),
-            Map.entry("f29af709-b683-46ef-80d6-875557c722ae","a962a29a-e4d6-40c5-8bde-2a549d292e8a"),
-            Map.entry("3af7f017-cbfa-4357-80d6-1d06c88e5532","a962a29a-e4d6-40c5-8bde-2a549d292e8a"),
-            Map.entry("e876a608-2ff0-41be-b954-56d6375755ac","a962a29a-e4d6-40c5-8bde-2a549d292e8a"),
-            Map.entry("7b584c3c-f84b-4cc7-b0e0-06b1ff224df0","afee7042-0263-4674-9e27-49ca952b14ea"),
-            Map.entry("02227e73-1988-4914-a155-92b1e0828889","afee7042-0263-4674-9e27-49ca952b14ea")
+            Map.entry("9ef873c7-35e6-4208-b541-e7fcc86490ff", "2c92873a-9225-4774-b8be-263482f1a7b4"),
+            Map.entry("3d00f2fc-9fa3-4fd6-bce4-8be603ca5c37", "2c92873a-9225-4774-b8be-263482f1a7b4"),
+            Map.entry("e3044ee1-d666-4fc5-8d31-1dcdafc4f85a", "2c92873a-9225-4774-b8be-263482f1a7b4"),
+            Map.entry("5bf8e6df-7eba-4958-8cee-e34dd56fba9e", "2c92873a-9225-4774-b8be-263482f1a7b4"),
+            Map.entry("9db63908-83ad-4125-b5b0-539015ef689e", "2c92873a-9225-4774-b8be-263482f1a7b4"),
+            Map.entry("b86f36f1-aeb5-4c43-887d-13101241ccd9", "4bc49c2e-f6f3-4c5c-a7e5-47cd7915e38e"),
+            Map.entry("c24a391a-6d6d-408e-994b-b8f35af718ea", "4bc49c2e-f6f3-4c5c-a7e5-47cd7915e38e"),
+            Map.entry("c739e42b-308d-47ee-9a06-0c2241e5da18", "4bc49c2e-f6f3-4c5c-a7e5-47cd7915e38e"),
+            Map.entry("43e8be98-1bde-4af9-b470-9b759731712d", "4bc49c2e-f6f3-4c5c-a7e5-47cd7915e38e"),
+            Map.entry("b01f0958-1765-4389-92c7-82dc75f5c0e6", "4bc49c2e-f6f3-4c5c-a7e5-47cd7915e38e"),
+            Map.entry("3f027298-6521-44f6-9699-9b9a53794e06", "4bc49c2e-f6f3-4c5c-a7e5-47cd7915e38e"),
+            Map.entry("1dc38e3e-1055-4252-8359-fac65c8e779b", "4bc49c2e-f6f3-4c5c-a7e5-47cd7915e38e"),
+            Map.entry("eff8d319-935e-40be-a8ab-e5681435fb81", "4bc49c2e-f6f3-4c5c-a7e5-47cd7915e38e"),
+            Map.entry("4fd89c4d-1555-4e04-97c7-314b08d4453f", "4bc49c2e-f6f3-4c5c-a7e5-47cd7915e38e"),
+            Map.entry("97fc7397-2d30-432f-ac42-157f7071a054", "4bc49c2e-f6f3-4c5c-a7e5-47cd7915e38e"),
+            Map.entry("b5ed86c9-792e-4395-950d-32e50195c3db", "4bc49c2e-f6f3-4c5c-a7e5-47cd7915e38e"),
+            Map.entry("98cadd31-6ff4-4be1-9595-f8b7625cca43", "4bc49c2e-f6f3-4c5c-a7e5-47cd7915e38e"),
+            Map.entry("6bf8420c-7dd8-4ae8-9194-6b9cd02e39f7", "4bc49c2e-f6f3-4c5c-a7e5-47cd7915e38e"),
+            Map.entry("d8c8d9c5-7645-4932-8de0-90f6c43a4f44", "4bc49c2e-f6f3-4c5c-a7e5-47cd7915e38e"),
+            Map.entry("9e1ec3ec-2bb5-43c4-8197-1f416869f936", "4bc49c2e-f6f3-4c5c-a7e5-47cd7915e38e"),
+            Map.entry("18a2920e-6973-4547-bbd0-94207e3156fd", "4bc49c2e-f6f3-4c5c-a7e5-47cd7915e38e"),
+            Map.entry("f86610d1-897c-4f11-b750-5fb1d9a29429", "6051c49f-56a8-41d0-a250-a4cb8c3f4084"),
+            Map.entry("a50c5f74-efda-4cdb-8221-984ac88d28a2", "6051c49f-56a8-41d0-a250-a4cb8c3f4084"),
+            Map.entry("b730779b-a473-4fa1-ac6d-361af4e8d5ca", "6051c49f-56a8-41d0-a250-a4cb8c3f4084"),
+            Map.entry("8b527223-42a8-47e1-9047-138dd732de8a", "6051c49f-56a8-41d0-a250-a4cb8c3f4084"),
+            Map.entry("5cd9196e-9695-437d-818f-4c1f94b33363", "6051c49f-56a8-41d0-a250-a4cb8c3f4084"),
+            Map.entry("578e0fab-7740-420d-9ce9-96fe10e8cc70", "a962a29a-e4d6-40c5-8bde-2a549d292e8a"),
+            Map.entry("f29af709-b683-46ef-80d6-875557c722ae", "a962a29a-e4d6-40c5-8bde-2a549d292e8a"),
+            Map.entry("3af7f017-cbfa-4357-80d6-1d06c88e5532", "a962a29a-e4d6-40c5-8bde-2a549d292e8a"),
+            Map.entry("e876a608-2ff0-41be-b954-56d6375755ac", "a962a29a-e4d6-40c5-8bde-2a549d292e8a"),
+            Map.entry("7b584c3c-f84b-4cc7-b0e0-06b1ff224df0", "afee7042-0263-4674-9e27-49ca952b14ea"),
+            Map.entry("02227e73-1988-4914-a155-92b1e0828889", "afee7042-0263-4674-9e27-49ca952b14ea")
     );
 
     private static final Map<String, String> CONCEPT_TO_TOPIC_GROUP = Map.ofEntries(
+            Map.entry("56eb5d77-4969-4a2c-917e-e96e56e67054", "700913a2-62c9-41d9-9011-1a16aea0f0db"),
             Map.entry("c2e521d9-6489-4d42-be76-c1682ba9af74", "7e30edfe-5ae3-45f9-8470-bb8002ecb705"),
             Map.entry("2d434129-6a91-4033-9461-23cd5ec94ca9", "7e30edfe-5ae3-45f9-8470-bb8002ecb705"),
             Map.entry("1b2416a5-4b5d-401d-941d-5f89de7df7a1", "7e30edfe-5ae3-45f9-8470-bb8002ecb705"),
@@ -495,7 +499,7 @@ public class RdfConfig {
             if (id != null) {
                 conceptIdResolver.resolve(URI.create(id)).map(UUID::toString).ifPresent(uuidKey -> {
                     handleGroup(resource, uuidKey, CONCEPT_TO_COMMODITY_GROUP, inCommodityGroup, isCommodityGroup, Set.of());
-                    handleGroup(resource, uuidKey, CONCEPT_TO_TOPIC_GROUP, inTopicGroup, isTopicGroup, Set.of());
+                    handleGroup(resource, uuidKey, CONCEPT_TO_TOPIC_GROUP, inTopicGroup, isTopicGroup, ADDITIONAL_TOPIC_GROUPS);
                     handleGroup(resource, uuidKey, CONCEPT_TO_REGION_GROUP, inRegionGroup, isRegionGroup, ADDITIONAL_REGION_GROUPS);
                 });
             }
