@@ -303,6 +303,7 @@ public class RdfConfig {
 
 
     private static final Map<String, String> CONCEPT_TO_COMMODITY_GROUP = Map.ofEntries(
+            Map.entry("99b580bf-4b7e-4e83-a70b-e7d7c1aafd9a","a05ddfe0-0c41-4f9f-b0d7-4ba3f0e61bc1"),
             Map.entry("4c762487-e337-42fa-9cf7-0f99d5c61127", "6051c49f-56a8-41d0-a250-a4cb8c3f4084"),
             Map.entry("0d498a9c-3a8e-48c8-8e93-7f7cbfba1169", "6051c49f-56a8-41d0-a250-a4cb8c3f4084"),
             Map.entry("6c0c77fd-83c6-40ff-ba5d-201a753c66cf", "6051c49f-56a8-41d0-a250-a4cb8c3f4084"),
