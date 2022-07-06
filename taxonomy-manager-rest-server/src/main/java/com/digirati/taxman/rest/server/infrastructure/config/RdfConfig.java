@@ -301,15 +301,13 @@ public class RdfConfig {
             Map.entry("b9d443ce-f458-411e-af52-0c461a63a89a", "4f2e0943-58f7-48b2-abf3-0f2212c735a2")
     );
 
+
     private static final Map<String, String> CONCEPT_TO_COMMODITY_GROUP = Map.ofEntries(
             Map.entry("4c762487-e337-42fa-9cf7-0f99d5c61127", "6051c49f-56a8-41d0-a250-a4cb8c3f4084"),
             Map.entry("0d498a9c-3a8e-48c8-8e93-7f7cbfba1169", "6051c49f-56a8-41d0-a250-a4cb8c3f4084"),
             Map.entry("6c0c77fd-83c6-40ff-ba5d-201a753c66cf", "6051c49f-56a8-41d0-a250-a4cb8c3f4084"),
             Map.entry("6135578d-d1b7-4dad-b2db-0e6b475eeb32", "a6d3b095-fd28-45e8-b751-75bf1da0a0f7"),
             Map.entry("5e4ad9ec-0328-469a-a257-0035e735e381", "7ed44b39-d791-435d-b01a-24eb10788dee"),
-            Map.entry("009b52a6-fc3f-47e9-8c82-b1fab17303f7", "7ed44b39-d791-435d-b01a-24eb10788dee"),
-            Map.entry("38e25244-2d82-46d9-bce4-cbe8478938ad", "7ed44b39-d791-435d-b01a-24eb10788dee"),
-            Map.entry("09e23659-d6a6-4fb6-9715-8765219ea455", "7ed44b39-d791-435d-b01a-24eb10788dee"),
             Map.entry("39f1239b-406c-49ce-8622-bb4ccf53f509", "7ed44b39-d791-435d-b01a-24eb10788dee"),
             Map.entry("ec074599-46dc-4ac9-8087-c730c6a241f2", "7ed44b39-d791-435d-b01a-24eb10788dee"),
             Map.entry("f7561f54-a962-4ade-8e3e-1f5b546f7664", "7ed44b39-d791-435d-b01a-24eb10788dee"),
@@ -335,9 +333,6 @@ public class RdfConfig {
             Map.entry("db845d01-9e16-498b-910a-145bde692071", "76081f5b-3c45-4b38-b0c0-56ffef958038"),
             Map.entry("e43f211c-2531-47ae-beb5-c5805bc2c0f1", "76081f5b-3c45-4b38-b0c0-56ffef958038"),
             Map.entry("44601d3a-fc54-410b-b3cc-e7374f6e51c6", "76081f5b-3c45-4b38-b0c0-56ffef958038"),
-            Map.entry("44a2557b-7141-49ab-bc47-665a8df75c4a", "76081f5b-3c45-4b38-b0c0-56ffef958038"),
-            Map.entry("3527b657-845f-4d8a-94e7-173db9c2f7cc", "76081f5b-3c45-4b38-b0c0-56ffef958038"),
-            Map.entry("d4eb2403-81cb-4047-b11d-90d9fe3d9317", "76081f5b-3c45-4b38-b0c0-56ffef958038"),
             Map.entry("4895b48b-24c1-4872-bad2-d8a80db1fbcc", "4bc49c2e-f6f3-4c5c-a7e5-47cd7915e38e"),
             Map.entry("0f6d5e2c-4ce9-450f-ac7c-f5eff0f820df", "4bc49c2e-f6f3-4c5c-a7e5-47cd7915e38e"),
             Map.entry("bb7afe54-2cc6-459b-86db-be751e8778fa", "4bc49c2e-f6f3-4c5c-a7e5-47cd7915e38e"),
