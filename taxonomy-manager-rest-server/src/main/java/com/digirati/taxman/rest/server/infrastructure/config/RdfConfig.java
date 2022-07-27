@@ -362,7 +362,6 @@ public class RdfConfig {
             Map.entry("152909dc-dc93-45c7-87aa-725dedfd2d36", "6051c49f-56a8-41d0-a250-a4cb8c3f4084"),
             Map.entry("0657bfa8-8a36-42af-b5b4-414ec6ea0f6b", "6051c49f-56a8-41d0-a250-a4cb8c3f4084"),
             Map.entry("7ed44b39-d791-435d-b01a-24eb10788dee", "6051c49f-56a8-41d0-a250-a4cb8c3f4084"),
-            Map.entry("2707c92b-f300-4263-95ba-bed882df8d27", "6051c49f-56a8-41d0-a250-a4cb8c3f4084"),
             Map.entry("a1e395d6-ad6a-448d-b61a-7e697cec6fc2", "6051c49f-56a8-41d0-a250-a4cb8c3f4084"),
             Map.entry("93f3444a-1173-423f-a5d3-7610872f8b34", "afee7042-0263-4674-9e27-49ca952b14ea"),
             Map.entry("068e4b7d-afc3-4681-b958-3f28b9985fe5", "afee7042-0263-4674-9e27-49ca952b14ea"),
