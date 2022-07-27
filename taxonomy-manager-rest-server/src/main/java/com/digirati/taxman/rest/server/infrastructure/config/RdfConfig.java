@@ -9,6 +9,7 @@ import com.digirati.taxman.rest.server.taxonomy.ConceptModelRepository;
 import com.digirati.taxman.rest.server.taxonomy.identity.AbstractIdResolver;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 import org.apache.jena.rdf.model.*;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -130,7 +131,7 @@ public class RdfConfig {
             Map.entry("4433e5c7-1e99-4103-ba11-066d5dc8866b", "9a2c5b3b-63b5-4f90-81a2-a17c06a725c1"),
             Map.entry("9bf69406-d321-47ad-8c19-f8d62f474f09", "9a2c5b3b-63b5-4f90-81a2-a17c06a725c1"),
             Map.entry("d330f9e1-9789-4a50-8b1a-343e9d49c9ab", "9a2c5b3b-63b5-4f90-81a2-a17c06a725c1"),
-            Map.entry("e6573f5f-2b1f-45f1-9cf2-978be165298d", "9a2c5b3b-63b5-4f90-81a2-a17c06a725c1"),
+            Map.entry("e6573f5f-2b1f-45f1-9cf2-978be165298d", "423b0903-142e-4db1-9712-b75681d85957"),
             Map.entry("10722a9a-7ffd-432f-bde0-84dcc7d42ba5", "9a2c5b3b-63b5-4f90-81a2-a17c06a725c1"),
             Map.entry("bc8e6db8-8f98-4dac-bd81-e323c4ff1789", "9a2c5b3b-63b5-4f90-81a2-a17c06a725c1"),
             Map.entry("8f817330-d9a1-48e1-afef-6a62144260db", "9a2c5b3b-63b5-4f90-81a2-a17c06a725c1"),
@@ -138,7 +139,7 @@ public class RdfConfig {
             Map.entry("3ca8c618-7f9c-4d7b-94b9-349a89398ea9", "9a2c5b3b-63b5-4f90-81a2-a17c06a725c1"),
             Map.entry("66fb80cc-f6fd-4e0e-8fc0-15db382fdce6", "9a2c5b3b-63b5-4f90-81a2-a17c06a725c1"),
             Map.entry("b30768cf-703c-460e-bc02-883665905044", "9a2c5b3b-63b5-4f90-81a2-a17c06a725c1"),
-            Map.entry("bdc3c63c-d1d6-4b18-b223-408ac9db624f", "9a2c5b3b-63b5-4f90-81a2-a17c06a725c1"),
+            Map.entry("bdc3c63c-d1d6-4b18-b223-408ac9db624f", "423b0903-142e-4db1-9712-b75681d85957"),
             Map.entry("316ab5b2-767c-41e8-a1ea-edfd8dd103c1", "9a2c5b3b-63b5-4f90-81a2-a17c06a725c1"),
             Map.entry("8713a060-3679-4edf-b84d-77d306f5b07a", "9a2c5b3b-63b5-4f90-81a2-a17c06a725c1"),
             Map.entry("81ad65da-8f51-4fc4-aff0-d239035a759e", "9a2c5b3b-63b5-4f90-81a2-a17c06a725c1"),
@@ -146,7 +147,7 @@ public class RdfConfig {
             Map.entry("f6e04371-aea7-49a3-9489-6296352ba053", "9a2c5b3b-63b5-4f90-81a2-a17c06a725c1"),
             Map.entry("b30e4942-8403-46c8-a9fb-1cb7b4001150", "9a2c5b3b-63b5-4f90-81a2-a17c06a725c1"),
             Map.entry("bf176e22-d1dc-4f6a-a013-ca9e0be1401f", "9a2c5b3b-63b5-4f90-81a2-a17c06a725c1"),
-            Map.entry("13af6d00-616c-417d-aca1-8c994b2dd548", "9a2c5b3b-63b5-4f90-81a2-a17c06a725c1"),
+            Map.entry("13af6d00-616c-417d-aca1-8c994b2dd548", "423b0903-142e-4db1-9712-b75681d85957"),
             Map.entry("9a4326b2-6613-44bb-ba53-926beae2bb4a", "9a2c5b3b-63b5-4f90-81a2-a17c06a725c1"),
             Map.entry("6dee9071-cc5c-471d-ae60-e8bf820ffdc1", "9a2c5b3b-63b5-4f90-81a2-a17c06a725c1"),
             Map.entry("82613fe6-04e3-4364-885c-1d679a6aecce", "9a2c5b3b-63b5-4f90-81a2-a17c06a725c1"),
@@ -303,7 +304,7 @@ public class RdfConfig {
 
 
     private static final Map<String, String> CONCEPT_TO_COMMODITY_GROUP = Map.ofEntries(
-            Map.entry("99b580bf-4b7e-4e83-a70b-e7d7c1aafd9a","a05ddfe0-0c41-4f9f-b0d7-4ba3f0e61bc1"),
+            Map.entry("99b580bf-4b7e-4e83-a70b-e7d7c1aafd9a", "a05ddfe0-0c41-4f9f-b0d7-4ba3f0e61bc1"),
             Map.entry("4c762487-e337-42fa-9cf7-0f99d5c61127", "6051c49f-56a8-41d0-a250-a4cb8c3f4084"),
             Map.entry("0d498a9c-3a8e-48c8-8e93-7f7cbfba1169", "6051c49f-56a8-41d0-a250-a4cb8c3f4084"),
             Map.entry("6c0c77fd-83c6-40ff-ba5d-201a753c66cf", "6051c49f-56a8-41d0-a250-a4cb8c3f4084"),
@@ -416,6 +417,7 @@ public class RdfConfig {
     );
 
     private static final Map<String, String> CONCEPT_TO_TOPIC_GROUP = Map.ofEntries(
+            Map.entry("c5cf00e4-f73e-475f-a9a8-74ec39a8e327", "314d5a4f-1097-463d-9634-07792bcba566"),
             Map.entry("56eb5d77-4969-4a2c-917e-e96e56e67054", "700913a2-62c9-41d9-9011-1a16aea0f0db"),
             Map.entry("c2e521d9-6489-4d42-be76-c1682ba9af74", "7e30edfe-5ae3-45f9-8470-bb8002ecb705"),
             Map.entry("2d434129-6a91-4033-9461-23cd5ec94ca9", "7e30edfe-5ae3-45f9-8470-bb8002ecb705"),
