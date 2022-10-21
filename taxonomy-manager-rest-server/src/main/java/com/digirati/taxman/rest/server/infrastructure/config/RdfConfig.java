@@ -11,6 +11,9 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import org.apache.jena.rdf.model.*;
+import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
+import org.apache.jena.vocabulary.XSD;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
@@ -57,6 +60,7 @@ public class RdfConfig {
      */
     public static final String uri = "http://crugroup.com/commodities#";
 
+
     public static final Property propertySet = m.createProperty(uri + "propertySet");
     public static final Property inCommodityGroup = m.createProperty(uri + "inCommodityGroup");
     public static final Property isCommodityGroup = m.createProperty(uri + "isCommodityGroup");
@@ -64,6 +68,29 @@ public class RdfConfig {
     public static final Property isTopicGroup = m.createProperty(uri + "isTopicGroup");
     public static final Property inRegionGroup = m.createProperty(uri + "inRegionGroup");
     public static final Property isRegionGroup = m.createProperty(uri + "isRegionGroup");
+
+    static void setupGroupToggle(Property prop) {
+        prop.addProperty(RDF.type, RDF.Property);
+        prop.addProperty(RDFS.label, prop.getLocalName());
+        prop.addProperty(RDFS.subClassOf, XSD.xboolean);
+
+    }
+
+    static void setupConceptSelector(Property prop) {
+        prop.addProperty(RDF.type, RDF.Property);
+        prop.addProperty(RDFS.label, prop.getLocalName());
+        prop.addProperty(RDFS.subClassOf, RDFS.Resource);
+    }
+
+    static {
+        setupGroupToggle(isCommodityGroup);
+        setupGroupToggle(isRegionGroup);
+        setupGroupToggle(isTopicGroup);
+        setupConceptSelector(inCommodityGroup);
+        setupConceptSelector(inTopicGroup);
+        setupConceptSelector(inRegionGroup);
+    }
+
     public static final Set<String> ADDITIONAL_TOPIC_GROUPS = Set.of("3f2cc76f-3065-4d47-904f-af4b53b96b05", "314d5a4f-1097-463d-9634-07792bcba566", "700913a2-62c9-41d9-9011-1a16aea0f0db");
     public static final Set<String> ADDITIONAL_REGION_GROUPS = Set.of("cf28b330-7a1f-46ac-8c6b-dcb2eeccc7dc");
     private static final Map<String, String> CONCEPT_TO_REGION_GROUP = Map.ofEntries(
@@ -532,13 +559,25 @@ public class RdfConfig {
         }
     }
 
+    public static Resource copyTo(Property resource, Model target, boolean isConceptSelector) {
+        var copy = resource.inModel(target);
+        if (isConceptSelector) {
+            setupConceptSelector(resource);
+        } else {
+            setupGroupToggle(resource);
+        }
+
+        return resource;
+    }
+
+
     public void addMetadataDecoration(RdfModel rdfModel, Resource resource, Multimap<String, String> stringStringMultimap) {
-        resource.addProperty(propertySet, inCommodityGroup);
-        resource.addProperty(propertySet, isCommodityGroup);
-        resource.addProperty(propertySet, inRegionGroup);
-        resource.addProperty(propertySet, isRegionGroup);
-        resource.addProperty(propertySet, inTopicGroup);
-        resource.addProperty(propertySet, isTopicGroup);
+        resource.addProperty(propertySet, copyTo(inCommodityGroup, resource.getModel(), true));
+        resource.addProperty(propertySet, copyTo(isCommodityGroup, resource.getModel(), false));
+        resource.addProperty(propertySet, copyTo(inRegionGroup, resource.getModel(), true));
+        resource.addProperty(propertySet, copyTo(isRegionGroup, resource.getModel(), false));
+        resource.addProperty(propertySet, copyTo(inTopicGroup, resource.getModel(), true));
+        resource.addProperty(propertySet, copyTo(isTopicGroup, resource.getModel(), false));
     }
 
     public static String DEFAULT_PROPERTY_SET = "{\"cru:propertySet\": [\n" +
