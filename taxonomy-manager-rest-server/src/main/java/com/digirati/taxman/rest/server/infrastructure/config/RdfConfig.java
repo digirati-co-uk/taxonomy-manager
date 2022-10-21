@@ -17,6 +17,8 @@ import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.UriInfo;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.*;
 
@@ -54,6 +56,8 @@ public class RdfConfig {
      * The namespace of the SKOS vocabulary as a string
      */
     public static final String uri = "http://crugroup.com/commodities#";
+
+    public static final Property propertySet = m.createProperty(uri + "propertySet");
     public static final Property inCommodityGroup = m.createProperty(uri + "inCommodityGroup");
     public static final Property isCommodityGroup = m.createProperty(uri + "isCommodityGroup");
     public static final Property inTopicGroup = m.createProperty(uri + "inTopicGroup");
@@ -477,7 +481,8 @@ public class RdfConfig {
     public RdfModelFactory rdfModelFactory() {
         return new RdfModelFactory(List.of(
                 RdfConfig::decorateProjectScopedModels,
-                this::decorareCommodityGroupModels
+                this::decorareCommodityGroupModels,
+                this::addMetadataDecoration
         ));
     }
 
@@ -526,4 +531,30 @@ public class RdfConfig {
             resource.addLiteral(inverseProperty, true);
         }
     }
+
+    public void addMetadataDecoration(RdfModel rdfModel, Resource resource, Multimap<String, String> stringStringMultimap) {
+        resource.addProperty(propertySet, inCommodityGroup);
+        resource.addProperty(propertySet, isCommodityGroup);
+        resource.addProperty(propertySet, inRegionGroup);
+        resource.addProperty(propertySet, isRegionGroup);
+        resource.addProperty(propertySet, inTopicGroup);
+        resource.addProperty(propertySet, isTopicGroup);
+    }
+
+    public static String DEFAULT_PROPERTY_SET = "{\"cru:propertySet\": [\n" +
+            "    {\n" +
+            "        \"@id\": \"cru:inCommodityGroup\",\n" +
+            "        \"@type\": \"rdf:Property\",\n" +
+            "        \"rdfs:isDefinedBy\": \"http://crugroup.com/taxonomy-schema\",\n" +
+            "        \"rdfs:label\": \"inCommodityGroup\",\n" +
+            "        \"rdfs:subClassOf\": \"rdfs:Resource\"\n" +
+            "    },\n" +
+            "    {\n" +
+            "        \"@id\": \"cru:isCommodityGroup\",\n" +
+            "        \"@type\": \"rdf:Property\",\n" +
+            "        \"rdfs:isDefinedBy\": \"http://crugroup.com/taxonomy-schema\",\n" +
+            "        \"rdfs:label\": \"isCommodityGroup\",\n" +
+            "        \"rdfs:subClassOf\": \"xsd:boolean\"\n" +
+            "    },\n" +
+            "  ]}";
 }
