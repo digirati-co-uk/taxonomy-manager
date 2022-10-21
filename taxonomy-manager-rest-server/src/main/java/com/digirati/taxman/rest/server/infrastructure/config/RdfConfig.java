@@ -562,9 +562,9 @@ public class RdfConfig {
     public static Resource copyTo(Property resource, Model target, boolean isConceptSelector) {
         var copy = resource.inModel(target);
         if (isConceptSelector) {
-            setupConceptSelector(resource);
+            setupConceptSelector(copy);
         } else {
-            setupGroupToggle(resource);
+            setupGroupToggle(copy);
         }
 
         return resource;
