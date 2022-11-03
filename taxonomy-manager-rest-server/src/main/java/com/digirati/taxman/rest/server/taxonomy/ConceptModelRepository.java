@@ -3,6 +3,7 @@ package com.digirati.taxman.rest.server.taxonomy;
 import com.digirati.taxman.common.taxonomy.CollectionModel;
 import com.digirati.taxman.common.taxonomy.ConceptModel;
 import com.digirati.taxman.common.taxonomy.ConceptRelationshipType;
+import com.digirati.taxman.rest.server.infrastructure.config.RdfConfig;
 import com.digirati.taxman.rest.server.infrastructure.event.ConceptEvent;
 import com.digirati.taxman.rest.server.infrastructure.event.ConceptEventListener;
 import com.digirati.taxman.rest.server.taxonomy.identity.ConceptIdResolver;
@@ -12,17 +13,19 @@ import com.digirati.taxman.rest.server.taxonomy.storage.ConceptDao;
 import com.digirati.taxman.rest.server.taxonomy.storage.ConceptDataSet;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRecord;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRelationshipRecord;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.jena.ext.com.google.common.collect.MultimapBuilder;
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.vocabulary.DCTerms;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -64,7 +67,12 @@ public class ConceptModelRepository {
     public Optional<ConceptModel> find(UUID uuid) {
         var dataset = conceptDao.loadDataSet(uuid);
 
-        return dataset.isEmpty() ? Optional.empty() : Optional.of(conceptMapper.map(dataset.get()));
+        return dataset.isEmpty() ? Optional.empty() : Optional.of(conceptMapper.map(dataset.get())).map(model -> {
+            for (var stmt : CRU_STMTS.get(uuid)) {
+                model.getResource().addProperty(stmt.getPredicate(), stmt.getObject());
+            }
+            return model;
+        });
     }
 
     /**
@@ -93,6 +101,17 @@ public class ConceptModelRepository {
                 .collect(Collectors.toList());
     }
 
+    private static List<Property> CRU_PROPS = List.of(
+            RdfConfig.inCommodityGroup,
+            RdfConfig.inRegionGroup,
+            RdfConfig.inTopicGroup,
+            RdfConfig.isTopicGroup,
+            RdfConfig.isCommodityGroup,
+            RdfConfig.isRegionGroup
+    );
+
+    private static Multimap<UUID, Statement> CRU_STMTS = HashMultimap.create();
+
     /**
      * Perform an idempotent update of an existing {@link ConceptModel}, updating all stored properties
      * as well relationships.
@@ -105,6 +124,15 @@ public class ConceptModelRepository {
             var dataSet = conceptDao.loadDataSet(model.getUuid());
             if (dataSet.isPresent()) {
                 existing = conceptMapper.map(dataSet.get());
+            }
+        }
+
+
+        var resource = model.getResource();
+        for (var prop : CRU_PROPS) {
+            var stmt = resource.getProperty(prop);
+            if (stmt != null) {
+                CRU_STMTS.put(model.getUuid(), stmt);
             }
         }
 
@@ -147,7 +175,7 @@ public class ConceptModelRepository {
             return getRelationshipsOrEmpty(newModel, conceptRelationshipType);
         }
 
-        Set<UUID> existing = getRelationshipsOrEmpty(existingModel,conceptRelationshipType)
+        Set<UUID> existing = getRelationshipsOrEmpty(existingModel, conceptRelationshipType)
                 .collect(Collectors.toSet());
         return getRelationshipsOrEmpty(newModel, conceptRelationshipType)
                 .filter(c -> !existing.contains(c));
@@ -172,6 +200,15 @@ public class ConceptModelRepository {
         }
 
         var uuid = model.getUuid();
+
+        var resource = model.getResource();
+        for (var prop : CRU_PROPS) {
+            var stmt = resource.getProperty(prop);
+            if (stmt != null) {
+                CRU_STMTS.put(uuid, stmt);
+            }
+        }
+
         var dataset = conceptMapper.map(model);
         conceptDao.storeDataSet(dataset);
         eventPublisher.notify(ConceptEvent.created(model));
@@ -213,12 +250,13 @@ public class ConceptModelRepository {
         for (var type : Set.of(ConceptRelationshipType.BROADER, ConceptRelationshipType.NARROWER)) {
             getNewRelationships(model, type, existing)
                     .forEach(relatedUuid
-                        -> createRelationshipToModel.accept(relatedUuid, type.inverse()));
+                            -> createRelationshipToModel.accept(relatedUuid, type.inverse()));
         }
     }
 
     /**
      * Deletes the concept.
+     *
      * @param uuid identifier of the concept
      */
     public void delete(UUID uuid) {
