@@ -1,6 +1,7 @@
 package com.digirati.taxman.rest.server;
 
 import com.digirati.taxman.common.taxonomy.ProjectModel;
+import com.digirati.taxman.rest.server.infrastructure.config.RdfConfig;
 import com.digirati.taxman.rest.server.management.ProjectModelRepository;
 import com.digirati.taxman.rest.taxonomy.ProjectPath;
 import com.digirati.taxman.rest.taxonomy.ProjectResource;
@@ -38,6 +39,9 @@ public class ServerProjectResource implements ProjectResource {
 
     @Override
     public Response updateProject(ProjectPath projectPath, @Valid ProjectModel project) {
+        var selection = project.getResource().getProperty(RdfConfig.selectedPropertySet);
+        RdfConfig.PROJECT_SELECTED_PROPERTIES.put(project.getResource().getURI(), selection);
+
         projectModelRepository.update(projectPath.getProjectSlug(), project);
         return Response.noContent().build();
     }

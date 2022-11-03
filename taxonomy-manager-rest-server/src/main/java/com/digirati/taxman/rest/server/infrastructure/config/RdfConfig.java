@@ -24,6 +24,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @ApplicationScoped
 public class RdfConfig {
@@ -62,6 +63,7 @@ public class RdfConfig {
 
 
     public static final Property propertySet = m.createProperty(uri + "propertySet");
+    public static final Property selectedPropertySet = m.createProperty(uri + "selectedPropertySet");
     public static final Property inCommodityGroup = m.createProperty(uri + "inCommodityGroup");
     public static final Property isCommodityGroup = m.createProperty(uri + "isCommodityGroup");
     public static final Property inTopicGroup = m.createProperty(uri + "inTopicGroup");
@@ -570,8 +572,14 @@ public class RdfConfig {
         return resource;
     }
 
+    public static Map<String, Statement> PROJECT_SELECTED_PROPERTIES = new ConcurrentHashMap<>();
 
     public void addMetadataDecoration(RdfModel rdfModel, Resource resource, Multimap<String, String> stringStringMultimap) {
+        var stmt = PROJECT_SELECTED_PROPERTIES.get(resource.getURI());
+        if (stmt != null) {
+            resource.addProperty(stmt.getPredicate(), stmt.getObject());
+        }
+
         resource.addProperty(propertySet, copyTo(inCommodityGroup, resource.getModel(), true));
         resource.addProperty(propertySet, copyTo(isCommodityGroup, resource.getModel(), false));
         resource.addProperty(propertySet, copyTo(inRegionGroup, resource.getModel(), true));
