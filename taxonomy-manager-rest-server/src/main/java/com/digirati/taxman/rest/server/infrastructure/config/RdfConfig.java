@@ -4,6 +4,7 @@ import com.digirati.taxman.common.rdf.PersistentProjectScopedModel;
 import com.digirati.taxman.common.rdf.RdfModel;
 import com.digirati.taxman.common.rdf.RdfModelFactory;
 import com.digirati.taxman.common.taxonomy.ConceptModel;
+import com.digirati.taxman.common.taxonomy.ProjectModel;
 import com.digirati.taxman.rest.server.infrastructure.web.WebContextHolder;
 import com.digirati.taxman.rest.server.taxonomy.ConceptModelRepository;
 import com.digirati.taxman.rest.server.taxonomy.identity.AbstractIdResolver;
@@ -551,13 +552,19 @@ public class RdfConfig {
                         .ifPresent(groupConcept -> model.add(groupConcept.getResource().getModel()));
             }
 
-            resource.addProperty(groupProperty, model.createResource(groupUri));
+            if (!resource.hasProperty(groupProperty)) {
+                resource.addProperty(groupProperty, model.createResource(groupUri));
+            }
         } else if (grouping.containsValue(uuid)) {
-            resource.addLiteral(inverseProperty, true);
+            if (!resource.hasProperty(inverseProperty)) {
+                resource.addLiteral(inverseProperty, true);
+            }
         }
 
         if (additionalGroupIds.contains(uuid)) {
-            resource.addLiteral(inverseProperty, true);
+            if (!resource.hasProperty(inverseProperty)) {
+                resource.addLiteral(inverseProperty, true);
+            }
         }
     }
 
@@ -575,9 +582,12 @@ public class RdfConfig {
     public static Map<String, Statement> PROJECT_SELECTED_PROPERTIES = new ConcurrentHashMap<>();
 
     public void addMetadataDecoration(RdfModel rdfModel, Resource resource, Multimap<String, String> stringStringMultimap) {
-        var stmt = PROJECT_SELECTED_PROPERTIES.get(resource.getURI());
-        if (stmt != null) {
-            resource.addProperty(stmt.getPredicate(), stmt.getObject());
+        if (rdfModel instanceof ProjectModel) {
+            var project = (ProjectModel) rdfModel;
+            var stmt = PROJECT_SELECTED_PROPERTIES.get(project.getSlug());
+            if (stmt != null) {
+                resource.addProperty(stmt.getPredicate(), stmt.getObject());
+            }
         }
 
         resource.addProperty(propertySet, copyTo(inCommodityGroup, resource.getModel(), true));

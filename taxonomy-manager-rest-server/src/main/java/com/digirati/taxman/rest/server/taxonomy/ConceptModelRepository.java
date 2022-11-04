@@ -19,6 +19,7 @@ import com.google.common.collect.Multimaps;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.ext.com.google.common.collect.MultimapBuilder;
 import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.vocabulary.DCTerms;
 
@@ -69,7 +70,10 @@ public class ConceptModelRepository {
 
         return dataset.isEmpty() ? Optional.empty() : Optional.of(conceptMapper.map(dataset.get())).map(model -> {
             for (var stmt : CRU_STMTS.get(uuid)) {
-                model.getResource().addProperty(stmt.getPredicate(), stmt.getObject());
+                Resource resource = model.getResource();
+                resource.removeAll(stmt.getPredicate());
+
+                resource.addProperty(stmt.getPredicate().inModel(resource.getModel()), stmt.getObject().inModel(resource.getModel()));
             }
             return model;
         });
