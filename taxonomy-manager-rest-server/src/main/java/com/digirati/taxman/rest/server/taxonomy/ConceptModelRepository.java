@@ -69,12 +69,17 @@ public class ConceptModelRepository {
         var dataset = conceptDao.loadDataSet(uuid);
 
         return dataset.isEmpty() ? Optional.empty() : Optional.of(conceptMapper.map(dataset.get())).map(model -> {
-            for (var stmt : CRU_STMTS.get(uuid)) {
+            var props = CRU_STMTS.computeIfAbsent(uuid, (k) -> new HashMap<>());
+            for (var prop : CRU_PROPS) {
+                var stmt = props.get(prop);
                 Resource resource = model.getResource();
-                resource.removeAll(stmt.getPredicate());
+                resource.removeAll(prop);
 
-                resource.addProperty(stmt.getPredicate().inModel(resource.getModel()), stmt.getObject().inModel(resource.getModel()));
+                if (stmt != null) {
+                    resource.addProperty(stmt.getPredicate().inModel(resource.getModel()), stmt.getObject().inModel(resource.getModel()));
+                }
             }
+
             return model;
         });
     }
@@ -114,7 +119,7 @@ public class ConceptModelRepository {
             RdfConfig.isRegionGroup
     );
 
-    private static Multimap<UUID, Statement> CRU_STMTS = HashMultimap.create();
+    private static Map<UUID, Map<Property, Statement>> CRU_STMTS = new HashMap<>();
 
     /**
      * Perform an idempotent update of an existing {@link ConceptModel}, updating all stored properties
@@ -133,11 +138,10 @@ public class ConceptModelRepository {
 
 
         var resource = model.getResource();
+        var props = CRU_STMTS.computeIfAbsent(model.getUuid(), k -> new HashMap<>());
         for (var prop : CRU_PROPS) {
             var stmt = resource.getProperty(prop);
-            if (stmt != null) {
-                CRU_STMTS.put(model.getUuid(), stmt);
-            }
+            props.put(prop, stmt);
         }
 
         conceptDao.storeDataSet(conceptMapper.map(model));
@@ -206,11 +210,10 @@ public class ConceptModelRepository {
         var uuid = model.getUuid();
 
         var resource = model.getResource();
+        var props = CRU_STMTS.computeIfAbsent(uuid, k -> new HashMap<>());
         for (var prop : CRU_PROPS) {
             var stmt = resource.getProperty(prop);
-            if (stmt != null) {
-                CRU_STMTS.put(uuid, stmt);
-            }
+            props.put(prop, stmt);
         }
 
         var dataset = conceptMapper.map(model);
