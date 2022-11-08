@@ -27,6 +27,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -68,20 +69,30 @@ public class ConceptModelRepository {
     public Optional<ConceptModel> find(UUID uuid) {
         var dataset = conceptDao.loadDataSet(uuid);
 
-        return dataset.isEmpty() ? Optional.empty() : Optional.of(conceptMapper.map(dataset.get())).map(model -> {
-            var props = CRU_STMTS.computeIfAbsent(uuid, (k) -> new HashMap<>());
-            for (var prop : CRU_PROPS) {
-                var stmt = props.get(prop);
-                Resource resource = model.getResource();
-                resource.removeAll(prop);
+        try {
+            RdfConfig.isInGet.set(true);
 
-                if (stmt != null) {
-                    resource.addProperty(stmt.getPredicate().inModel(resource.getModel()), stmt.getObject().inModel(resource.getModel()));
+            return dataset.isEmpty() ? Optional.empty() : Optional.of(conceptMapper.map(dataset.get())).map(model -> {
+                var props = CRU_STMTS.computeIfAbsent(uuid, (k) -> new HashMap<>());
+                for (var prop : CRU_PROPS) {
+                    if (!props.containsKey(prop)) {
+                        continue;
+                    }
+
+                    var stmt = props.get(prop);
+                    Resource resource = model.getResource();
+                    resource.removeAll(prop);
+
+                    if (stmt != null) {
+                        resource.addProperty(stmt.getPredicate().inModel(resource.getModel()), stmt.getObject().inModel(resource.getModel()));
+                    }
                 }
-            }
 
-            return model;
-        });
+                return model;
+            });
+        } finally {
+            RdfConfig.isInGet.set(false);
+        }
     }
 
     /**
@@ -119,7 +130,7 @@ public class ConceptModelRepository {
             RdfConfig.isRegionGroup
     );
 
-    private static Map<UUID, Map<Property, Statement>> CRU_STMTS = new HashMap<>();
+    public static final Map<UUID, Map<Property, Statement>> CRU_STMTS = new ConcurrentHashMap<>();
 
     /**
      * Perform an idempotent update of an existing {@link ConceptModel}, updating all stored properties

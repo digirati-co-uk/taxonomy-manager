@@ -30,6 +30,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @ApplicationScoped
 public class RdfConfig {
 
+    public static final ThreadLocal<Boolean> isInGet = ThreadLocal.withInitial(() -> false);
+
     private final ThreadLocal<Boolean> isInRecursiveCall =
             ThreadLocal.withInitial(() -> false);
 
@@ -517,25 +519,29 @@ public class RdfConfig {
     }
 
     private void decorareCommodityGroupModels(RdfModel rdfModel, Resource resource, Multimap<String, String> stringStringMultimap) {
-        if (!(rdfModel instanceof ConceptModel)) {
-            return;
-        }
+        if (isInGet.get()) {
 
-        boolean isRecursive = isInRecursiveCall.get();
-        if (!isRecursive) {
-            isInRecursiveCall.set(true);
 
-            ConceptModel model = (ConceptModel) rdfModel;
-            String id = resource.getURI();
-            if (id != null) {
-                conceptIdResolver.resolve(URI.create(id)).map(UUID::toString).ifPresent(uuidKey -> {
-                    handleGroup(resource, uuidKey, CONCEPT_TO_COMMODITY_GROUP, inCommodityGroup, isCommodityGroup, Set.of());
-                    handleGroup(resource, uuidKey, CONCEPT_TO_TOPIC_GROUP, inTopicGroup, isTopicGroup, ADDITIONAL_TOPIC_GROUPS);
-                    handleGroup(resource, uuidKey, CONCEPT_TO_REGION_GROUP, inRegionGroup, isRegionGroup, ADDITIONAL_REGION_GROUPS);
-                });
+            if (!(rdfModel instanceof ConceptModel)) {
+                return;
             }
 
-            isInRecursiveCall.set(false);
+            boolean isRecursive = isInRecursiveCall.get();
+            if (!isRecursive) {
+                isInRecursiveCall.set(true);
+
+                ConceptModel model = (ConceptModel) rdfModel;
+                String id = resource.getURI();
+                if (id != null) {
+                    conceptIdResolver.resolve(URI.create(id)).map(UUID::toString).ifPresent(uuidKey -> {
+                        handleGroup(resource, uuidKey, CONCEPT_TO_COMMODITY_GROUP, inCommodityGroup, isCommodityGroup, Set.of());
+                        handleGroup(resource, uuidKey, CONCEPT_TO_TOPIC_GROUP, inTopicGroup, isTopicGroup, ADDITIONAL_TOPIC_GROUPS);
+                        handleGroup(resource, uuidKey, CONCEPT_TO_REGION_GROUP, inRegionGroup, isRegionGroup, ADDITIONAL_REGION_GROUPS);
+                    });
+                }
+
+                isInRecursiveCall.set(false);
+            }
         }
     }
 
