@@ -122,6 +122,7 @@ public class ConceptModelRepository {
     }
 
     private static List<Property> CRU_PROPS = List.of(
+            RdfConfig.selectedPropertySet,
             RdfConfig.inCommodityGroup,
             RdfConfig.inRegionGroup,
             RdfConfig.inTopicGroup,
