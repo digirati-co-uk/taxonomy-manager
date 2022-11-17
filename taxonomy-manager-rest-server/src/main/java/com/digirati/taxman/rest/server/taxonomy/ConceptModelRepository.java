@@ -26,6 +26,7 @@ import org.apache.jena.vocabulary.DCTerms;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import java.net.URI;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
@@ -75,6 +76,10 @@ public class ConceptModelRepository {
                 ExtraTripleBank
                         .getStatementsFor(resource)
                         .forEach(stmt -> {
+                            if (stmt.getObject().isResource() && stmt.getObject().isURIResource() && !resource.getModel().containsResource(stmt.getObject())) {
+                                var id = idResolver.resolve(URI.create(resource.getURI()));
+                                id.flatMap(this::find).ifPresent(concept -> model.getResource().getModel().add(concept.getResource().getModel()));
+                            }
                             resource.addProperty(stmt.getPredicate().inModel(resource.getModel()), stmt.getObject().inModel(resource.getModel()));
                         });
 
