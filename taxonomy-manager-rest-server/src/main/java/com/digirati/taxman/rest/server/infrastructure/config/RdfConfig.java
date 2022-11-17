@@ -98,7 +98,7 @@ public class RdfConfig {
 
     public static final Set<String> ADDITIONAL_TOPIC_GROUPS = Set.of("3f2cc76f-3065-4d47-904f-af4b53b96b05", "314d5a4f-1097-463d-9634-07792bcba566", "700913a2-62c9-41d9-9011-1a16aea0f0db");
     public static final Set<String> ADDITIONAL_REGION_GROUPS = Set.of("cf28b330-7a1f-46ac-8c6b-dcb2eeccc7dc");
-    private static final Map<String, String> CONCEPT_TO_REGION_GROUP = Map.ofEntries(
+    public static final Map<String, String> CONCEPT_TO_REGION_GROUP = Map.ofEntries(
             Map.entry("d9c761e8-0ccb-4f1a-a3a9-b37624110600", "1ceb32aa-0450-41a5-9958-544b628b7c2f"),
             Map.entry("fab527a5-c60f-499b-8bf3-d85d62dc1b67", "1ceb32aa-0450-41a5-9958-544b628b7c2f"),
             Map.entry("fa2417f2-ff6b-4744-b37c-0c8a52c368bb", "1ceb32aa-0450-41a5-9958-544b628b7c2f"),
@@ -339,7 +339,7 @@ public class RdfConfig {
     );
 
 
-    private static final Map<String, String> CONCEPT_TO_COMMODITY_GROUP = Map.ofEntries(
+    public static final Map<String, String> CONCEPT_TO_COMMODITY_GROUP = Map.ofEntries(
             Map.entry("99b580bf-4b7e-4e83-a70b-e7d7c1aafd9a", "a05ddfe0-0c41-4f9f-b0d7-4ba3f0e61bc1"),
             Map.entry("4c762487-e337-42fa-9cf7-0f99d5c61127", "6051c49f-56a8-41d0-a250-a4cb8c3f4084"),
             Map.entry("0d498a9c-3a8e-48c8-8e93-7f7cbfba1169", "6051c49f-56a8-41d0-a250-a4cb8c3f4084"),
@@ -451,7 +451,7 @@ public class RdfConfig {
             Map.entry("02227e73-1988-4914-a155-92b1e0828889", "afee7042-0263-4674-9e27-49ca952b14ea")
     );
 
-    private static final Map<String, String> CONCEPT_TO_TOPIC_GROUP = Map.ofEntries(
+    public static final Map<String, String> CONCEPT_TO_TOPIC_GROUP = Map.ofEntries(
             Map.entry("da716ef7-f6a6-47d1-9ac5-f29ece2a9a1d", "a99f3a29-887f-4cf6-aa6c-ba5d93eb36d8"),
             Map.entry("c5cf00e4-f73e-475f-a9a8-74ec39a8e327", "314d5a4f-1097-463d-9634-07792bcba566"),
             Map.entry("56eb5d77-4969-4a2c-917e-e96e56e67054", "700913a2-62c9-41d9-9011-1a16aea0f0db"),
@@ -513,7 +513,7 @@ public class RdfConfig {
     public RdfModelFactory rdfModelFactory() {
         return new RdfModelFactory(List.of(
                 RdfConfig::decorateProjectScopedModels,
-                this::decorareCommodityGroupModels,
+//                this::decorareCommodityGroupModels,
                 this::addMetadataDecoration
         ));
     }

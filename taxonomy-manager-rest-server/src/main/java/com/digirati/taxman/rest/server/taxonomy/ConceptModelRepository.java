@@ -70,23 +70,13 @@ public class ConceptModelRepository {
         var dataset = conceptDao.loadDataSet(uuid);
 
         try {
-            RdfConfig.isInGet.set(true);
-
             return dataset.isEmpty() ? Optional.empty() : Optional.of(conceptMapper.map(dataset.get())).map(model -> {
-                var props = CRU_STMTS.computeIfAbsent(uuid, (k) -> new HashMap<>());
-                for (var prop : CRU_PROPS) {
-                    if (!props.containsKey(prop)) {
-                        continue;
-                    }
-
-                    var stmt = props.get(prop);
-                    Resource resource = model.getResource();
-                    resource.removeAll(prop);
-
-                    if (stmt != null) {
-                        resource.addProperty(stmt.getPredicate().inModel(resource.getModel()), stmt.getObject().inModel(resource.getModel()));
-                    }
-                }
+                Resource resource = model.getResource();
+                ExtraTripleBank
+                        .getStatementsFor(resource)
+                        .forEach(stmt -> {
+                            resource.addProperty(stmt.getPredicate().inModel(resource.getModel()), stmt.getObject().inModel(resource.getModel()));
+                        });
 
                 return model;
             });
@@ -150,11 +140,7 @@ public class ConceptModelRepository {
 
 
         var resource = model.getResource();
-        var props = CRU_STMTS.computeIfAbsent(model.getUuid(), k -> new HashMap<>());
-        for (var prop : CRU_PROPS) {
-            var stmt = resource.getProperty(prop);
-            props.put(prop, stmt);
-        }
+        ExtraTripleBank.storeStatementsFrom(resource);
 
         conceptDao.storeDataSet(conceptMapper.map(model));
         applySymmetricRelationChanges(model, existing);
@@ -222,11 +208,7 @@ public class ConceptModelRepository {
         var uuid = model.getUuid();
 
         var resource = model.getResource();
-        var props = CRU_STMTS.computeIfAbsent(uuid, k -> new HashMap<>());
-        for (var prop : CRU_PROPS) {
-            var stmt = resource.getProperty(prop);
-            props.put(prop, stmt);
-        }
+        ExtraTripleBank.storeStatementsFrom(resource);
 
         var dataset = conceptMapper.map(model);
         conceptDao.storeDataSet(dataset);
