@@ -153,12 +153,11 @@ public class ConceptModelRepository {
             }
         }
 
+        conceptDao.storeDataSet(conceptMapper.map(model));
+        applySymmetricRelationChanges(model, existing);
 
         var resource = model.getResource();
         ExtraTripleBank.storeStatementsFrom(resource);
-
-        conceptDao.storeDataSet(conceptMapper.map(model));
-        applySymmetricRelationChanges(model, existing);
 
         eventPublisher.notify(ConceptEvent.updated(model, existing));
     }

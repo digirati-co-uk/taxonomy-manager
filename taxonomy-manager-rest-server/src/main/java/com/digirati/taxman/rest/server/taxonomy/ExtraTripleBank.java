@@ -62,6 +62,11 @@ public class ExtraTripleBank {
     public static void storeStatementsFrom(Resource resource) {
         var statements = resource.listProperties();
         var newStatements = new HashMap<Property, Statement>();
+        var uri = resource.getURI();
+
+        if (uri == null) {
+            return;
+        }
 
         while (statements.hasNext()) {
             var statement = statements.next();
