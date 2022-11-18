@@ -39,6 +39,9 @@ import java.util.stream.Stream;
 @ApplicationScoped
 public class ConceptModelRepository {
 
+    private final ThreadLocal<Boolean> isInRecursiveCall =
+            ThreadLocal.withInitial(() -> false);
+
     /**
      * This is currently set to false, as we don't fully support transitive relationships.
      * It can be modified and tested in the future releases.
@@ -73,15 +76,22 @@ public class ConceptModelRepository {
         try {
             return dataset.isEmpty() ? Optional.empty() : Optional.of(conceptMapper.map(dataset.get())).map(model -> {
                 Resource resource = model.getResource();
-                ExtraTripleBank
-                        .getStatementsFor(resource)
-                        .forEach(stmt -> {
-                            if (stmt.getObject().isResource() && stmt.getObject().isURIResource() && !resource.getModel().containsResource(stmt.getObject())) {
-                                var id = idResolver.resolve(URI.create(resource.getURI()));
-                                id.flatMap(this::find).ifPresent(concept -> model.getResource().getModel().add(concept.getResource().getModel()));
-                            }
-                            resource.addProperty(stmt.getPredicate().inModel(resource.getModel()), stmt.getObject().inModel(resource.getModel()));
-                        });
+                if (!isInRecursiveCall.get()) {
+                    try {
+                        isInRecursiveCall.set(true);
+                        ExtraTripleBank
+                                .getStatementsFor(resource)
+                                .forEach(stmt -> {
+                                    if (stmt.getObject().isResource() && stmt.getObject().isURIResource() && !resource.getModel().containsResource(stmt.getObject())) {
+                                        var id = idResolver.resolve(URI.create(resource.getURI()));
+                                        id.flatMap(this::find).ifPresent(concept -> model.getResource().getModel().add(concept.getResource().getModel()));
+                                    }
+                                    resource.addProperty(stmt.getPredicate().inModel(resource.getModel()), stmt.getObject().inModel(resource.getModel()));
+                                });
+                    } finally {
+                        isInRecursiveCall.set(false);
+                    }
+                }
 
                 return model;
             });
