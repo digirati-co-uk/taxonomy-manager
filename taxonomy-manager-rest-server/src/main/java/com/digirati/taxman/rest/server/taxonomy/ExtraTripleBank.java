@@ -20,6 +20,11 @@ public class ExtraTripleBank {
     public static final Model m = ModelFactory.createDefaultModel();
     public static final Map<String, Map<Property, Statement>> CRU_STMTS = new ConcurrentHashMap<>();
 
+    public static boolean hasStatement(Resource resource, Property prop) {
+        return getStatementsFor(resource)
+                .anyMatch(stmt -> stmt.getPredicate().equals(prop));
+    }
+
     public static void createInitialTriple(Property group, Property inverse, Map<String, String> collection) {
         for (var entry : collection.entrySet()) {
             var conceptUuid = "http://backend.dev.digirati.taxman.digirati.io/v0.1/concept/" + entry.getKey();

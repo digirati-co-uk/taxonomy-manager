@@ -13,11 +13,7 @@ import com.digirati.taxman.rest.server.taxonomy.storage.ConceptDao;
 import com.digirati.taxman.rest.server.taxonomy.storage.ConceptDataSet;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRecord;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRelationshipRecord;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.jena.ext.com.google.common.collect.MultimapBuilder;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
@@ -107,9 +103,9 @@ public class ConceptModelRepository {
      * @return all concepts with preferred labels beginning with the given substring
      */
     @Transactional(Transactional.TxType.REQUIRED)
-    public CollectionModel findByPartialLabel(String partialLabel, String languageKey) {
+    public CollectionModel findByPartialLabel(String partialLabel, String languageKey, String filter) {
         Collection<ConceptRecord> concepts = conceptDao.getConceptsByPartialLabel(partialLabel, languageKey);
-        return searchResultsMapper.map(concepts, partialLabel);
+        return searchResultsMapper.map(concepts, partialLabel, filter);
     }
 
     /**
@@ -125,18 +121,6 @@ public class ConceptModelRepository {
                 .map(record -> conceptMapper.map(new ConceptDataSet(record)))
                 .collect(Collectors.toList());
     }
-
-    private static List<Property> CRU_PROPS = List.of(
-            RdfConfig.selectedPropertySet,
-            RdfConfig.inCommodityGroup,
-            RdfConfig.inRegionGroup,
-            RdfConfig.inTopicGroup,
-            RdfConfig.isTopicGroup,
-            RdfConfig.isCommodityGroup,
-            RdfConfig.isRegionGroup
-    );
-
-    public static final Map<UUID, Map<Property, Statement>> CRU_STMTS = new ConcurrentHashMap<>();
 
     /**
      * Perform an idempotent update of an existing {@link ConceptModel}, updating all stored properties
