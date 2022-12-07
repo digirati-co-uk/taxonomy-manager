@@ -14,6 +14,7 @@ import com.google.common.collect.MultimapBuilder;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
+import org.apache.jena.vocabulary.SKOS;
 import org.apache.jena.vocabulary.XSD;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -596,12 +597,15 @@ public class RdfConfig {
             }
         }
 
-        resource.addProperty(propertySet, copyTo(inCommodityGroup, resource.getModel(), true));
-        resource.addProperty(propertySet, copyTo(isCommodityGroup, resource.getModel(), false));
-        resource.addProperty(propertySet, copyTo(inRegionGroup, resource.getModel(), true));
-        resource.addProperty(propertySet, copyTo(isRegionGroup, resource.getModel(), false));
-        resource.addProperty(propertySet, copyTo(inTopicGroup, resource.getModel(), true));
-        resource.addProperty(propertySet, copyTo(isTopicGroup, resource.getModel(), false));
+        if (resource.hasProperty(SKOS.topConceptOf)) {
+            resource.addProperty(propertySet, copyTo(isCommodityGroup, resource.getModel(), false));
+            resource.addProperty(propertySet, copyTo(isRegionGroup, resource.getModel(), false));
+            resource.addProperty(propertySet, copyTo(isTopicGroup, resource.getModel(), false));
+        } else {
+            resource.addProperty(propertySet, copyTo(inCommodityGroup, resource.getModel(), true));
+            resource.addProperty(propertySet, copyTo(inRegionGroup, resource.getModel(), true));
+            resource.addProperty(propertySet, copyTo(inTopicGroup, resource.getModel(), true));
+        }
     }
 
     public static String DEFAULT_PROPERTY_SET = "{\"cru:propertySet\": [\n" +
