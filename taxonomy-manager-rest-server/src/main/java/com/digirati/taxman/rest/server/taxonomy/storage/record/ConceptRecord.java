@@ -6,6 +6,8 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -26,6 +28,8 @@ public class ConceptRecord implements Concept {
     private Multimap<String, String> historyNote = ArrayListMultimap.create();
     private Multimap<String, String> scopeNote = ArrayListMultimap.create();
     private Multimap<String, String> definition = ArrayListMultimap.create();
+
+    private List<ConceptSchemeReferenceRecord> topConceptOf = new ArrayList<>();
 
     public ConceptRecord(UUID uuid, String projectId) {
         this.uuid = uuid;
@@ -141,6 +145,14 @@ public class ConceptRecord implements Concept {
         this.definition = definition;
     }
 
+    public List<ConceptSchemeReferenceRecord> getTopConceptOf() {
+        return topConceptOf;
+    }
+
+    public void setTopConceptOf(List<ConceptSchemeReferenceRecord> topConceptOf) {
+        this.topConceptOf = topConceptOf;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -172,6 +184,7 @@ public class ConceptRecord implements Concept {
                 .add("historyNote", historyNote)
                 .add("scopeNote", scopeNote)
                 .add("definition", definition)
+                .add("topConceptOf", topConceptOf)
                 .toString();
     }
 }

@@ -1,6 +1,7 @@
 package com.digirati.taxman.rest.server.taxonomy.storage.record.mapper;
 
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRecord;
+import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptSchemeReferenceRecord;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
@@ -26,6 +27,8 @@ public class ConceptRecordMapper implements RowMapper<ConceptRecord> {
         record.setHistoryNote(ResultSetUtils.getPlainLiteralMap(rs, "history_note"));
         record.setScopeNote(ResultSetUtils.getPlainLiteralMap(rs, "scope_note"));
         record.setDefinition(ResultSetUtils.getPlainLiteralMap(rs, "definition"));
+        record.setTopConceptOf(ResultSetUtils.getJsonArray(rs, ConceptSchemeReferenceRecord[].class, "top_concept_of"));
+
         return record;
     }
 }

@@ -4,6 +4,7 @@ import com.digirati.taxman.common.rdf.PersistentProjectScopedModel;
 import com.digirati.taxman.common.rdf.RdfModel;
 import com.digirati.taxman.common.rdf.RdfModelFactory;
 import com.digirati.taxman.common.taxonomy.ConceptModel;
+import com.digirati.taxman.common.taxonomy.ConceptSchemeModel;
 import com.digirati.taxman.common.taxonomy.ProjectModel;
 import com.digirati.taxman.rest.server.infrastructure.web.WebContextHolder;
 import com.digirati.taxman.rest.server.taxonomy.ConceptModelRepository;
@@ -27,6 +28,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class RdfConfig {
@@ -597,15 +599,41 @@ public class RdfConfig {
             }
         }
 
-        if (resource.hasProperty(SKOS.topConceptOf)) {
-            resource.addProperty(propertySet, copyTo(isCommodityGroup, resource.getModel(), false));
-            resource.addProperty(propertySet, copyTo(isRegionGroup, resource.getModel(), false));
-            resource.addProperty(propertySet, copyTo(isTopicGroup, resource.getModel(), false));
-        } else {
-            resource.addProperty(propertySet, copyTo(inCommodityGroup, resource.getModel(), true));
-            resource.addProperty(propertySet, copyTo(inRegionGroup, resource.getModel(), true));
-            resource.addProperty(propertySet, copyTo(inTopicGroup, resource.getModel(), true));
+        if (rdfModel instanceof ConceptModel) {
+            var concept = (ConceptModel) rdfModel;
+            var conceptSchemes = concept.getResources(ConceptSchemeModel.class, SKOS.topConceptOf).collect(Collectors.toList());
+
+            var hasCommodity = conceptSchemes.stream()
+                    .flatMap(conceptScheme -> conceptScheme.getTitle().values().stream())
+                    .anyMatch(title -> title.toLowerCase().contains("commodit"));
+
+            var hasRegion = conceptSchemes.stream()
+                    .flatMap(conceptScheme -> conceptScheme.getTitle().values().stream())
+                    .anyMatch(title -> title.toLowerCase().contains("region"));
+
+            var hasTopic = conceptSchemes.stream()
+                    .flatMap(conceptScheme -> conceptScheme.getTitle().values().stream())
+                    .anyMatch(title -> title.toLowerCase().contains("topic"));
+
+            if (resource.hasProperty(SKOS.topConceptOf)) {
+                if (hasCommodity) {
+                    resource.addProperty(propertySet, copyTo(isCommodityGroup, resource.getModel(), false));
+                }
+
+                if (hasRegion) {
+                    resource.addProperty(propertySet, copyTo(isRegionGroup, resource.getModel(), false));
+                }
+
+                if (hasTopic) {
+                    resource.addProperty(propertySet, copyTo(isTopicGroup, resource.getModel(), false));
+                }
+            } else {
+                resource.addProperty(propertySet, copyTo(inCommodityGroup, resource.getModel(), true));
+                resource.addProperty(propertySet, copyTo(inRegionGroup, resource.getModel(), true));
+                resource.addProperty(propertySet, copyTo(inTopicGroup, resource.getModel(), true));
+            }
         }
+
     }
 
     public static String DEFAULT_PROPERTY_SET = "{\"cru:propertySet\": [\n" +

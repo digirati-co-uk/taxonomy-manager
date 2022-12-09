@@ -6,10 +6,16 @@ import com.digirati.taxman.common.rdf.RdfModelFactory;
 import com.digirati.taxman.common.taxonomy.ConceptLabelExtractor;
 import com.digirati.taxman.common.taxonomy.ConceptModel;
 import com.digirati.taxman.common.taxonomy.ConceptRelationshipType;
+import com.digirati.taxman.common.taxonomy.ConceptSchemeModel;
 import com.digirati.taxman.rest.server.taxonomy.identity.ConceptIdResolver;
+import com.digirati.taxman.rest.server.taxonomy.identity.ConceptSchemeIdResolver;
 import com.digirati.taxman.rest.server.taxonomy.storage.ConceptDataSet;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRecord;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRelationshipRecord;
+import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptSchemeReferenceRecord;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.vocabulary.SKOS;
@@ -26,10 +32,12 @@ import java.util.stream.Stream;
  */
 public class ConceptMapper {
 
+    private ConceptSchemeIdResolver conceptSchemeIdResolver;
     private final ConceptIdResolver idResolver;
     private final RdfModelFactory factory;
 
-    public ConceptMapper(ConceptIdResolver idResolver, RdfModelFactory modelFactory) {
+    public ConceptMapper(ConceptSchemeIdResolver conceptSchemeIdResolver, ConceptIdResolver idResolver, RdfModelFactory modelFactory) {
+        this.conceptSchemeIdResolver = conceptSchemeIdResolver;
         this.idResolver = idResolver;
         this.factory = modelFactory;
     }
@@ -53,13 +61,24 @@ public class ConceptMapper {
                 builder.addEmbeddedModel(DCTerms.source, URI.create(record.getSource()));
             }
 
+            for (ConceptSchemeReferenceRecord relationship : dataset.getRecord().getTopConceptOf()) {
+                Multimap<String, String> multimap = ArrayListMultimap.create();
+                for (String key : relationship.getTitle().keySet()) {
+                    multimap.putAll(key, relationship.getTitle().get(key));
+                }
+
+                builder.addEmbeddedModel(SKOS.topConceptOf, factory.createBuilder(ConceptSchemeModel.class)
+                        .setUri(conceptSchemeIdResolver.resolve(relationship.getUuid()))
+                        .addPlainLiteral(SKOS.prefLabel, multimap));
+            }
+
             for (ConceptRelationshipRecord relationship : dataset.getRelationshipRecords()) {
                 var type = relationship.getType();
                 var property = type.getSkosProperty(relationship.isTransitive());
                 var source = relationship.getTargetSource();
 
                 RdfModelBuilder<ConceptModel> embeddedModel = factory.createBuilder(ConceptModel.class)
-                        .addPlainLiteral(SKOS.prefLabel, relationship.getTargetPreferredLabel())
+                        .addPlainLiteral(DCTerms.title, relationship.getTargetPreferredLabel())
                         .setUri(idResolver.resolve(relationship.getTarget()));
 
                 if (source != null) {
