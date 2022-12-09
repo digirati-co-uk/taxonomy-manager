@@ -42,7 +42,8 @@ public interface ConceptResource {
     @Produces({MediaTypes.APPLICATION_JSONLD_SKOS_VALUE, MediaTypes.APPLICATION_RDF_XML_VALUE})
     @JsonLdFrame(input = "jsonld/framing/collection.json")
     Response getConceptsByPartialLabel(@QueryParam("label") String partialLabel,
-                                       @QueryParam("language") String languageKey);
+                                       @QueryParam("language") String languageKey,
+                                       @QueryParam("filter") String filter);
 
     @PUT
     @Path("/{concept}")

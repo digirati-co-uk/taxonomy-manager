@@ -2,9 +2,10 @@ package com.digirati.taxman.rest.server.taxonomy.storage.record.mapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import org.json.JSONArray;
@@ -44,5 +45,21 @@ final class ResultSetUtils {
         }
 
         return map;
+    }
+
+    public static <T> List<T> getJsonArray(ResultSet rs, Class<T[]> type, String column) throws SQLException {
+        String json = rs.getString(column);
+        List<T> list = new ArrayList<>();
+
+        if (json == null) {
+            return list;
+        }
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return Arrays.asList(objectMapper.readValue(json, type));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

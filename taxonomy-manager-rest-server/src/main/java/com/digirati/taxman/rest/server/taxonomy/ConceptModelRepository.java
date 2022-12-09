@@ -3,6 +3,7 @@ package com.digirati.taxman.rest.server.taxonomy;
 import com.digirati.taxman.common.taxonomy.CollectionModel;
 import com.digirati.taxman.common.taxonomy.ConceptModel;
 import com.digirati.taxman.common.taxonomy.ConceptRelationshipType;
+import com.digirati.taxman.rest.server.infrastructure.config.RdfConfig;
 import com.digirati.taxman.rest.server.infrastructure.event.ConceptEvent;
 import com.digirati.taxman.rest.server.infrastructure.event.ConceptEventListener;
 import com.digirati.taxman.rest.server.taxonomy.identity.ConceptIdResolver;
@@ -13,16 +14,17 @@ import com.digirati.taxman.rest.server.taxonomy.storage.ConceptDataSet;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRecord;
 import com.digirati.taxman.rest.server.taxonomy.storage.record.ConceptRelationshipRecord;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.vocabulary.DCTerms;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.net.URI;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -32,6 +34,9 @@ import java.util.stream.Stream;
  */
 @ApplicationScoped
 public class ConceptModelRepository {
+
+    private final ThreadLocal<Boolean> isInRecursiveCall =
+            ThreadLocal.withInitial(() -> false);
 
     /**
      * This is currently set to false, as we don't fully support transitive relationships.
@@ -64,7 +69,31 @@ public class ConceptModelRepository {
     public Optional<ConceptModel> find(UUID uuid) {
         var dataset = conceptDao.loadDataSet(uuid);
 
-        return dataset.isEmpty() ? Optional.empty() : Optional.of(conceptMapper.map(dataset.get()));
+        try {
+            return dataset.isEmpty() ? Optional.empty() : Optional.of(conceptMapper.map(dataset.get())).map(model -> {
+                Resource resource = model.getResource();
+                if (!isInRecursiveCall.get()) {
+                    try {
+                        isInRecursiveCall.set(true);
+                        ExtraTripleBank
+                                .getStatementsFor(resource)
+                                .forEach(stmt -> {
+                                    if (stmt.getObject().isResource() && stmt.getObject().isURIResource() && !resource.getModel().containsResource(stmt.getObject())) {
+                                        var id = idResolver.resolve(URI.create(resource.getURI()));
+                                        id.flatMap(this::find).ifPresent(concept -> model.getResource().getModel().add(concept.getResource().getModel()));
+                                    }
+                                    resource.addProperty(stmt.getPredicate().inModel(resource.getModel()), stmt.getObject().inModel(resource.getModel()));
+                                });
+                    } finally {
+                        isInRecursiveCall.set(false);
+                    }
+                }
+
+                return model;
+            });
+        } finally {
+            RdfConfig.isInGet.set(false);
+        }
     }
 
     /**
@@ -74,9 +103,9 @@ public class ConceptModelRepository {
      * @return all concepts with preferred labels beginning with the given substring
      */
     @Transactional(Transactional.TxType.REQUIRED)
-    public CollectionModel findByPartialLabel(String partialLabel, String languageKey) {
+    public CollectionModel findByPartialLabel(String partialLabel, String languageKey, String filter) {
         Collection<ConceptRecord> concepts = conceptDao.getConceptsByPartialLabel(partialLabel, languageKey);
-        return searchResultsMapper.map(concepts, partialLabel);
+        return searchResultsMapper.map(concepts, partialLabel, filter);
     }
 
     /**
@@ -110,6 +139,9 @@ public class ConceptModelRepository {
 
         conceptDao.storeDataSet(conceptMapper.map(model));
         applySymmetricRelationChanges(model, existing);
+
+        var resource = model.getResource();
+        ExtraTripleBank.storeStatementsFrom(resource);
 
         eventPublisher.notify(ConceptEvent.updated(model, existing));
     }
@@ -147,7 +179,7 @@ public class ConceptModelRepository {
             return getRelationshipsOrEmpty(newModel, conceptRelationshipType);
         }
 
-        Set<UUID> existing = getRelationshipsOrEmpty(existingModel,conceptRelationshipType)
+        Set<UUID> existing = getRelationshipsOrEmpty(existingModel, conceptRelationshipType)
                 .collect(Collectors.toSet());
         return getRelationshipsOrEmpty(newModel, conceptRelationshipType)
                 .filter(c -> !existing.contains(c));
@@ -172,6 +204,10 @@ public class ConceptModelRepository {
         }
 
         var uuid = model.getUuid();
+
+        var resource = model.getResource();
+        ExtraTripleBank.storeStatementsFrom(resource);
+
         var dataset = conceptMapper.map(model);
         conceptDao.storeDataSet(dataset);
         eventPublisher.notify(ConceptEvent.created(model));
@@ -213,12 +249,13 @@ public class ConceptModelRepository {
         for (var type : Set.of(ConceptRelationshipType.BROADER, ConceptRelationshipType.NARROWER)) {
             getNewRelationships(model, type, existing)
                     .forEach(relatedUuid
-                        -> createRelationshipToModel.accept(relatedUuid, type.inverse()));
+                            -> createRelationshipToModel.accept(relatedUuid, type.inverse()));
         }
     }
 
     /**
      * Deletes the concept.
+     *
      * @param uuid identifier of the concept
      */
     public void delete(UUID uuid) {
