@@ -12,7 +12,7 @@ select
         skos_concept_scheme_concept relation
         inner join skos_concept_scheme scs on relation.concept_scheme_id = scs.id
       where
-        relation.concept_id = c.id AND scs.deleted = false
+        relation.concept_id = c.id AND scs.deleted = false AND relation.is_top_concept = true
     )
   ) as top_concept_of
 from
