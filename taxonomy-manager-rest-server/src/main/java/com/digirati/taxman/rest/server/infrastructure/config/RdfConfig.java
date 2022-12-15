@@ -605,7 +605,7 @@ public class RdfConfig {
 
             var hasCommodity = conceptSchemes.stream()
                     .flatMap(conceptScheme -> conceptScheme.getTitle().values().stream())
-                    .anyMatch(title -> title.toLowerCase().contains("commodit"));
+                    .anyMatch(title -> title.toLowerCase().contains("cru commodities"));
 
             var hasRegion = conceptSchemes.stream()
                     .flatMap(conceptScheme -> conceptScheme.getTitle().values().stream())
@@ -613,7 +613,7 @@ public class RdfConfig {
 
             var hasTopic = conceptSchemes.stream()
                     .flatMap(conceptScheme -> conceptScheme.getTitle().values().stream())
-                    .anyMatch(title -> title.toLowerCase().contains("topic"));
+                    .anyMatch(title -> title.toLowerCase().contains("cru topic hierarchy"));
 
             var hasAnyGroup = hasTopic | hasRegion | hasCommodity;
 
