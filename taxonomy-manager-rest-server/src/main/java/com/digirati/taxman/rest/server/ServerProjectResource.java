@@ -3,6 +3,7 @@ package com.digirati.taxman.rest.server;
 import com.digirati.taxman.common.taxonomy.ProjectModel;
 import com.digirati.taxman.rest.server.infrastructure.config.RdfConfig;
 import com.digirati.taxman.rest.server.management.ProjectModelRepository;
+import com.digirati.taxman.rest.server.taxonomy.ExtraTripleBank;
 import com.digirati.taxman.rest.taxonomy.ProjectPath;
 import com.digirati.taxman.rest.taxonomy.ProjectResource;
 
@@ -10,6 +11,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.core.Response;
+import java.net.URI;
 
 @ApplicationScoped
 public class ServerProjectResource implements ProjectResource {
@@ -31,6 +33,11 @@ public class ServerProjectResource implements ProjectResource {
     public Response getProject(ProjectPath projectPath) {
         var model = projectModelRepository.find(projectPath.getProjectSlug());
         if (model.isPresent()) {
+            var resource = model.get().getResource();
+            ExtraTripleBank.getStatementsFor(resource)
+                    .forEach(stmt -> {
+                        resource.addProperty(stmt.getPredicate().inModel(resource.getModel()), stmt.getObject().inModel(resource.getModel()));
+                    });
             return Response.ok(model.get()).build();
         } else {
             return Response.status(Response.Status.NOT_FOUND).build();
@@ -39,8 +46,7 @@ public class ServerProjectResource implements ProjectResource {
 
     @Override
     public Response updateProject(ProjectPath projectPath, @Valid ProjectModel project) {
-        var selection = project.getResource().getProperty(RdfConfig.selectedPropertySet);
-        RdfConfig.PROJECT_SELECTED_PROPERTIES.put(project.getResource().getURI(), selection);
+        ExtraTripleBank.storeStatementsFrom(project.getResource());
 
         projectModelRepository.update(projectPath.getProjectSlug(), project);
         return Response.noContent().build();
