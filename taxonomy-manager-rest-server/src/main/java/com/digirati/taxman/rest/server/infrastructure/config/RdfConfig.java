@@ -632,6 +632,13 @@ public class RdfConfig {
                 resource.addProperty(propertySet, copyTo(inRegionGroup, resource.getModel(), true));
                 resource.addProperty(propertySet, copyTo(inTopicGroup, resource.getModel(), true));
             }
+        } else if (rdfModel instanceof ProjectModel) {
+            resource.addProperty(propertySet, copyTo(isCommodityGroup, resource.getModel(), false));
+            resource.addProperty(propertySet, copyTo(isRegionGroup, resource.getModel(), false));
+            resource.addProperty(propertySet, copyTo(isTopicGroup, resource.getModel(), false));
+            resource.addProperty(propertySet, copyTo(inCommodityGroup, resource.getModel(), true));
+            resource.addProperty(propertySet, copyTo(inRegionGroup, resource.getModel(), true));
+            resource.addProperty(propertySet, copyTo(inTopicGroup, resource.getModel(), true));
         }
 
     }

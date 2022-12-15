@@ -1,6 +1,7 @@
 {
   "@context": {
-    "dcterms": "http://purl.org/dc/terms/"
+    "dcterms": "http://purl.org/dc/terms/",
+    "cru": "http://crugroup.com/commodities#"
   },
   "@type": "rdfs:Dataset",
   "dcterms:identifier": {

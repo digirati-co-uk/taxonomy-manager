@@ -69,7 +69,7 @@ public class ConceptMapper {
 
                 builder.addEmbeddedModel(SKOS.topConceptOf, factory.createBuilder(ConceptSchemeModel.class)
                         .setUri(conceptSchemeIdResolver.resolve(relationship.getUuid()))
-                        .addPlainLiteral(SKOS.prefLabel, multimap));
+                        .addPlainLiteral(DCTerms.title, multimap));
             }
 
             for (ConceptRelationshipRecord relationship : dataset.getRelationshipRecords()) {
@@ -78,7 +78,7 @@ public class ConceptMapper {
                 var source = relationship.getTargetSource();
 
                 RdfModelBuilder<ConceptModel> embeddedModel = factory.createBuilder(ConceptModel.class)
-                        .addPlainLiteral(DCTerms.title, relationship.getTargetPreferredLabel())
+                        .addPlainLiteral(SKOS.prefLabel, relationship.getTargetPreferredLabel())
                         .setUri(idResolver.resolve(relationship.getTarget()));
 
                 if (source != null) {
