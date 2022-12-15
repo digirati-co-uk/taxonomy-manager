@@ -1,14 +1,11 @@
 package com.digirati.taxman.rest.server.taxonomy;
 
-import com.digirati.taxman.common.rdf.PersistentModel;
-import com.digirati.taxman.common.rdf.RdfModel;
 import com.digirati.taxman.rest.server.infrastructure.config.RdfConfig;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import org.apache.jena.rdf.model.*;
 
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
@@ -18,7 +15,7 @@ import java.util.stream.Stream;
  */
 public class ExtraTripleBank {
     public static final Model m = ModelFactory.createDefaultModel();
-    public static final Map<String, Map<Property, Statement>> CRU_STMTS = new ConcurrentHashMap<>();
+    public static final Map<String, Multimap<Property, Statement>> CRU_STMTS = new ConcurrentHashMap<>();
 
     public static boolean hasStatement(Resource resource, Property prop) {
         return getStatementsFor(resource)
@@ -52,21 +49,21 @@ public class ExtraTripleBank {
     }
 
     public static void addOverride(String uuid, Property property, Statement statement) {
-        var map = CRU_STMTS.computeIfAbsent(uuid, (k) -> new HashMap<>());
+        var map = CRU_STMTS.computeIfAbsent(uuid, (k) -> HashMultimap.create());
         map.put(property, statement);
     }
 
     public static Stream<Statement> getStatementsFor(Resource resource) {
         var key = resource.getURI();
 
-        return CRU_STMTS.getOrDefault(key, new HashMap<>())
+        return CRU_STMTS.getOrDefault(key, HashMultimap.create())
                 .values()
                 .stream();
     }
 
     public static void storeStatementsFrom(Resource resource) {
         var statements = resource.listProperties();
-        var newStatements = new HashMap<Property, Statement>();
+        var newStatements = HashMultimap.<Property, Statement>create();
         var uri = resource.getURI();
 
         if (uri == null) {
