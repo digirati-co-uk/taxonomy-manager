@@ -615,7 +615,9 @@ public class RdfConfig {
                     .flatMap(conceptScheme -> conceptScheme.getTitle().values().stream())
                     .anyMatch(title -> title.toLowerCase().contains("topic"));
 
-            if (resource.hasProperty(SKOS.topConceptOf)) {
+            var hasAnyGroup = hasTopic | hasRegion | hasCommodity;
+
+            if (hasAnyGroup) {
                 if (hasCommodity) {
                     resource.addProperty(propertySet, copyTo(isCommodityGroup, resource.getModel(), false));
                 }
