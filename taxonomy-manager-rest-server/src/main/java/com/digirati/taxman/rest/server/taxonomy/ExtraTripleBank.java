@@ -24,8 +24,8 @@ public class ExtraTripleBank {
 
     public static void createInitialTriple(Property group, Property inverse, Map<String, String> collection) {
         for (var entry : collection.entrySet()) {
-            var conceptUuid = "http://backend.dev.digirati.taxman.digirati.io/v0.1/concept/" + entry.getKey();
-            var groupUuid = "http://backend.dev.digirati.taxman.digirati.io/v0.1/concept/" + entry.getValue();
+            var conceptUuid = "http://backend.dev.cru.taxman.digirati.io/v0.1/concept/" + entry.getKey();
+            var groupUuid = "http://backend.dev.cru.taxman.digirati.io/v0.1/concept/" + entry.getValue();
             var resource = m.createResource(conceptUuid);
             var groupResource = m.createResource(groupUuid);
             var stmt = m.createStatement(resource, group, groupResource);
@@ -34,7 +34,7 @@ public class ExtraTripleBank {
         }
 
         for (var value : collection.values()) {
-            var groupUuid = "http://backend.dev.digirati.taxman.digirati.io/v0.1/concept/" + value;
+            var groupUuid = "http://backend.dev.cru.taxman.digirati.io/v0.1/concept/" + value;
             var groupResource = m.createResource(groupUuid);
             var inverseStmt = m.createLiteralStatement(groupResource, inverse, true);
 
