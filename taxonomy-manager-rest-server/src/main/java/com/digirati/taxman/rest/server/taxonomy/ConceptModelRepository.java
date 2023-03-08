@@ -103,8 +103,12 @@ public class ConceptModelRepository {
      * @return all concepts with preferred labels beginning with the given substring
      */
     @Transactional(Transactional.TxType.REQUIRED)
-    public CollectionModel findByPartialLabel(String partialLabel, String languageKey, String filter) {
-        Collection<ConceptRecord> concepts = conceptDao.getConceptsByPartialLabel(partialLabel, languageKey);
+    public CollectionModel findByPartialLabel(String projectSlug, String partialLabel, String languageKey, String filter) {
+        Collection<ConceptRecord> concepts = conceptDao.getConceptsByPartialLabel(partialLabel, languageKey)
+                .stream()
+                .filter(record -> record.getProjectId().equalsIgnoreCase(projectSlug))
+                .collect(Collectors.toList());
+
         return searchResultsMapper.map(concepts, partialLabel, filter);
     }
 
