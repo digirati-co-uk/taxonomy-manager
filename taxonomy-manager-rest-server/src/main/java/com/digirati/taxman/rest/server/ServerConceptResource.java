@@ -2,7 +2,6 @@ package com.digirati.taxman.rest.server;
 
 import com.digirati.taxman.common.taxonomy.CollectionModel;
 import com.digirati.taxman.common.taxonomy.ConceptModel;
-import com.digirati.taxman.rest.server.infrastructure.config.RdfConfig;
 import com.digirati.taxman.rest.server.taxonomy.ConceptCollectionModelRepository;
 import com.digirati.taxman.rest.server.taxonomy.ConceptModelRepository;
 import com.digirati.taxman.rest.taxonomy.ConceptPath;
@@ -13,7 +12,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.BeanParam;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.core.Response;
 
 @ApplicationScoped
@@ -56,9 +54,8 @@ public class ServerConceptResource implements ConceptResource {
     }
 
     @Override
-    public Response getConceptsByPartialLabel(@HeaderParam(RdfConfig.X_PROJECT_SLUG) String projectSlug, String partialLabel, String languageKey, String filter) {
-
-        CollectionModel matches = concepts.findByPartialLabel(projectSlug, partialLabel, languageKey, filter);
+    public Response getConceptsByPartialLabel(String partialLabel, String languageKey, String filter) {
+        CollectionModel matches = concepts.findByPartialLabel(partialLabel, languageKey, filter);
 
         return Response.ok(matches).build();
     }
