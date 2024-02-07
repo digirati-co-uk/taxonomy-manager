@@ -128,14 +128,6 @@ public class ConceptModelRepository {
      */
     public void update(ConceptModel model) {
         ConceptModel existing = null;
-        if (model.getUuid() == null) {
-            model.setUuid(UUID.randomUUID());
-        } else {
-            var dataSet = conceptDao.loadDataSet(model.getUuid());
-            if (dataSet.isPresent()) {
-                existing = conceptMapper.map(dataSet.get());
-            }
-        }
 
         conceptDao.storeDataSet(conceptMapper.map(model));
         applySymmetricRelationChanges(model, existing);
